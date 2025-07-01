@@ -1,11 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HesiLab</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(145deg, #101d30, #1a2c47);
+      color: #f4f4f4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      color: #61dafb;
+    }
+
+    h2 {
+      font-weight: 300;
+      color: #d0d0d0;
+      margin-top: 1rem;
+    }
+
+    .content {
+      max-width: 700px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    }
+
+    p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #ccc;
+    }
+
+    footer {
+      margin-top: 3rem;
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      .content {
+        padding: 1.5rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Bienvenido a HesiLab</h1>
-  <p>Esta es la página principal.</p>
+
+  <header>
+    <h1>HesiLab</h1>
+    <h2>Tu herramienta digital para entrenadores de baloncesto</h2>
+  </header>
+
+  <div class="content">
+    <p>
+      Estamos construyendo una plataforma pensada para que entrenadores de baloncesto puedan organizar, compartir y potenciar su trabajo de forma más eficiente.
+      <br><br>
+      Muy pronto tendrás disponible herramientas colaborativas, sincronización multidispositivo y mucho más.
+    </p>
+  </div>
+
+  <footer>
+    © 2025 HesiLab. Todos los derechos reservados.
+  </footer>
+
 </body>
 </html>
