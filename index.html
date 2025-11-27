@@ -49,6 +49,29 @@
       padding: 10px;
       margin-top: 10px;
     }
+    .data-item {
+      background: #f9f9f9;
+      padding: 10px;
+      margin: 10px 0;
+      border-left: 3px solid #3498db;
+    }
+    .data-item strong {
+      color: #2c3e50;
+    }
+    .error-message {
+      background: #e74c3c;
+      color: white;
+      padding: 15px;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
+    .success-message {
+      background: #27ae60;
+      color: white;
+      padding: 15px;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
@@ -78,6 +101,22 @@
   <section class="admin-section" id="adminSection">
     <h3>Panel de Administración</h3>
     <p>Bienvenido administrador. Aquí puedes gestionar la web, añadir contenido o configurar opciones.</p>
+    
+    <div style="margin-top: 30px;">
+      <h4>Web Scraping</h4>
+      <input type="text" id="urlInput" placeholder="URL a scrapear" style="width: 60%; padding: 10px;">
+      <button onclick="executeWebScraping()" style="padding: 10px 20px; background: #27ae60; color: white; border: none; cursor: pointer;">
+        🔍 Ejecutar Scraping
+      </button>
+      
+      <div id="loadingIndicator" style="display: none; margin-top: 15px; color: #3498db;">
+        ⏳ Obteniendo datos...
+      </div>
+      
+      <div id="resultsContainer" style="margin-top: 20px; background: white; padding: 15px; border: 1px solid #ccc; max-height: 500px; overflow-y: auto;">
+        <p style="color: #7f8c8d;">Los resultados aparecerán aquí...</p>
+      </div>
+    </div>
   </section>
 
   <script>
@@ -95,6 +134,207 @@
       } else {
         alert("Contraseña incorrecta");
       }
+    }
+
+    async function executeWebScraping() {
+      const urlInput = document.getElementById('urlInput').value;
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const resultsContainer = document.getElementById('resultsContainer');
+      
+      // Validar URL
+      if (!urlInput) {
+        resultsContainer.innerHTML = '<div class="error-message">⚠️ Por favor, introduce una URL válida</div>';
+        return;
+      }
+
+      // Mostrar indicador de carga
+      loadingIndicator.style.display = 'block';
+      resultsContainer.innerHTML = '<p style="color: #7f8c8d;">Procesando...</p>';
+
+      try {
+        // Opción 1: Scraping directo (puede fallar por CORS)
+        const response = await fetch(urlInput);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const html = await response.text();
+        
+        // Parsear el HTML
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Ejemplo de extracción de datos
+        const title = doc.querySelector('title')?.textContent || 'Sin título';
+        const h1Tags = Array.from(doc.querySelectorAll('h1')).map(h1 => h1.textContent);
+        const h2Tags = Array.from(doc.querySelectorAll('h2')).map(h2 => h2.textContent);
+        const paragraphs = Array.from(doc.querySelectorAll('p')).slice(0, 5).map(p => p.textContent);
+        const links = Array.from(doc.querySelectorAll('a')).slice(0, 10).map(a => ({
+          text: a.textContent.trim(),
+          href: a.href
+        }));
+        const images = Array.from(doc.querySelectorAll('img')).slice(0, 5).map(img => ({
+          src: img.src,
+          alt: img.alt
+        }));
+
+        // Mostrar resultados
+        displayResults({
+          url: urlInput,
+          title,
+          h1Tags,
+          h2Tags,
+          paragraphs,
+          links,
+          images
+        });
+
+        loadingIndicator.style.display = 'none';
+
+      } catch (error) {
+        loadingIndicator.style.display = 'none';
+        
+        // Si falla por CORS, ofrecer alternativa
+        resultsContainer.innerHTML = `
+          <div class="error-message">
+            <strong>❌ Error al obtener datos:</strong><br>
+            ${error.message}<br><br>
+            <strong>Posibles soluciones:</strong><br>
+            1. La URL puede tener protección CORS<br>
+            2. Usa un proxy CORS: <code>https://api.allorigins.win/raw?url=${encodeURIComponent(urlInput)}</code><br>
+            3. Implementa un backend con Node.js para el scraping<br><br>
+            <button onclick="tryWithProxy('${urlInput}')" style="padding: 8px 15px; background: #3498db; color: white; border: none; cursor: pointer; border-radius: 3px;">
+              🔄 Intentar con Proxy CORS
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    async function tryWithProxy(url) {
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const resultsContainer = document.getElementById('resultsContainer');
+      
+      loadingIndicator.style.display = 'block';
+      resultsContainer.innerHTML = '<p style="color: #7f8c8d;">Intentando con proxy CORS...</p>';
+
+      try {
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+        const response = await fetch(proxyUrl);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        const title = doc.querySelector('title')?.textContent || 'Sin título';
+        const h1Tags = Array.from(doc.querySelectorAll('h1')).map(h1 => h1.textContent);
+        const h2Tags = Array.from(doc.querySelectorAll('h2')).map(h2 => h2.textContent);
+        const paragraphs = Array.from(doc.querySelectorAll('p')).slice(0, 5).map(p => p.textContent);
+        const links = Array.from(doc.querySelectorAll('a')).slice(0, 10).map(a => ({
+          text: a.textContent.trim(),
+          href: a.href
+        }));
+        const images = Array.from(doc.querySelectorAll('img')).slice(0, 5).map(img => ({
+          src: img.src,
+          alt: img.alt
+        }));
+
+        displayResults({
+          url,
+          title,
+          h1Tags,
+          h2Tags,
+          paragraphs,
+          links,
+          images
+        });
+
+        loadingIndicator.style.display = 'none';
+
+      } catch (error) {
+        loadingIndicator.style.display = 'none';
+        resultsContainer.innerHTML = `
+          <div class="error-message">
+            <strong>❌ Error con proxy:</strong><br>
+            ${error.message}
+          </div>
+        `;
+      }
+    }
+
+    function displayResults(data) {
+      const resultsContainer = document.getElementById('resultsContainer');
+      
+      let html = `
+        <div class="success-message">
+          ✅ Datos obtenidos correctamente de: <strong>${data.url}</strong>
+        </div>
+        
+        <div class="data-item">
+          <strong>📄 Título de la página:</strong><br>
+          ${data.title}
+        </div>
+      `;
+
+      if (data.h1Tags && data.h1Tags.length > 0) {
+        html += `
+          <div class="data-item">
+            <strong>📌 Encabezados H1 (${data.h1Tags.length}):</strong><br>
+            <ul>
+              ${data.h1Tags.map(h1 => `<li>${h1.substring(0, 100)}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }
+
+      if (data.h2Tags && data.h2Tags.length > 0) {
+        html += `
+          <div class="data-item">
+            <strong>📍 Encabezados H2 (${data.h2Tags.length}):</strong><br>
+            <ul>
+              ${data.h2Tags.slice(0, 10).map(h2 => `<li>${h2.substring(0, 100)}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }
+
+      if (data.paragraphs && data.paragraphs.length > 0) {
+        html += `
+          <div class="data-item">
+            <strong>📝 Primeros párrafos:</strong><br>
+            ${data.paragraphs.map((p, i) => `<p><em>Párrafo ${i+1}:</em> ${p.substring(0, 150)}${p.length > 150 ? '...' : ''}</p>`).join('')}
+          </div>
+        `;
+      }
+
+      if (data.links && data.links.length > 0) {
+        html += `
+          <div class="data-item">
+            <strong>🔗 Enlaces encontrados (${data.links.length}):</strong><br>
+            <ul>
+              ${data.links.map(link => `<li><a href="${link.href}" target="_blank">${link.text || 'Sin texto'}</a></li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }
+
+      if (data.images && data.images.length > 0) {
+        html += `
+          <div class="data-item">
+            <strong>🖼️ Imágenes encontradas (${data.images.length}):</strong><br>
+            <ul>
+              ${data.images.map(img => `<li>${img.alt || 'Sin descripción'} - <code>${img.src}</code></li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }
+
+      resultsContainer.innerHTML = html;
     }
   </script>
 </body>
