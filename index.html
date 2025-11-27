@@ -1,211 +1,80 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HesiLab</title>
+  <meta charset="UTF-8">
+  <title>Hesilab</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(145deg, #101d30, #1a2c47);
-      color: #f4f4f4;
-      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f4f4;
     }
-
-    nav {
-      background-color: #0e1a2b;
-      display: flex;
-      padding: 0.5rem 1rem;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 999;
-    }
-
-    nav a {
-      color: #61dafb;
-      margin-right: 1.5rem;
-      text-decoration: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    nav a.active {
-      text-decoration: underline;
-    }
-
-    .container {
-      margin-top: 4rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-    }
-
     header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    h1 {
-      font-size: 3rem;
-      color: #61dafb;
-    }
-
-    h2 {
-      font-weight: 300;
-      color: #d0d0d0;
-      margin-top: 1rem;
-    }
-
-    .content {
-      max-width: 700px;
-      text-align: center;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 2rem;
-      border-radius: 15px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-    }
-
-    p {
-      font-size: 1.1rem;
-      line-height: 1.6;
-      color: #ccc;
-    }
-
-    footer {
-      margin-top: 3rem;
-      font-size: 0.8rem;
-      color: #888;
+      background: #2c3e50;
+      color: white;
+      padding: 15px;
       text-align: center;
     }
-
-    .hidden {
+    section {
+      padding: 20px;
+    }
+    .admin-section {
       display: none;
+      background: #ecf0f1;
+      padding: 20px;
+      border: 2px solid #2c3e50;
+      margin-top: 20px;
     }
-
-    .game-box {
-      margin-top: 2rem;
-      text-align: center;
+    .login-box {
+      margin-top: 20px;
+      background: #fff;
+      padding: 15px;
+      border: 1px solid #ccc;
+      max-width: 300px;
     }
-
-    #ball {
-      width: 50px;
-      height: 50px;
-      background: url('https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png') no-repeat center;
-      background-size: cover;
-      margin: 2rem auto;
-      cursor: pointer;
-      display: none;
-    }
-
-    .score {
-      font-size: 1.2rem;
-      margin-top: 1rem;
-      color: #61dafb;
-    }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2.2rem;
-      }
-
-      .content {
-        padding: 1.5rem;
-      }
-
-      nav {
-        flex-direction: column;
-      }
+    input[type="password"], input[type="button"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
+  <header>
+    <h1>Bienvenido a Hesilab</h1>
+  </header>
 
-  <nav>
-    <a onclick="showTab('home')" id="tab-home" class="active">Inicio</a>
-    <a onclick="showTab('game')" id="tab-game">Juego</a>
-  </nav>
+  <!-- Sección pública -->
+  <section>
+    <h2>Sección Pública</h2>
+    <p>Este es el espacio abierto para todos los visitantes. Aquí puedes poner información sobre tu proyecto, noticias, imágenes o lo que quieras.</p>
+  </section>
 
-  <div class="container">
-
-    <!-- INICIO -->
-    <section id="home-tab">
-      <header>
-        <h1>HesiLab</h1>
-        <h2>Tu herramienta digital para entrenadores de baloncesto</h2>
-      </header>
-
-      <div class="content">
-        <p>
-          Estamos construyendo una plataforma pensada para que entrenadores de baloncesto puedan organizar, compartir y potenciar su trabajo de forma más eficiente.
-          <br><br>
-          Muy pronto tendrás disponible herramientas colaborativas, sincronización multidispositivo y mucho más.
-        </p>
-      </div>
-    </section>
-
-    <!-- JUEGO -->
-    <section id="game-tab" class="hidden">
-      <header>
-        <h1>Juego de Reflejos</h1>
-        <h2>Haz clic en el balón tan pronto como aparezca</h2>
-      </header>
-
-      <div class="content">
-        <button onclick="startGame()">Comenzar</button>
-        <div id="ball"></div>
-        <div class="score">Aciertos: <span id="score">0</span></div>
-      </div>
-    </section>
-
-    <footer>
-      © 2025 HesiLab. Todos los derechos reservados.
-    </footer>
-  </div>
+  <!-- Login para administradores -->
+  <section>
+    <h2>Acceso Administradores</h2>
+    <div class="login-box">
+      <label for="password">Introduce la contraseña:</label>
+      <input type="password" id="password" placeholder="Contraseña">
+      <input type="button" value="Entrar" onclick="checkPassword()">
+    </div>
+    <div class="admin-section" id="adminSection">
+      <h3>Panel de Administración</h3>
+      <p>Bienvenido administrador. Aquí puedes gestionar la web, añadir contenido o configurar opciones.</p>
+    </div>
+  </section>
 
   <script>
-    function showTab(tab) {
-      document.getElementById('home-tab').classList.add('hidden');
-      document.getElementById('game-tab').classList.add('hidden');
-      document.getElementById(`${tab}-tab`).classList.remove('hidden');
-
-      document.getElementById('tab-home').classList.remove('active');
-      document.getElementById('tab-game').classList.remove('active');
-      document.getElementById(`tab-${tab}`).classList.add('active');
+    function checkPassword() {
+      const password = document.getElementById("password").value;
+      const adminSection = document.getElementById("adminSection");
+      if (password === "hesilab123") { // Contraseña de ejemplo
+        adminSection.style.display = "block";
+        alert("Acceso concedido");
+      } else {
+        alert("Contraseña incorrecta");
+      }
     }
-
-    let score = 0;
-    let timeoutId;
-
-    function startGame() {
-      score = 0;
-      document.getElementById('score').textContent = score;
-      showBall();
-    }
-
-    function showBall() {
-      const ball = document.getElementById('ball');
-      const delay = Math.random() * 2000 + 1000; // entre 1 y 3 segundos
-      timeoutId = setTimeout(() => {
-        ball.style.display = 'block';
-      }, delay);
-    }
-
-    document.getElementById('ball').addEventListener('click', () => {
-      score++;
-      document.getElementById('score').textContent = score;
-      document.getElementById('ball').style.display = 'none';
-      showBall();
-    });
   </script>
-
 </body>
 </html>
