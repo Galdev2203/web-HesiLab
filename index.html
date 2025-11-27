@@ -13,7 +13,19 @@
       background: #2c3e50;
       color: white;
       padding: 15px;
-      text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      margin: 0;
+    }
+    .admin-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
     }
     section {
       padding: 20px;
@@ -41,35 +53,44 @@
 </head>
 <body>
   <header>
-    <h1>Bienvenido a Hesilab</h1>
+    <h1>Hesilab</h1>
+    <!-- Botón de admin arriba a la derecha -->
+    <button class="admin-btn" onclick="showAdminLogin()" title="Acceso Admin">👤</button>
   </header>
 
   <!-- Sección pública -->
-  <section>
+  <section id="publicSection">
     <h2>Sección Pública</h2>
-    <p>Este es el espacio abierto para todos los visitantes. Aquí puedes poner información sobre tu proyecto, noticias, imágenes o lo que quieras.</p>
+    <p>Bienvenido a Hesilab. Aquí puedes mostrar información general, noticias o lo que quieras.</p>
   </section>
 
   <!-- Login para administradores -->
-  <section>
+  <section id="loginSection" style="display:none;">
     <h2>Acceso Administradores</h2>
     <div class="login-box">
       <label for="password">Introduce la contraseña:</label>
       <input type="password" id="password" placeholder="Contraseña">
       <input type="button" value="Entrar" onclick="checkPassword()">
     </div>
-    <div class="admin-section" id="adminSection">
-      <h3>Panel de Administración</h3>
-      <p>Bienvenido administrador. Aquí puedes gestionar la web, añadir contenido o configurar opciones.</p>
-    </div>
+  </section>
+
+  <!-- Panel privado -->
+  <section class="admin-section" id="adminSection">
+    <h3>Panel de Administración</h3>
+    <p>Bienvenido administrador. Aquí puedes gestionar la web, añadir contenido o configurar opciones.</p>
   </section>
 
   <script>
+    function showAdminLogin() {
+      document.getElementById("publicSection").style.display = "none";
+      document.getElementById("loginSection").style.display = "block";
+    }
+
     function checkPassword() {
       const password = document.getElementById("password").value;
-      const adminSection = document.getElementById("adminSection");
       if (password === "hesilab123") { // Contraseña de ejemplo
-        adminSection.style.display = "block";
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("adminSection").style.display = "block";
         alert("Acceso concedido");
       } else {
         alert("Contraseña incorrecta");
