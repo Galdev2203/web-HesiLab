@@ -106,4 +106,17 @@
         }));
 
         // Redirigir al dashboard
-        window.location.href = "dashboard.h
+        window.location.href = "dashboard.html";
+      } else {
+        document.getElementById("errorMsg").innerText = data.message || "Error de inicio de sesión";
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      document.getElementById("errorMsg").innerText = "Error conectando al servidor";
+    });
+  }
+</script>
+
+</body>
+</html>
