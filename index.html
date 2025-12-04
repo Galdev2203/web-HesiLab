@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Asistencia - Login</title>
+  <title>Login Asistencia</title>
 
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-family: Arial;
+      background: #f3f3f3;
       height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       margin: 0;
     }
-    #login-container {
+    #box {
       background: white;
       padding: 30px;
-      border-radius: 12px;
-      text-align: center;
+      border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
       width: 90%;
       max-width: 350px;
     }
@@ -32,38 +32,36 @@
 
 <body>
 
-<div id="login-container">
-  <h2>Acceder</h2>
-  <p>Inicia sesión con tu cuenta de Google</p>
+<div id="box">
+  <h2>Inicia sesión</h2>
 
-  <!-- Aquí aparecerá el botón de Google -->
   <div id="g_id_signin"></div>
 
-  <p id="errorMsg" style="color:red;"></p>
+  <p id="msg" style="color:red;"></p>
 </div>
 
 <script>
-  // ---------------------------
-  // CONFIGURA TU CLIENT ID AQUÍ
-  // ---------------------------
-  const GOOGLE_CLIENT_ID = "237946791556-fjmsab63iuk08cm5v761fh5j6j23t6h9.apps.googleusercontent.com";
+  // --------------------------------------------
+  // 🔧 RELLENA ESTOS 3 DATOS
+  // --------------------------------------------
+  const GOOGLE_CLIENT_ID = "237946791556-fjmsab63iuk08cm5v761fh5j6j23t6h9.apps.googleusercontent.com";          // ...
+  const SUPABASE_URL = "https://etmkmapztxvmzvlntgkh.supabase.co"; // ...
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0bWttYXB6dHh2bXp2bG50Z2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MzYyMDgsImV4cCI6MjA4MDQxMjIwOH0.SWrJhk4asccEIZ7hILcANQGw8nF8mDDb3kktKiYu7hs";                // ...
 
-  // URL de tu Edge Function o API de login en Supabase
-  const LOGIN_API_URL = "https://etmkmapztxvmzvlntgkh.supabase.co/functions/v1/login"; 
-  // *Si aún no la tienes, lo conectaremos después*
+  const LOGIN_API_URL = `${SUPABASE_URL}/functions/v1/login`;
 
-  // ---------------------------
-  // CARGA AUTOMÁTICA DE SESIÓN
-  // ---------------------------
-  const savedSession = localStorage.getItem("session_token");
-  if (savedSession) {
-    window.location.href = "dashboard.html"; // e.g. pantalla principal
+  // --------------------------------------------
+  // 🔒 AUTO-LOGIN SI YA HAY SESIÓN GUARDADA
+  // --------------------------------------------
+  const existing = localStorage.getItem("session_token");
+  if (existing) {
+    window.location.href = "dashboard.html"; // cambiar si quieres
   }
 
-  // ---------------------------
-  // BOTÓN OFICIAL DE GOOGLE
-  // ---------------------------
-  window.onload = function () {
+  // --------------------------------------------
+  // 🔵 INICIALIZAR BOTÓN DE GOOGLE
+  // --------------------------------------------
+  window.onload = () => {
     google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: handleGoogleLogin
@@ -79,41 +77,44 @@
     );
   };
 
-  // ---------------------------
-  // MANEJAR LOGIN GOOGLE
-  // ---------------------------
+  // --------------------------------------------
+  // 🟩 FUNCIÓN QUE SE EJECUTA AL HACER LOGIN
+  // --------------------------------------------
   function handleGoogleLogin(response) {
-    const id_token = response.credential;
+    const idToken = response.credential;
 
-    // Enviar el token a Supabase o a tu backend
+    // Llamar a tu función de Supabase con autorización
     fetch(LOGIN_API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
-        action: "loginGoogle",
-        token: id_token
-      }),
+        token: idToken,
+        action: "loginGoogle"
+      })
     })
-    .then(res => res.json())
+    .then(r => r.json())
     .then(data => {
       if (data.status === "ok") {
-        // Guardar sesión en localStorage
+        // Guardar sesión
         localStorage.setItem("session_token", data.session_token);
         localStorage.setItem("user", JSON.stringify({
+          email: data.email,
           user_id: data.user_id,
-          nombre: data.nombre,
-          email: data.email
+          nombre: data.nombre
         }));
 
-        // Redirigir al dashboard
+        // Redirigir
         window.location.href = "dashboard.html";
       } else {
-        document.getElementById("errorMsg").innerText = data.message || "Error de inicio de sesión";
+        document.getElementById("msg").innerText = data.message || "Error en el login";
       }
     })
     .catch(err => {
-      console.log(err);
-      document.getElementById("errorMsg").innerText = "Error conectando al servidor";
+      console.error(err);
+      document.getElementById("msg").innerText = "Error conectando con el servidor";
     });
   }
 </script>
