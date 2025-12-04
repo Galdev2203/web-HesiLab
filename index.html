@@ -1,124 +1,109 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Asistencia Baloncesto</title>
+  <title>Asistencia - Login</title>
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f7f7f7;
+      background: #f2f2f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
     }
-
-    h2 {
-      text-align: center;
-    }
-
-    .container {
-      max-width: 400px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
+    #login-container {
+      background: white;
+      padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    input, select, button, textarea {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-
-    button {
-      background: #007bff;
-      color: #fff;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:active {
-      opacity: 0.8;
-    }
-
-    .success {
-      margin-top: 15px;
       text-align: center;
-      color: green;
-      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 350px;
     }
   </style>
-
 </head>
+
 <body>
-  <h2>Asistencia del Equipo</h2>
 
-  <div class="container">
-    <select id="jugador">
-      <option value="" disabled selected>Selecciona jugador</option>
-      <option>Raquel</option>
-      <option>Paula</option>
-      <option>Amaia</option>
-      <option>Sofia</option>
-      <option>Aicha</option>
-      <option>Alba</option>
-      <option>Mariki</option>
-      <option>Rokiatou</option>
-      <option>Daniela</option>
-      <option>Shere</option>
-      <option>Andrea</option>
-      <option>Claudia</option>
-      <option>Malak</option>
-      <option>Fatima</option>
-      <option>Paola</option>
-      <option>Celia</option>
-      <option>Sara</option>
-      <option>Nerea</option>
-      <!-- Puedes añadir más, o luego hacer que carguen dinámicamente -->
-    </select>
+<div id="login-container">
+  <h2>Acceder</h2>
+  <p>Inicia sesión con tu cuenta de Google</p>
 
-    <input type="date" id="fecha">
+  <!-- Aquí aparecerá el botón de Google -->
+  <div id="g_id_signin"></div>
 
-    <select id="estado">
-      <option value="Presente">Presente</option>
-      <option value="Ausente">Ausente</option>
-      <option value="Tarde">Tarde</option>
-    </select>
+  <p id="errorMsg" style="color:red;"></p>
+</div>
 
-    <textarea id="comentario" placeholder="Comentario (opcional)"></textarea>
+<script>
+  // ---------------------------
+  // CONFIGURA TU CLIENT ID AQUÍ
+  // ---------------------------
+  const GOOGLE_CLIENT_ID = "237946791556-fjmsab63iuk08cm5v761fh5j6j23t6h9.apps.googleusercontent.com";
 
-    <button onclick="guardar()">Guardar asistencia</button>
+  // URL de tu Edge Function o API de login en Supabase
+  const LOGIN_API_URL = "https://etmkmapztxvmzvlntgkh.supabase.co/functions/v1/login"; 
+  // *Si aún no la tienes, lo conectaremos después*
 
-    <div class="success" id="mensaje"></div>
-  </div>
+  // ---------------------------
+  // CARGA AUTOMÁTICA DE SESIÓN
+  // ---------------------------
+  const savedSession = localStorage.getItem("session_token");
+  if (savedSession) {
+    window.location.href = "dashboard.html"; // e.g. pantalla principal
+  }
 
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwH64IFmCovKUQITQWWu1cBp10PKp7TKshdRgJiIfqt1DDjtK1NuxEcAiZyJOxpbjGf/exec";
+  // ---------------------------
+  // BOTÓN OFICIAL DE GOOGLE
+  // ---------------------------
+  window.onload = function () {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleLogin
+    });
 
-    function guardar() {
-      const data = {
-        jugador: document.getElementById("jugador").value,
-        fecha: document.getElementById("fecha").value,
-        estado: document.getElementById("estado").value,
-        comentario: document.getElementById("comentario").value,
-      };
+    google.accounts.id.renderButton(
+      document.getElementById("g_id_signin"),
+      {
+        theme: "filled_blue",
+        size: "large",
+        shape: "pill"
+      }
+    );
+  };
 
-      fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(data)
-      })
-      .then(r => r.json())
-      .then(res => {
-        document.getElementById("mensaje").innerText = "Asistencia guardada ✔";
-        setTimeout(() => document.getElementById("mensaje").innerText = "", 2000);
-      })
-      .catch(err => alert("Error: " + err));
-    }
-  </script>
+  // ---------------------------
+  // MANEJAR LOGIN GOOGLE
+  // ---------------------------
+  function handleGoogleLogin(response) {
+    const id_token = response.credential;
 
-</body>
-</html>
+    // Enviar el token a Supabase o a tu backend
+    fetch(LOGIN_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "loginGoogle",
+        token: id_token
+      }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "ok") {
+        // Guardar sesión en localStorage
+        localStorage.setItem("session_token", data.session_token);
+        localStorage.setItem("user", JSON.stringify({
+          user_id: data.user_id,
+          nombre: data.nombre,
+          email: data.email
+        }));
+
+        // Redirigir al dashboard
+        window.location.href = "dashboard.h
