@@ -26,24 +26,23 @@
 <h2>Bienvenido al Panel</h2>
 <p id="userinfo">Cargando datos del usuario...</p>
 
-<button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+<button class="logout-btn" id="logoutBtn">Cerrar sesión</button>
 
 <script type="module">
   import { supabase } from "./supabaseClient.js";
 
   // Recuperar sesión
-  const { data, error } = await supabase.auth.getSession();
+  const { data } = await supabase.auth.getSession();
 
   if (!data.session) {
     window.location.href = "/index.html";
   } else {
-    const user = data.session.user;
     document.getElementById("userinfo").innerText =
-      `Has iniciado sesión como: ${user.email}`;
+      `Has iniciado sesión como: ${data.session.user.email}`;
   }
 
   // Logout
-  window.logout = async () => {
+  document.getElementById("logoutBtn").onclick = async () => {
     await supabase.auth.signOut();
     window.location.href = "/index.html";
   };
