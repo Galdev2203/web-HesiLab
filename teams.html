@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mis equipos</title>
+<style>
+  body{font-family:Arial;padding:20px;}
+  .team-card{padding:12px;border:1px solid #eee;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+  .primary-btn{background:#2b8aef;color:white;padding:8px 12px;border:none;border-radius:6px;cursor:pointer;}
+  .danger-btn{background:#d9534f;color:white;padding:6px 10px;border:none;border-radius:6px;cursor:pointer;}
+  #createForm{margin-top:16px;}
+</style>
+</head>
+<body>
+  <h2>Mis equipos</h2>
+  <div id="teamsContainer">Cargando equipos...</div>
+
+  <div id="createForm">
+    <h3>Crear equipo</h3>
+    <input id="teamName" placeholder="Nombre del equipo" />
+    <input id="teamCategory" placeholder="Categoría (opcional)" />
+    <button id="createBtn" class="primary-btn">Crear</button>
+  </div>
+
+  <script type="module">
+    import { supabase } from "./supabaseClient.js";
+
+    // comprobar sesión
+    const { data: sessionData } = await supabase.auth.getSession();
+    const session = sessionData.session;
+    if (!session) {
+      window.location.href = "/index.html";
+      throw new Error("No session");
+    }
+    const user = session.user;
+
+    // cargar equipos donde el usuario es staff
+    async function loadTeams() {
+      document.getElementById('teamsContainer').innerText = 'Cargando equipos...';
+      // consultamos team_staff -> teams
+      const { data, error } = await supabase
+        .from('team_staff')
+        .select('team_id, role, teams(id,name,category)')
+        .eq('user_id', user.id)
+        .eq('active', true);
+
+      if (error) {
+        document.getElementById('teamsContainer').innerText = 'Error al cargar: ' + error.message;
+        console.error(error);
+        return;
+      }
+      if (!data || data.length === 0) {
+        document.getElementById('teamsContainer').innerHTML = '<p>No tienes equipos todavía.</p>';
+        return;
+      }
+
+      const container = document.getElementById('teamsContainer');
+      container.innerHTML = '';
+      data.forEach(row => {
+        const team = row.teams;
+        const div = document.createElement('div');
+        div.className = 'team-card';
+        div.innerHTML = `
+          <div>
+            <strong>${team.name}</strong><br/><small>${team.category || ''}</small>
+          </div>
+          <div>
+            <button class="primary-btn" data-teamid="${team.id}">Entrar</button>
+            <button class="danger-btn" data-teamid="${team.id}" data-action="delete">Eliminar</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      // attach handlers
+      document.querySelectorAll('button.primary-btn[data-teamid]').forEach(b=>{
+        b.onclick = (e) => {
+          const id = b.getAttribute('data-teamid');
+          window.location.href = `/team_detail.html?team_id=${id}`;
+        }
+      });
+
+      document.querySelectorAll('button.danger-btn[data-action="delete"]').forEach(b=>{
+        b.onclick = async () => {
+          if (!confirm('¿Eliminar equipo? Esta acción eliminará relaciones; confirmar.')) return;
+          const teamId = b.getAttribute('data-teamid');
+          // borrar equipo (también se eliminarán filas relacionadas por FK)
+          const { error } = await supabase.from('teams').delete().eq('id', teamId);
+          if (error) return alert('Error al eliminar: ' + error.message);
+          loadTeams();
+        }
+      });
+    }
+
+    // crear equipo
+    document.getElementById('createBtn').onclick = async () => {
+      const name = document.getElementById('teamName').value.trim();
+      const category = document.getElementById('teamCategory').value.trim();
+      if (!name) return alert('Pon un nombre al equipo');
+
+      // insertar en teams
+      const { data: newTeam, error } = await supabase
+        .from('teams')
+        .insert({ name, category, created_by: user.id })
+        .select()
+        .single();
+
+      if (error) return alert('Error creando equipo: ' + error.message);
+
+      // añadir como staff principal
+      const { error: err2 } = await supabase
+        .from('team_staff')
+        .insert({ team_id: newTeam.id, user_id: user.id, role: 'principal' });
+
+      if (err2) {
+        alert('Equipo creado pero no se pudo asignar staff: ' + err2.message);
+      } else {
+        document.getElementById('teamName').value = '';
+        document.getElementById('teamCategory').value = '';
+        loadTeams();
+      }
+    };
+
+    // inicial
+    loadTeams();
+  </script>
+</body>
+</html>
