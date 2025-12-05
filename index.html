@@ -1,31 +1,40 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Asistencia</title>
-
-  <!-- Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar sesión</title>
 
   <style>
     body {
       font-family: Arial;
       background: #f3f3f3;
       height: 100vh;
+      margin: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 0;
     }
+
     #box {
       background: white;
       padding: 30px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      text-align: center;
       width: 90%;
       max-width: 350px;
+      text-align: center;
+    }
+
+    .google-btn {
+      background: #4285F4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
     }
   </style>
 </head>
@@ -34,100 +43,13 @@
 
 <div id="box">
   <h2>Inicia sesión</h2>
-  <div id="g_id_signin"></div>
-  <p id="msg" style="color:red;"></p>
+
+  <a
+    href="https://etmkmapztxvmzvlntgkh.supabase.co/auth/v1/authorize?provider=google&redirect_to=https://hesilab.com/dashboard.html"
+  >
+    <button class="google-btn">Iniciar sesión con Google</button>
+  </a>
 </div>
-
-<script>
-  // -------------------------------------------------
-  // CONFIG
-  // -------------------------------------------------
-  const GOOGLE_CLIENT_ID = "237946791556-fjmsab63iuk08cm5v761fh5j6j23t6h9.apps.googleusercontent.com";
-  const SUPABASE_URL = "https://etmkmapztxvmzvlntgkh.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGc...tu clave anon...";
-  const LOGIN_API_URL = `${SUPABASE_URL}/functions/v1/login`;
-
-
-  // -------------------------------------------------
-  // AUTO-LOGIN SI YA HAY SESIÓN
-  // -------------------------------------------------
-  const existing = localStorage.getItem("session_token");
-  if (existing) {
-    window.location.href = "dashboard.html";
-  }
-
-
-  // -------------------------------------------------
-  // INICIALIZAR GOOGLE IDENTITY SERVICES
-  // -------------------------------------------------
-  window.onload = () => {
-
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: handleGoogleLogin,
-
-      // ⭐ CLAVES PARA QUE SUPABASE ACEPTE EL TOKEN ⭐
-      use_fedcm_for_prompt: true,  
-      auto_select: false,
-      ux_mode: "popup"
-    });
-
-    google.accounts.id.renderButton(
-      document.getElementById("g_id_signin"),
-      {
-        theme: "filled_blue",
-        size: "large",
-        shape: "pill"
-      }
-    );
-
-    // 🔥 Obligatorio para GIS + Supabase Auth
-    google.accounts.id.prompt();
-  };
-
-
-  // -------------------------------------------------
-  // LOGIN CALLBACK
-  // -------------------------------------------------
-  function handleGoogleLogin(response) {
-    const idToken = response.credential;
-    console.log("TOKEN GOOGLE:", idToken);
-
-    fetch(LOGIN_API_URL, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        idToken: idToken   // <-- tu función recoge idToken y ella lo transforma en id_token
-      })
-    })
-    .then(r => r.json())
-    .then(data => {
-
-      if (data.status === "ok") {
-        localStorage.setItem("session_token", data.session_token);
-        localStorage.setItem("refresh_token", data.refresh_token);
-
-        localStorage.setItem("user", JSON.stringify({
-          email: data.email,
-          user_id: data.user_id,
-          nombre: data.nombre
-        }));
-
-        window.location.href = "dashboard.html";
-
-      } else {
-        document.getElementById("msg").innerText = data.message || "Error en el login";
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById("msg").innerText = "Error conectando con el servidor";
-    });
-  }
-</script>
 
 </body>
 </html>
