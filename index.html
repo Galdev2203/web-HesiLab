@@ -48,20 +48,16 @@
 </div>
 
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  import { supabase } from "./supabaseClient.js";
 
-  const SUPABASE_URL = "https://etmkmapztxvmzvlntgkh.supabase.co";
-  const SUPABASE_ANON_KEY = "TU_ANON_KEY_AQUÍ";
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // Redirigir si ya hay sesión
+  // Ver si ya hay sesión
   const { data: sessionData } = await supabase.auth.getSession();
+
   if (sessionData.session) {
     window.location.href = "dashboard.html";
   }
 
-  // Login con Google
+  // Login Google
   document.getElementById("loginBtn").onclick = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
