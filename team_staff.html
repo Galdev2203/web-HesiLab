@@ -106,7 +106,7 @@
 
       div.innerHTML = `
         <div>
-          <strong>${staff.users.email}</strong><br>
+          <strong>${staff.profiles?.email || "(sin email)"}</strong><br>
           <small>Rol: ${staff.role}</small>
         </div>
         <button class="btn danger" data-id="${staff.id}">Eliminar</button>
