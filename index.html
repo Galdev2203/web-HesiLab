@@ -34,39 +34,42 @@
 
 <div id="box">
   <h2>Inicia sesión</h2>
-
   <div id="g_id_signin"></div>
-
   <p id="msg" style="color:red;"></p>
 </div>
 
 <script>
-  // --------------------------------------------
-  // 🔧 CONFIG
-  // --------------------------------------------
+  // -------------------------------------------------
+  // CONFIG
+  // -------------------------------------------------
   const GOOGLE_CLIENT_ID = "237946791556-fjmsab63iuk08cm5v761fh5j6j23t6h9.apps.googleusercontent.com";
   const SUPABASE_URL = "https://etmkmapztxvmzvlntgkh.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0bWttYXB6dHh2bXp2bG50Z2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MzYyMDgsImV4cCI6MjA4MDQxMjIwOH0.SWrJhk4asccEIZ7hILcANQGw8nF8mDDb3kktKiYu7hs";
-
+  const SUPABASE_ANON_KEY = "eyJhbGc...tu clave anon...";
   const LOGIN_API_URL = `${SUPABASE_URL}/functions/v1/login`;
 
 
-  // --------------------------------------------
-  // 🔒 AUTO-LOGIN SI YA HAY SESIÓN
-  // --------------------------------------------
+  // -------------------------------------------------
+  // AUTO-LOGIN SI YA HAY SESIÓN
+  // -------------------------------------------------
   const existing = localStorage.getItem("session_token");
   if (existing) {
     window.location.href = "dashboard.html";
   }
 
 
-  // --------------------------------------------
-  // 🔵 INICIALIZAR BOTÓN DE GOOGLE
-  // --------------------------------------------
+  // -------------------------------------------------
+  // INICIALIZAR GOOGLE IDENTITY SERVICES
+  // -------------------------------------------------
   window.onload = () => {
+
     google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
-      callback: handleGoogleLogin
+      callback: handleGoogleLogin,
+
+      // ⭐ CLAVES PARA QUE SUPABASE ACEPTE EL TOKEN ⭐
+      use_fedcm_for_prompt: true,  
+      auto_select: false,
+      ux_mode: "popup"
     });
 
     google.accounts.id.renderButton(
@@ -77,17 +80,19 @@
         shape: "pill"
       }
     );
+
+    // 🔥 Obligatorio para GIS + Supabase Auth
+    google.accounts.id.prompt();
   };
 
 
-  // --------------------------------------------
-  // 🟩 FUNCIÓN QUE SE EJECUTA AL HACER LOGIN
-  // --------------------------------------------
+  // -------------------------------------------------
+  // LOGIN CALLBACK
+  // -------------------------------------------------
   function handleGoogleLogin(response) {
     const idToken = response.credential;
     console.log("TOKEN GOOGLE:", idToken);
 
-    // Llamada a tu Edge Function
     fetch(LOGIN_API_URL, {
       method: "POST",
       headers: {
@@ -95,14 +100,13 @@
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        idToken: idToken   // 👈 nombre correcto que espera la function
+        idToken: idToken   // <-- tu función recoge idToken y ella lo transforma en id_token
       })
     })
     .then(r => r.json())
     .then(data => {
-      if (data.status === "ok") {
 
-        // Guardar sesión
+      if (data.status === "ok") {
         localStorage.setItem("session_token", data.session_token);
         localStorage.setItem("refresh_token", data.refresh_token);
 
@@ -112,7 +116,6 @@
           nombre: data.nombre
         }));
 
-        // Redirigir
         window.location.href = "dashboard.html";
 
       } else {
