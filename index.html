@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login Asistencia</title>
 
-  <!-- Supabase v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" type="module"></script>
-
   <style>
     body {
       font-family: Arial;
@@ -50,17 +47,15 @@
   </button>
 </div>
 
-<!-- 🚀 TODO EL CÓDIGO DE SUPABASE DEBE IR EN MÓDULO -->
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
   const SUPABASE_URL = "https://etmkmapztxvmzvlntgkh.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0bWttYXB6dHh2bXp2bG50Z2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MzYyMDgsImV4cCI6MjA4MDQxMjIwOH0.SWrJhk4asccEIZ7hILcANQGw8nF8mDDb3kktKiYu7hs";
 
-  // ⭐ Crear cliente Supabase correctamente
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // 🔥 Redirigir si ya existe sesión
+  // 🔥 Comprobación de sesión
   async function checkSession() {
     const { data } = await supabase.auth.getSession();
     if (data.session) {
@@ -70,7 +65,7 @@
 
   checkSession();
 
-  // 🟦 LOGIN CON GOOGLE
+  // 🔵 Login con Google
   document.getElementById("loginBtn").onclick = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
