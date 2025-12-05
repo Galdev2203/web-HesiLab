@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login Asistencia</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     body {
       font-family: Arial;
@@ -42,11 +44,43 @@
 <div id="box">
   <h2>Inicia sesión</h2>
 
-  <a href="https://etmkmapztxvmzvlntgkh.supabase.co/auth/v1/authorize?provider=google&redirect_to=https://hesilab.com/dashboard.html">
-    <button class="google-btn">Iniciar sesión con Google</button>
-  </a>
+  <!-- BOTÓN LOGIN CON GOOGLE -->
+  <button class="google-btn" onclick="signInGoogle()">
+    Iniciar sesión con Google
+  </button>
 
 </div>
+
+
+<script>
+  const SUPABASE_URL = "https://etmkmapztxvmzvlntgkh.supabase.co";
+  const SUPABASE_ANON_KEY = "TU_ANON_KEY_AQUÍ"; // PÉGALO AQUÍ COMPLETO
+
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // 🔥 1. SI YA HAY SESIÓN → REDIRIGIR AUTOMÁTICAMENTE
+  async function checkSession() {
+    const { data: sessionData } = await supabase.auth.getSession();
+
+    if (sessionData.session) {
+      window.location.href = "dashboard.html";
+    }
+  }
+
+  checkSession();
+
+
+  // 🔵 2. LOGIN CON GOOGLE
+  async function signInGoogle() {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: "https://hesilab.com/dashboard.html"
+      }
+    });
+  }
+</script>
+
 
 </body>
 </html>
