@@ -85,6 +85,7 @@
   // --------------------------------------------
   function handleGoogleLogin(response) {
     const idToken = response.credential;
+    console.log("TOKEN GOOGLE:", idToken);
 
     // Llamada a tu Edge Function
     fetch(LOGIN_API_URL, {
