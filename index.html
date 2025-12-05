@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Iniciar sesión</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Asistencia</title>
 
   <style>
     body {
       font-family: Arial;
       background: #f3f3f3;
       height: 100vh;
-      margin: 0;
       display: flex;
       justify-content: center;
       align-items: center;
+      margin: 0;
     }
-
     #box {
       background: white;
       padding: 30px;
@@ -25,13 +24,12 @@
       max-width: 350px;
       text-align: center;
     }
-
     .google-btn {
       background: #4285F4;
       color: white;
       border: none;
+      padding: 12px 20px;
       border-radius: 6px;
-      padding: 10px 20px;
       font-size: 16px;
       cursor: pointer;
       width: 100%;
@@ -44,11 +42,10 @@
 <div id="box">
   <h2>Inicia sesión</h2>
 
-  <a
-    href="https://etmkmapztxvmzvlntgkh.supabase.co/auth/v1/authorize?provider=google&redirect_to=https://hesilab.com/dashboard.html"
-  >
+  <a href="https://etmkmapztxvmzvlntgkh.supabase.co/auth/v1/authorize?provider=google&redirect_to=https://hesilab.com/dashboard.html">
     <button class="google-btn">Iniciar sesión con Google</button>
   </a>
+
 </div>
 
 </body>
