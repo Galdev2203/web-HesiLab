@@ -48,24 +48,20 @@
 </div>
 
 <script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
   const SUPABASE_URL = "https://etmkmapztxvmzvlntgkh.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0bWttYXB6dHh2bXp2bG50Z2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MzYyMDgsImV4cCI6MjA4MDQxMjIwOH0.SWrJhk4asccEIZ7hILcANQGw8nF8mDDb3kktKiYu7hs";
+  const SUPABASE_ANON_KEY = "TU_ANON_KEY_AQUÍ";
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // 🔥 Redirigir si ya existe sesión
-  async function checkSession() {
-    const { data } = await supabase.auth.getSession();
-    if (data.session) {
-      window.location.href = "dashboard.html";
-    }
+  // Redirigir si ya hay sesión
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (sessionData.session) {
+    window.location.href = "dashboard.html";
   }
 
-  checkSession();
-
-  // 🔵 Login con Google
+  // Login con Google
   document.getElementById("loginBtn").onclick = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
