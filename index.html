@@ -55,7 +55,7 @@
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // 🔥 Comprobación de sesión
+  // 🔥 Redirigir si ya existe sesión
   async function checkSession() {
     const { data } = await supabase.auth.getSession();
     if (data.session) {
