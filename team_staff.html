@@ -88,7 +88,7 @@
 
     const { data, error } = await supabase
       .from("team_staff")
-      .select("id, role, user_id, profiles(email)")
+      .select("id, role, user_id, profiles(id, email)")
       .eq("team_id", teamId)
       .eq("active", true);
 
