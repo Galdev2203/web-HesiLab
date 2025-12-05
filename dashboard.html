@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Asistencia</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      padding: 20px;
+    }
+    .logout-btn {
+      background: #d9534f;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>Bienvenido al Panel</h2>
+<p id="userinfo">Cargando datos del usuario...</p>
+
+<button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+
+<script type="module">
+  import { supabase } from "./supabaseClient.js";
+
+  // Recuperar sesión
+  const { data, error } = await supabase.auth.getSession();
+
+  if (!data.session) {
+    window.location.href = "/index.html";
+  } else {
+    const user = data.session.user;
+    document.getElementById("userinfo").innerText =
+      `Has iniciado sesión como: ${user.email}`;
+  }
+
+  // Logout
+  window.logout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/index.html";
+  };
+</script>
+
+</body>
+</html>
