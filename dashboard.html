@@ -1,71 +1,55 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <!-- GOOGLE ANALYTICS -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3BQNCKKTXJ"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-3BQNCKKTXJ');
-  </script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Asistencia</title>
-
+---
+layout: default
+title: Panel de Asistencia
+custom_css: |
   <style>
-    body {
-      font-family: Arial;
-      padding: 20px;
-    }
-
+    body { font-family: Arial; padding: 20px; }
     .logout-btn {
-      background: #d9534f;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
+      background: #d9534f; color: white;
+      border: none; padding: 10px 20px;
+      border-radius: 6px; cursor: pointer;
       margin-top: 30px;
     }
-
-    /* CONTENEDOR DE TARJETAS */
     #cardsContainer {
-      margin-top: 30px;
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
+      margin-top: 30px; display: flex;
+      gap: 20px; flex-wrap: wrap;
     }
-
-    /* TARJETA */
     .card {
-      background: #f4f6f9;
-      padding: 20px;
-      border-radius: 10px;
-      width: 250px;
-      cursor: pointer;
-      border: 1px solid #ddd;
-      transition: 0.2s ease;
+      background: #f4f6f9; padding:20px;
+      border-radius:10px; width:250px;
+      cursor:pointer; border:1px solid #ddd;
+      transition:0.2s ease;
     }
-
-    .card:hover {
-      background: #e8eef7;
-      transform: translateY(-3px);
-    }
-
-    .card h3 {
-      margin: 0;
-      margin-bottom: 10px;
-    }
+    .card:hover { background:#e8eef7; transform:translateY(-3px); }
+    .card h3 { margin:0 0 10px 0; }
   </style>
-</head>
+custom_js: |
+  <script type="module">
+    import { supabase } from "./supabaseClient.js";
 
-<body>
+    const { data } = await supabase.auth.getSession();
+
+    if (!data.session) {
+      window.location.href = "/index.html";
+    } else {
+      document.getElementById("userinfo").innerText =
+        `Has iniciado sesión como: ${data.session.user.email}`;
+    }
+
+    document.getElementById("teamsCard").onclick = () => {
+      window.location.href = "/teams.html";
+    };
+
+    document.getElementById("logoutBtn").onclick = async () => {
+      await supabase.auth.signOut();
+      window.location.href = "/index.html";
+    };
+  </script>
+---
 
 <h2>Bienvenido al Panel</h2>
 <p id="userinfo">Cargando datos del usuario...</p>
 
-<!-- TARJETAS -->
 <div id="cardsContainer">
   <div class="card" id="teamsCard">
     <h3>Mis equipos</h3>
@@ -74,32 +58,3 @@
 </div>
 
 <button class="logout-btn" id="logoutBtn">Cerrar sesión</button>
-
-<script type="module">
-  import { supabase } from "./supabaseClient.js";
-
-  // Recuperar sesión
-  const { data } = await supabase.auth.getSession();
-
-  if (!data.session) {
-    window.location.href = "/index.html";
-  } else {
-    document.getElementById("userinfo").innerText =
-      `Has iniciado sesión como: ${data.session.user.email}`;
-  }
-
-  // Navegar a Mis Equipos
-  document.getElementById("teamsCard").onclick = () => {
-    window.location.href = "/teams.html"; 
-    // Cambia el nombre si tu listado de equipos está en otro archivo
-  };
-
-  // Logout
-  document.getElementById("logoutBtn").onclick = async () => {
-    await supabase.auth.signOut();
-    window.location.href = "/index.html";
-  };
-</script>
-
-</body>
-</html>
