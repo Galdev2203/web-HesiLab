@@ -1,18 +1,7 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <!-- GOOGLE ANALYTICS -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3BQNCKKTXJ"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-3BQNCKKTXJ');
-  </script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Asistencia</title>
-
+---
+layout: default
+title: Login Asistencia
+custom_css: |
   <style>
     body {
       font-family: Arial;
@@ -43,38 +32,25 @@
       width: 100%;
     }
   </style>
-</head>
+custom_js: |
+  <script type="module">
+    import { supabase } from "./supabaseClient.js";
 
-<body>
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (sessionData.session) {
+      window.location.href = "dashboard.html";
+    }
+
+    document.getElementById("loginBtn").onclick = async () => {
+      await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: "https://hesilab.com/dashboard.html" }
+      });
+    };
+  </script>
+---
 
 <div id="box">
   <h2>Inicia sesión</h2>
-
-  <button class="google-btn" id="loginBtn">
-    Iniciar sesión con Google
-  </button>
+  <button class="google-btn" id="loginBtn">Iniciar sesión con Google</button>
 </div>
-
-<script type="module">
-  import { supabase } from "./supabaseClient.js";
-
-  // Ver si ya hay sesión
-  const { data: sessionData } = await supabase.auth.getSession();
-
-  if (sessionData.session) {
-    window.location.href = "dashboard.html";
-  }
-
-  // Login Google
-  document.getElementById("loginBtn").onclick = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: "https://hesilab.com/dashboard.html"
-      }
-    });
-  };
-</script>
-
-</body>
-</html>
