@@ -24,8 +24,8 @@
     }
     .primary { background: #2b8aef; color: white; }
     .danger { background: #d9534f; color: white; }
-    #addBox { margin-top: 20px; }
     select { padding: 6px; }
+    #addBox { margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -67,7 +67,7 @@
     throw new Error("Missing team_id");
   }
 
-  // Mi rol actual (se actualizará dinámicamente)
+  // Mi rol actual
   let myRole = null;
 
   async function loadMyRole() {
@@ -91,10 +91,10 @@
   // 🔥 Cargar staff
   // =====================================================
   async function loadStaff() {
-    await loadMyRole(); // <-- se recalcula dinámicamente cada vez
+    await loadMyRole();
 
     const container = document.getElementById("staffList");
-    container.innerText = "Cargando...";
+    container.innerHTML = "Cargando...";
 
     const { data, error } = await supabase
       .from("team_staff")
@@ -114,7 +114,7 @@
       const div = document.createElement("div");
       div.className = "staff-card";
 
-      // selector de roles + botón guardar
+      // Selector + botón
       const roleEditor = `
         <select class="roleSelect" data-id="${staff.id}">
           <option value="principal" ${staff.role === "principal" ? "selected" : ""}>Principal</option>
@@ -130,7 +130,7 @@
           <small>Rol actual: ${staff.role}</small>
         </div>
 
-        <div style="display:flex; align-items:center;">
+        <div style="display:flex; gap:12px; align-items:center;">
           ${roleEditor}
           <button class="btn danger deleteBtn" data-id="${staff.id}" data-user="${staff.user_id}">
             Eliminar
@@ -142,36 +142,31 @@
       const selectRole = div.querySelector(".roleSelect");
       const saveRoleBtn = div.querySelector(".saveRoleBtn");
 
-      // =====================================================
-      // 🔥 PERMISOS
-      // =====================================================
-
-      // Si NO soy principal → no puedo editar nada
+      // 🔹 Permisos
       if (myRole !== "principal") {
         deleteBtn.style.display = "none";
         selectRole.style.display = "none";
         saveRoleBtn.style.display = "none";
       }
 
-      // No puedo cambiarme mi propio rol
+      // 🔹 No puedo editarme a mí mismo
       if (staff.user_id === user.id) {
+        deleteBtn.style.display = "none";
         selectRole.style.display = "none";
         saveRoleBtn.style.display = "none";
-        deleteBtn.style.display = "none";
       }
 
       container.appendChild(div);
     });
 
     // =====================================================
-    // 🔥 Guardar cambios de rol (OPCIÓN B: modificar myRole sin recargar)
+    // 🔥 Guardar cambios de rol (usando RPC)
     // =====================================================
     document.querySelectorAll(".saveRoleBtn").forEach(btn => {
       btn.onclick = async () => {
         const id = btn.getAttribute("data-id");
         const newRole = btn.parentElement.querySelector(".roleSelect").value;
 
-        // Obtener información del miembro a editar
         const { data: staffRow } = await supabase
           .from("team_staff")
           .select("user_id, role")
@@ -180,46 +175,18 @@
 
         const userIdToEdit = staffRow.user_id;
 
-        // No cambiar mi propio rol
         if (userIdToEdit === user.id) {
-          alert("No puedes cambiar tu propio rol porque eres el entrenador principal.");
+          alert("No puedes cambiar tu propio rol.");
           return;
         }
 
-        // Caso normal: cambiar a segundo o ayudante
-        if (newRole !== "principal") {
-          const { error } = await supabase
-            .from("team_staff")
-            .update({ role: newRole })
-            .eq("id", id);
-
-          if (error) {
-            alert("Error actualizando rol: " + error.message);
-            return;
-          }
-
-          alert("Rol actualizado correctamente.");
-          loadStaff();
-          return;
-        }
-
-        // SI SE PONE A OTRO COMO PRINCIPAL ↓↓↓
-
-        // Buscar el actual principal
-        const { data: currentPrincipal } = await supabase
-          .from("team_staff")
-          .select("id, user_id")
-          .eq("team_id", teamId)
-          .eq("role", "principal")
-          .eq("active", true)
-          .single();
-
-        if (currentPrincipal && currentPrincipal.user_id === user.id) {
+        // 🔥 PROMOVER A PRINCIPAL (RPC)
+        if (newRole === "principal") {
 
           const confirmChange = confirm(
-            "Solo puede haber un principal por equipo.\n\n" +
-            "Si haces principal a este entrenador:\n" +
-            "➡ Él será PRINCIPAL\n" +
+            "Solo puede haber un principal.\n\n" +
+            "Si continúas:\n" +
+            "➡ El entrenador seleccionado será PRINCIPAL\n" +
             "➡ Tú pasarás a SEGUNDO\n" +
             "➡ Perderás permisos\n\n" +
             "¿Confirmas?"
@@ -227,34 +194,39 @@
 
           if (!confirmChange) return;
 
-          // ⭐ USAR RPC REAL
-const { error: rpcError } = await supabase.rpc("transfer_principal", {
-  p_team_id: teamId,
-  p_new_principal: userIdToEdit
-});
+          const { error: rpcError } = await supabase.rpc("transfer_principal", {
+            p_team_id: teamId,
+            p_new_principal: userIdToEdit
+          });
 
-if (rpcError) {
-  alert("Error al transferir principal: " + rpcError.message);
-  return;
-}
+          if (rpcError) {
+            alert("Error al transferir principal: " + rpcError.message);
+            return;
+          }
 
-alert("Transferencia completada correctamente.");
-await loadMyRole();
-await loadStaff();
-return;
+          alert("Transferencia realizada correctamente.");
 
+          // 💥 Limpiar UI inmediatamente
+          document.getElementById("staffList").innerHTML = "Actualizando...";
 
-          alert("Cambio realizado: ya no eres el principal.");
-
-          // ⚠️ OPCIÓN B: Recalcular mi rol automáticamente
           await loadMyRole();
-
-          // Y recargar visualmente la UI
-          loadStaff();
+          await loadStaff();
           return;
         }
 
-        alert("Error inesperado al verificar el principal actual.");
+        // 🔥 Cambio normal (segundo/ayudante)
+        const { error } = await supabase
+          .from("team_staff")
+          .update({ role: newRole })
+          .eq("id", id);
+
+        if (error) {
+          alert("Error actualizando rol: " + error.message);
+          return;
+        }
+
+        alert("Rol actualizado correctamente.");
+        loadStaff();
       };
     });
 
@@ -303,7 +275,6 @@ return;
       return;
     }
 
-    // Buscar usuario por email
     const { data: usr, error } = await supabase.rpc("get_user_by_email", { p_email: email });
 
     if (error || !usr || usr.length === 0) {
