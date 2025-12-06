@@ -24,9 +24,6 @@
       font-size: 16px;
       text-decoration: none;
     }
-    .danger {
-      background: #d9534f;
-    }
   </style>
 </head>
 
@@ -36,7 +33,7 @@
 <p id="teamCategory"></p>
 
 <div id="actions" style="display:none;">
-  <a id="playersBtn" class="btn">Jugadoras</a>
+  <a id="playersBtn" class="btn">Jugadores</a>
   <a id="staffBtn" class="btn">Entrenadores</a>
   <a id="attendanceBtn" class="btn">Pasar asistencia</a>
 </div>
@@ -99,11 +96,12 @@
   document.getElementById("teamTitle").innerText = teamData.name;
   document.getElementById("teamCategory").innerText = teamData.category || "";
 
-  // Mostrar botones y configurar enlaces
+  // Mostrar botones y configurar enlaces correctos
   document.getElementById("actions").style.display = "block";
 
-  document.getElementById("playersBtn").href = `/team_players.html?team_id=${teamId}`;
-  document.getElementById("staffBtn").href = `/team_staff.html?team_id=${teamId}`;
+  // 🔥 RUTAS CORREGIDAS
+  document.getElementById("playersBtn").href = `/players.html?team_id=${teamId}`;
+  document.getElementById("staffBtn").href = `/staff.html?team_id=${teamId}`;
   document.getElementById("attendanceBtn").href = `/attendance.html?team_id=${teamId}`;
 </script>
 
