@@ -67,25 +67,32 @@
     throw new Error("Missing team_id");
   }
 
-  // Comprobar permisos del usuario (qué rol tiene en este equipo)
-  const { data: permission, error: permErr } = await supabase
-    .from("team_staff")
-    .select("id, role")
-    .eq("team_id", teamId)
-    .eq("user_id", user.id)
-    .eq("active", true);
+  // Mi rol actual (se actualizará dinámicamente)
+  let myRole = null;
 
-  if (permErr || !permission || permission.length === 0) {
-    document.getElementById("errorMsg").innerText = "No tienes permiso para ver este equipo.";
-    throw new Error("No permission");
+  async function loadMyRole() {
+    const { data, error } = await supabase
+      .from("team_staff")
+      .select("role")
+      .eq("team_id", teamId)
+      .eq("user_id", user.id)
+      .eq("active", true)
+      .single();
+
+    if (error || !data) {
+      document.getElementById("errorMsg").innerText = "No tienes permiso para ver este equipo.";
+      throw new Error("No permission");
+    }
+
+    myRole = data.role;
   }
-
-  const myRole = permission[0].role;
 
   // =====================================================
   // 🔥 Cargar staff
   // =====================================================
   async function loadStaff() {
+    await loadMyRole(); // <-- se recalcula dinámicamente cada vez
+
     const container = document.getElementById("staffList");
     container.innerText = "Cargando...";
 
@@ -136,141 +143,119 @@
       const saveRoleBtn = div.querySelector(".saveRoleBtn");
 
       // =====================================================
-      // 🔥 REGLAS DE PERMISOS PARA EDITAR ROLES / ELIMINAR
+      // 🔥 PERMISOS
       // =====================================================
 
-      // 1) Si NO soy principal → no edito nada
+      // Si NO soy principal → no puedo editar nada
       if (myRole !== "principal") {
         deleteBtn.style.display = "none";
         selectRole.style.display = "none";
         saveRoleBtn.style.display = "none";
       }
 
-      // 2) El principal NO puede cambiarse su propio rol
+      // No puedo cambiarme mi propio rol
       if (staff.user_id === user.id) {
         selectRole.style.display = "none";
         saveRoleBtn.style.display = "none";
-        deleteBtn.style.display = "none"; 
+        deleteBtn.style.display = "none";
       }
 
-      // Añadir tarjeta
       container.appendChild(div);
     });
 
     // =====================================================
-// 🔥 Guardar cambios de rol (LÓGICA NUEVA CON LÍMITE DE 1 PRINCIPAL)
-// =====================================================
-document.querySelectorAll(".saveRoleBtn").forEach(btn => {
-  btn.onclick = async () => {
-    const id = btn.getAttribute("data-id");
-    const newRole = btn.parentElement.querySelector(".roleSelect").value;
+    // 🔥 Guardar cambios de rol (OPCIÓN B: modificar myRole sin recargar)
+    // =====================================================
+    document.querySelectorAll(".saveRoleBtn").forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.getAttribute("data-id");
+        const newRole = btn.parentElement.querySelector(".roleSelect").value;
 
-    // Obtener información del miembro a editar
-    const { data: staffRow, error: rowErr } = await supabase
-      .from("team_staff")
-      .select("user_id, role")
-      .eq("id", id)
-      .single();
+        // Obtener información del miembro a editar
+        const { data: staffRow } = await supabase
+          .from("team_staff")
+          .select("user_id, role")
+          .eq("id", id)
+          .single();
 
-    if (rowErr) {
-      alert("Error cargando miembro.");
-      return;
-    }
+        const userIdToEdit = staffRow.user_id;
 
-    const userIdToEdit = staffRow.user_id;
+        // No cambiar mi propio rol
+        if (userIdToEdit === user.id) {
+          alert("No puedes cambiar tu propio rol porque eres el entrenador principal.");
+          return;
+        }
 
-    // 1) Evitar que el principal cambie su propio rol
-    if (userIdToEdit === user.id) {
-      alert("No puedes cambiar tu propio rol porque eres el entrenador principal.");
-      return;
-    }
+        // Caso normal: cambiar a segundo o ayudante
+        if (newRole !== "principal") {
+          const { error } = await supabase
+            .from("team_staff")
+            .update({ role: newRole })
+            .eq("id", id);
 
-    // 2) Si el nuevo rol NO es principal → actualizar normal
-    if (newRole !== "principal") {
-      const { error } = await supabase
-        .from("team_staff")
-        .update({ role: newRole })
-        .eq("id", id);
+          if (error) {
+            alert("Error actualizando rol: " + error.message);
+            return;
+          }
 
-      if (error) {
-        alert("Error actualizando rol: " + error.message);
-        return;
-      }
+          alert("Rol actualizado correctamente.");
+          loadStaff();
+          return;
+        }
 
-      alert("Rol actualizado correctamente.");
-      loadStaff();
-      return;
-    }
+        // SI SE PONE A OTRO COMO PRINCIPAL ↓↓↓
+
+        // Buscar el actual principal
+        const { data: currentPrincipal } = await supabase
+          .from("team_staff")
+          .select("id, user_id")
+          .eq("team_id", teamId)
+          .eq("role", "principal")
+          .eq("active", true)
+          .single();
+
+        if (currentPrincipal && currentPrincipal.user_id === user.id) {
+
+          const confirmChange = confirm(
+            "Solo puede haber un principal por equipo.\n\n" +
+            "Si haces principal a este entrenador:\n" +
+            "➡ Él será PRINCIPAL\n" +
+            "➡ Tú pasarás a SEGUNDO\n" +
+            "➡ Perderás permisos\n\n" +
+            "¿Confirmas?"
+          );
+
+          if (!confirmChange) return;
+
+          // 1) Hacer principal al nuevo
+          await supabase
+            .from("team_staff")
+            .update({ role: "principal" })
+            .eq("id", id);
+
+          // 2) Convertirme a segundo
+          await supabase
+            .from("team_staff")
+            .update({ role: "segundo" })
+            .eq("team_id", teamId)
+            .eq("user_id", user.id);
+
+          alert("Cambio realizado: ya no eres el principal.");
+
+          // ⚠️ OPCIÓN B: Recalcular mi rol automáticamente
+          await loadMyRole();
+
+          // Y recargar visualmente la UI
+          loadStaff();
+          return;
+        }
+
+        alert("Error inesperado al verificar el principal actual.");
+      };
+    });
 
     // =====================================================
-    // 🔥 Si el nuevo rol ES PRINCIPAL → comprobar si ya existe uno
-    // =====================================================
-    const { data: currentPrincipal, error: pErr } = await supabase
-      .from("team_staff")
-      .select("id, user_id, role")
-      .eq("team_id", teamId)
-      .eq("role", "principal")
-      .eq("active", true)
-      .single();
-
-    // Si hay un principal (debería ser siempre el usuario actual)
-    if (currentPrincipal && currentPrincipal.user_id === user.id) {
-
-      // ⚠️ MOSTRAR AVISO IMPORTANTE
-      const confirmChange = confirm(
-        "Solo puede haber un entrenador principal por equipo.\n\n" +
-        "Si haces principal a este entrenador:\n" +
-        "➡ Él será el nuevo PRINCIPAL\n" +
-        "➡ Tú pasarás a ser SEGUNDO\n" +
-        "➡ Perderás los permisos de principal\n\n" +
-        "¿Confirmas el cambio?"
-      );
-
-      if (!confirmChange) return;
-
-      // =====================================================
-      // 🔥 Acciones si confirma
-      // 1) Convertir al nuevo en PRINCIPAL
-      // 2) Convertir al usuario actual en SEGUNDO
-      // =====================================================
-
-      // 1) Actualizamos al nuevo principal
-      const { error: errNew } = await supabase
-        .from("team_staff")
-        .update({ role: "principal" })
-        .eq("id", id);
-
-      if (errNew) {
-        alert("Error haciendo principal al nuevo entrenador.");
-        return;
-      }
-
-      // 2) Degradamos al usuario actual a segundo
-      const { error: errMe } = await supabase
-        .from("team_staff")
-        .update({ role: "segundo" })
-        .eq("team_id", teamId)
-        .eq("user_id", user.id);
-
-      if (errMe) {
-        alert("Error al actualizar tu rol.");
-        return;
-      }
-
-      alert("Cambio realizado: el nuevo entrenador es principal y tú ahora eres segundo.");
-
-      // Como ya no es principal → recargar
-      loadStaff();
-      return;
-    }
-
-    // (Por si algún caso extraño no detecta principal actual)
-    alert("Error: no se pudo verificar el rol del principal actual.");
-  };
-});
-
-    // =====================================================
-    // 🔥 Eliminar miembro del staff
+    // 🔥 Eliminar entrenador
     // =====================================================
     document.querySelectorAll(".deleteBtn").forEach(btn => {
       btn.onclick = async () => {
@@ -314,7 +299,7 @@ document.querySelectorAll(".saveRoleBtn").forEach(btn => {
       return;
     }
 
-    // Buscar usuario por email (RPC)
+    // Buscar usuario por email
     const { data: usr, error } = await supabase.rpc("get_user_by_email", { p_email: email });
 
     if (error || !usr || usr.length === 0) {
