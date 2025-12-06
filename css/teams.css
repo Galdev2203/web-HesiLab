@@ -1,0 +1,116 @@
+/* teams.css - Estilos para la página de equipos */
+
+body {
+  padding: 20px;
+  background: #f5f7fa;
+}
+
+h2 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.team-card {
+  padding: 16px;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.team-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.team-card strong {
+  color: #333;
+  font-size: 16px;
+}
+
+.team-card small {
+  color: #666;
+  font-size: 13px;
+}
+
+.primary-btn {
+  background: #2b8aef;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.primary-btn:hover {
+  background: #1a7de8;
+}
+
+.danger-btn {
+  background: #d9534f;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 8px;
+  transition: all 0.2s ease;
+}
+
+.danger-btn:hover {
+  background: #c9302c;
+}
+
+#createForm {
+  margin-top: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e1e8ed;
+}
+
+#createForm h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+#createForm input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+#createForm input:focus {
+  outline: none;
+  border-color: #2b8aef;
+  box-shadow: 0 0 0 3px rgba(43, 138, 239, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .team-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .team-card > div:last-child {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+  
+  .primary-btn, .danger-btn {
+    flex: 1;
+  }
+}

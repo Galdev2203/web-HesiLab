@@ -1,0 +1,67 @@
+/* team_detail.css - Estilos para detalles del equipo */
+
+body {
+  padding: 20px;
+  background: #f5f7fa;
+}
+
+h2 {
+  color: #333;
+  margin-bottom: 5px;
+}
+
+#teamCategory {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+#actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 400px;
+}
+
+.btn {
+  display: block;
+  padding: 16px 20px;
+  background: #2b8aef;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+  background: #1a7de8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+#errorMessage {
+  color: #d9534f;
+  font-size: 14px;
+  padding: 10px;
+  background: #ffebee;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  #actions {
+    max-width: 100%;
+  }
+}

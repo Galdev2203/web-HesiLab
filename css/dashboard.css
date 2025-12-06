@@ -1,0 +1,84 @@
+/* dashboard.css - Estilos para el panel principal */
+
+body {
+  padding: 20px;
+  background: #f5f7fa;
+}
+
+h2 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+#userinfo {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 14px;
+}
+
+.logout-btn {
+  background: #d9534f;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 30px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: #c9302c;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(217, 83, 79, 0.3);
+}
+
+#cardsContainer {
+  margin-top: 30px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 280px;
+  cursor: pointer;
+  border: 1px solid #e1e8ed;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.card:hover {
+  background: #f8f9fa;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: #2b8aef;
+}
+
+.card h3 {
+  margin: 0 0 12px 0;
+  color: #2b8aef;
+  font-size: 20px;
+}
+
+.card p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #cardsContainer {
+    flex-direction: column;
+  }
+  
+  .card {
+    width: 100%;
+  }
+}

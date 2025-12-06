@@ -1,0 +1,185 @@
+/* players.css - Estilos para gestión de jugadores */
+
+body {
+  padding: 20px;
+  background: #f5f7fa;
+}
+
+h2 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+#errorMsg {
+  color: #d9534f;
+  font-size: 14px;
+  padding: 10px;
+  background: #ffebee;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.grid {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+#searchInput {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+#refreshBtn {
+  padding: 10px 16px;
+  background: #666;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#refreshBtn:hover {
+  background: #555;
+}
+
+.card {
+  border: 1px solid #e1e8ed;
+  padding: 14px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card strong {
+  color: #333;
+  font-size: 15px;
+}
+
+.muted {
+  color: #666;
+  font-size: 13px;
+}
+
+.btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.primary {
+  background: #2b8aef;
+  color: #fff;
+}
+
+.primary:hover {
+  background: #1a7de8;
+}
+
+.danger {
+  background: #d9534f;
+  color: #fff;
+  margin-left: 8px;
+}
+
+.danger:hover {
+  background: #c9302c;
+}
+
+.small {
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
+/* Formulario */
+#formBox {
+  border: 1px solid #e1e8ed;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+  background: white;
+}
+
+#formBox h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+  font-size: 14px;
+}
+
+input,
+select,
+textarea {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  width: 100%;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #2b8aef;
+  box-shadow: 0 0 0 3px rgba(43, 138, 239, 0.1);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .card > div:last-child {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    flex: 1;
+  }
+}

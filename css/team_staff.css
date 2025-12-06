@@ -1,0 +1,149 @@
+/* team_staff.css - Estilos para gestión de entrenadores */
+
+body {
+  padding: 20px;
+  background: #f5f7fa;
+}
+
+h2 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+#errorMsg {
+  color: #d9534f;
+  font-size: 14px;
+  padding: 10px;
+  background: #ffebee;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.staff-card {
+  border: 1px solid #e1e8ed;
+  padding: 14px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.staff-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.staff-card strong {
+  color: #333;
+  font-size: 15px;
+}
+
+.staff-card small {
+  color: #666;
+  font-size: 13px;
+}
+
+.btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.primary {
+  background: #2b8aef;
+  color: white;
+}
+
+.primary:hover {
+  background: #1a7de8;
+}
+
+.danger {
+  background: #d9534f;
+  color: white;
+}
+
+.danger:hover {
+  background: #c9302c;
+}
+
+select {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+}
+
+select:focus {
+  outline: none;
+  border-color: #2b8aef;
+  box-shadow: 0 0 0 3px rgba(43, 138, 239, 0.1);
+}
+
+#addBox {
+  margin-top: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e1e8ed;
+}
+
+#addBox h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+#addBox input {
+  width: 60%;
+  padding: 10px;
+  margin-right: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+#addBox input:focus {
+  outline: none;
+  border-color: #2b8aef;
+  box-shadow: 0 0 0 3px rgba(43, 138, 239, 0.1);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #e1e8ed;
+  margin: 30px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .staff-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .staff-card > div:last-child {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  #addBox input {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  #addBox select {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}

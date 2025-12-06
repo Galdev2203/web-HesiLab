@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff del equipo</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/team_staff.css">
+  
+  <!-- Analytics -->
+  <script src="../js/analytics.js"></script>
+</head>
+<body>
+
+<h2>Entrenadores del equipo</h2>
+<p id="errorMsg" style="color:red;"></p>
+
+<div id="staffList">Cargando staff...</div>
+
+<hr>
+
+<div id="addBox">
+  <h3>Añadir entrenador</h3>
+  <input id="emailInput" placeholder="Email del entrenador" style="width:60%; padding:6px;" />
+  <select id="roleInput" style="padding:6px;">
+    <option value="segundo">Segundo</option>
+    <option value="ayudante" selected>Ayudante</option>
+  </select>
+  <button id="addBtn" class="btn primary">Añadir</button>
+</div>
+
+<!-- JS -->
+<script type="module" src="../js/team_staff.js"></script>
+</body>
+</html>
