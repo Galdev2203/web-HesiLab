@@ -12,11 +12,17 @@
     gtag('config', 'G-3BQNCKKTXJ');
   </script>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ page.title }}</title>
+
+  <!-- CSS personalizado por página -->
+  {{ page.custom_css }}
 </head>
 
 <body>
   {{ content }}
+
+  <!-- JS personalizado por página -->
+  {{ page.custom_js }}
 </body>
 </html>
