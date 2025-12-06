@@ -10,6 +10,7 @@
       font-family: Arial;
       padding: 20px;
     }
+
     .logout-btn {
       background: #d9534f;
       color: white;
@@ -17,6 +18,36 @@
       padding: 10px 20px;
       border-radius: 6px;
       cursor: pointer;
+      margin-top: 30px;
+    }
+
+    /* CONTENEDOR DE TARJETAS */
+    #cardsContainer {
+      margin-top: 30px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* TARJETA */
+    .card {
+      background: #f4f6f9;
+      padding: 20px;
+      border-radius: 10px;
+      width: 250px;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      transition: 0.2s ease;
+    }
+
+    .card:hover {
+      background: #e8eef7;
+      transform: translateY(-3px);
+    }
+
+    .card h3 {
+      margin: 0;
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -25,6 +56,14 @@
 
 <h2>Bienvenido al Panel</h2>
 <p id="userinfo">Cargando datos del usuario...</p>
+
+<!-- TARJETAS -->
+<div id="cardsContainer">
+  <div class="card" id="teamsCard">
+    <h3>Mis equipos</h3>
+    <p>Gestiona equipos, entrenadores y jugadores.</p>
+  </div>
+</div>
 
 <button class="logout-btn" id="logoutBtn">Cerrar sesión</button>
 
@@ -40,6 +79,12 @@
     document.getElementById("userinfo").innerText =
       `Has iniciado sesión como: ${data.session.user.email}`;
   }
+
+  // Navegar a Mis Equipos
+  document.getElementById("teamsCard").onclick = () => {
+    window.location.href = "/teams.html"; 
+    // Cambia el nombre si tu listado de equipos está en otro archivo
+  };
 
   // Logout
   document.getElementById("logoutBtn").onclick = async () => {
