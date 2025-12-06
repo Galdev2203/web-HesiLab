@@ -227,18 +227,22 @@
 
           if (!confirmChange) return;
 
-          // 1) Hacer principal al nuevo
-          await supabase
-            .from("team_staff")
-            .update({ role: "principal" })
-            .eq("id", id);
+          // ⭐ USAR RPC REAL
+const { error: rpcError } = await supabase.rpc("transfer_principal", {
+  p_team_id: teamId,
+  p_new_principal: userIdToEdit
+});
 
-          // 2) Convertirme a segundo
-          await supabase
-            .from("team_staff")
-            .update({ role: "segundo" })
-            .eq("team_id", teamId)
-            .eq("user_id", user.id);
+if (rpcError) {
+  alert("Error al transferir principal: " + rpcError.message);
+  return;
+}
+
+alert("Transferencia completada correctamente.");
+await loadMyRole();
+await loadStaff();
+return;
+
 
           alert("Cambio realizado: ya no eres el principal.");
 
