@@ -4,7 +4,7 @@ import { supabase } from '../js/supabaseClient.js';
 // Sesión
 const { data: sessionData } = await supabase.auth.getSession();
 if (!sessionData.session) {
-  window.location.href = '/index.html';
+  window.location.href = '/pages/index.html';
   throw new Error('No session');
 }
 const user = sessionData.session.user;

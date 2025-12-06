@@ -4,7 +4,7 @@ import { supabase } from "../js/supabaseClient.js";
 // Validar sesión
 const { data: sessionData } = await supabase.auth.getSession();
 if (!sessionData.session) {
-  window.location.href = "/index.html";
+  window.location.href = "/pages/index.html";
   throw new Error("No session");
 }
 const user = sessionData.session.user;
@@ -57,6 +57,6 @@ document.getElementById("teamCategory").innerText = teamData.category || "";
 // Mostrar botones y configurar enlaces correctos
 document.getElementById("actions").style.display = "block";
 
-document.getElementById("playersBtn").href = `/players.html?team_id=${teamId}`;
-document.getElementById("staffBtn").href = `/team_staff.html?team_id=${teamId}`;
-document.getElementById("attendanceBtn").href = `/attendance.html?team_id=${teamId}`;
+document.getElementById("playersBtn").href = `/pages/players.html?team_id=${teamId}`;
+document.getElementById("staffBtn").href = `/pages/team_staff.html?team_id=${teamId}`;
+document.getElementById("attendanceBtn").href = `/pages/attendance.html?team_id=${teamId}`;

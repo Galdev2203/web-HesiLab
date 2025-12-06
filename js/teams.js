@@ -5,7 +5,7 @@ import { supabase } from "../js/supabaseClient.js";
 const { data: sessionData } = await supabase.auth.getSession();
 const session = sessionData.session;
 if (!session) {
-  window.location.href = "/index.html";
+  window.location.href = "/pages/index.html";
   throw new Error("No session");
 }
 const user = session.user;
@@ -57,7 +57,7 @@ async function loadTeams() {
   document.querySelectorAll('button.primary-btn[data-teamid]').forEach(b => {
     b.onclick = () => {
       const id = b.getAttribute('data-teamid');
-      window.location.href = `/team_detail.html?team_id=${id}`;
+      window.location.href = `/pages/team_detail.html?team_id=${id}`;
     }
   });
 
