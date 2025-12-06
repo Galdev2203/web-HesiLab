@@ -67,7 +67,11 @@
           </div>
           <div>
             <button class="primary-btn" data-teamid="${team.id}">Entrar</button>
-            <button class="danger-btn" data-teamid="${team.id}" data-action="delete">Eliminar</button>
+        
+            ${row.role === 'principal' 
+              ? `<button class="danger-btn" data-teamid="${team.id}" data-action="delete">Eliminar</button>` 
+              : ``}
+        
           </div>
         `;
         container.appendChild(div);
