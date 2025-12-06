@@ -66,7 +66,7 @@
     throw new Error("Missing team_id");
   }
 
-  // Comprobar permisos del usuario
+  // Comprobar permisos del usuario (qué rol tiene en este equipo)
   const { data: permission, error: permErr } = await supabase
     .from("team_staff")
     .select("id, role")
@@ -109,12 +109,24 @@
           <strong>${staff.profiles?.email || "(sin email)"}</strong><br>
           <small>Rol: ${staff.role}</small>
         </div>
-        <button class="btn danger" data-id="${staff.id}">Eliminar</button>
+        <button class="btn danger" data-id="${staff.id}" data-user="${staff.user_id}">Eliminar</button>
       `;
 
-      // Evitar que un ayudante elimine al principal, etc.
+      const deleteBtn = div.querySelector(".danger");
+
+      // 🔥 REGLAS DE VISIBILIDAD DEL BOTÓN ELIMINAR
+
+      // 1) Si no soy principal → no puedo eliminar a nadie
       if (myRole !== "principal") {
-        div.querySelector(".danger").style.display = "none";
+        deleteBtn.style.display = "none";
+
+      // 2) Si soy principal:
+      } else {
+        // ⚠️ No puedo eliminarme a mí mismo
+        if (staff.user_id === user.id) {
+          deleteBtn.style.display = "none";
+        }
+        // Un principal sí puede borrar a segundos o ayudantes
       }
 
       container.appendChild(div);
@@ -123,6 +135,14 @@
     // Botón eliminar
     document.querySelectorAll("button.danger").forEach(btn => {
       btn.onclick = async () => {
+        const userIdToDelete = btn.getAttribute("data-user");
+
+        // ⚠️ Protección adicional (doble check)
+        if (userIdToDelete === user.id) {
+          alert("No puedes eliminarte a ti mismo porque eres el entrenador principal.");
+          return;
+        }
+
         if (!confirm("¿Eliminar este entrenador del equipo?")) return;
 
         const id = btn.getAttribute("data-id");
