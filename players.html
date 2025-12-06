@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Jugadores — HesiLab</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    h2 { margin-top: 0; }
+    .card { border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 10px; display:flex; justify-content:space-between; align-items:center; }
+    .btn { padding: 8px 12px; border-radius:6px; border:none; cursor:pointer; }
+    .primary { background:#2b8aef; color:#fff; }
+    .danger { background:#d9534f; color:#fff; }
+    .muted { color:#666; font-size:0.9rem; }
+    .grid { display:flex; gap:12px; align-items:center; margin-bottom:12px; }
+    input, select, textarea { padding:8px; border-radius:6px; border:1px solid #ccc; }
+    .small { font-size:0.9rem; padding:6px 8px; }
+    #formBox { border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-top: 16px; background:#fafafa; }
+    label { display:block; font-weight:600; margin-bottom:6px; }
+    .inline { display:flex; gap:8px; align-items:center; }
+    .field { display:flex; flex-direction:column; width:100%; }
+    .row { display:flex; gap:8px; }
+  </style>
+</head>
+<body>
+
+<h2>Jugadores del equipo</h2>
+<p id="errorMsg" style="color:red;"></p>
+
+<div class="grid">
+  <input id="searchInput" placeholder="Buscar por nombre o dorsal" style="flex:1" />
+  <button id="refreshBtn" class="btn small">Refrescar</button>
+</div>
+
+<div id="playersList">Cargando jugadores...</div>
+
+<!-- Formulario: crear / editar -->
+<div id="formBox">
+  <h3 id="formTitle">Añadir jugador</h3>
+
+  <div style="display:grid; gap:10px;">
+    <div class="row">
+      <div class="field">
+        <label for="playerName">Nombre <span style="color:red;">*</span></label>
+        <input id="playerName" placeholder="Nombre completo" />
+      </div>
+
+      <div class="field" style="max-width:140px;">
+        <label for="playerNumber">Dorsal <span style="color:red;">*</span></label>
+        <input id="playerNumber" placeholder="Número" inputmode="numeric" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="playerPosition">Posición (opcional)</label>
+        <input id="playerPosition" placeholder="Ej: Alero, Base..." />
+      </div>
+
+      <div class="field">
+        <label for="playerNotes">Notas (opcional)</label>
+        <input id="playerNotes" placeholder="Notas" />
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button id="savePlayerBtn" class="btn primary">Guardar jugador</button>
+      <button id="cancelEditBtn" class="btn">Cancelar</button>
+      <div style="flex:1"></div>
+      <small class="muted">Campos con <span style="color:red">*</span> obligatorios</small>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { supabase } from './supabaseClient.js';
+
+  // sesión
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData.session) {
+    window.location.href = '/index.html';
+    throw new Error('No session');
+  }
+  const user = sessionData.session.user;
+
+  // team_id desde querystring
+  const params = new URLSearchParams(window.location.search);
+  const teamId = params.get('team_id');
+  if (!teamId) {
+    document.getElementById('errorMsg').innerText = 'Error: falta team_id en la URL.';
+    throw new Error('Missing team_id');
+  }
+
+  // mi rol actual
+  let myRole = null;
+  async function loadMyRole() {
+    const { data, error } = await supabase
+      .from('team_staff')
+      .select('role')
+      .eq('team_id', teamId)
+      .eq('user_id', user.id)
+      .eq('active', true)
+      .single();
+
+    if (error || !data) {
+      document.getElementById('errorMsg').innerText = 'No tienes permiso para ver este equipo.';
+      throw new Error('No permission');
+    }
+
+    myRole = data.role;
+  }
+
+  // estado de edición
+  let editingId = null;
+
+  // helpers
+  function escapeHtml(s) {
+    if (!s) return '';
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function getFilters() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    return { q };
+  }
+
+  // carga y render
+  async function loadPlayers() {
+    await loadMyRole();
+
+    const container = document.getElementById('playersList');
+    container.innerHTML = 'Cargando...';
+
+    // Traer jugadores del equipo
+    const { data, error } = await supabase
+      .from('players')
+      .select('id, name, number, position, notes, active, created_at')
+      .eq('team_id', teamId)
+      .order('number', { ascending: true });
+
+    if (error) {
+      container.innerText = 'Error cargando jugadores: ' + error.message;
+      console.error(error);
+      return;
+    }
+
+    const { q } = getFilters();
+    let list = data || [];
+    if (q) {
+      list = list.filter(x =>
+        (x.name || '').toLowerCase().includes(q) ||
+        (x.number !== null && String(x.number).includes(q))
+      );
+    }
+
+    if (list.length === 0) {
+      container.innerHTML = '<p class="muted">No hay jugadores.</p>';
+      return;
+    }
+
+    container.innerHTML = '';
+    list.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const left = document.createElement('div');
+      left.innerHTML = `<strong>${escapeHtml(p.name)}</strong> <span class="muted">#${p.number ?? '-'}</span><br>
+                        <span class="muted">${p.position ? escapeHtml(p.position) + ' • ' : ''}${p.notes ? escapeHtml(p.notes) : ''}</span>`;
+
+      const right = document.createElement('div');
+
+      // editar (principal/segundo)
+      if (myRole === 'principal' || myRole === 'segundo') {
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn small';
+        editBtn.textContent = 'Editar';
+        editBtn.onclick = () => openEditForm(p);
+        right.appendChild(editBtn);
+      }
+
+      // eliminar (solo principal)
+      if (myRole === 'principal') {
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn danger';
+        delBtn.style.marginLeft = '8px';
+        delBtn.textContent = 'Eliminar';
+        delBtn.onclick = async () => {
+          if (!confirm('¿Eliminar jugador? Esta acción es irreversible.')) return;
+          // limpiar UI rápidamente
+          document.getElementById('playersList').innerHTML = 'Actualizando...';
+          const { error } = await supabase.from('players').delete().eq('id', p.id);
+          if (error) {
+            alert('Error eliminando: ' + error.message);
+            loadPlayers();
+            return;
+          }
+          loadPlayers();
+        };
+        right.appendChild(delBtn);
+      }
+
+      card.appendChild(left);
+      card.appendChild(right);
+      container.appendChild(card);
+    });
+  }
+
+  // abrir formulario para editar
+  function openEditForm(player) {
+    editingId = player.id;
+    document.getElementById('formTitle').innerText = 'Editar jugador';
+    document.getElementById('playerName').value = player.name || '';
+    document.getElementById('playerNumber').value = player.number ?? '';
+    document.getElementById('playerPosition').value = player.position || '';
+    document.getElementById('playerNotes').value = player.notes || '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // cancelar edición
+  document.getElementById('cancelEditBtn').onclick = (e) => {
+    e.preventDefault();
+    resetForm();
+  };
+
+  function resetForm() {
+    editingId = null;
+    document.getElementById('formTitle').innerText = 'Añadir jugador';
+    document.getElementById('playerName').value = '';
+    document.getElementById('playerNumber').value = '';
+    document.getElementById('playerPosition').value = '';
+    document.getElementById('playerNotes').value = '';
+  }
+
+  // guardar (crear o actualizar)
+  document.getElementById('savePlayerBtn').onclick = async () => {
+    // validar permisos
+    await loadMyRole();
+    if (!(myRole === 'principal' || myRole === 'segundo')) {
+      alert('No tienes permiso para añadir/editar jugadores.');
+      return;
+    }
+
+    const name = document.getElementById('playerName').value.trim();
+    const numberRaw = document.getElementById('playerNumber').value.trim();
+    const position = document.getElementById('playerPosition').value.trim();
+    const notes = document.getElementById('playerNotes').value.trim();
+
+    // validaciones: name + dorsal obligatorios
+    if (!name) { alert('El nombre es obligatorio.'); return; }
+    if (!numberRaw) { alert('El dorsal es obligatorio.'); return; }
+    const number = parseInt(numberRaw, 10);
+    if (Number.isNaN(number) || number < 0) { alert('Dorsal inválido.'); return; }
+
+    // preparar payload
+    const payload = {
+      team_id: teamId,
+      name,
+      number,
+      position: position || null,
+      notes: notes || null,
+      active: true
+    };
+
+    // limpiar UI inmediatamente para evitar condiciones inconsistentes
+    document.getElementById('playersList').innerHTML = 'Actualizando...';
+
+    if (editingId) {
+      // update
+      const { error } = await supabase.from('players').update(payload).eq('id', editingId);
+      if (error) {
+        alert('Error actualizando jugador: ' + error.message);
+        loadPlayers();
+        return;
+      }
+      alert('Jugador actualizado.');
+      resetForm();
+      await loadPlayers();
+      return;
+    } else {
+      // insert
+      const { error } = await supabase.from('players').insert(payload);
+      if (error) {
+        alert('Error añadiendo jugador: ' + error.message);
+        loadPlayers();
+        return;
+      }
+      alert('Jugador añadido.');
+      resetForm();
+      await loadPlayers();
+      return;
+    }
+  };
+
+  // filtros y eventos
+  document.getElementById('refreshBtn').onclick = () => loadPlayers();
+  document.getElementById('searchInput').oninput = debounce(() => loadPlayers(), 300);
+
+  // debounce
+  function debounce(fn, wait) {
+    let t;
+    return (...a) => { clearTimeout(t); t = setTimeout(()=>fn(...a), wait); };
+  }
+
+  // inicial
+  loadPlayers();
+</script>
+</body>
+</html>
