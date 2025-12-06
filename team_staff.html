@@ -25,6 +25,7 @@
     .primary { background: #2b8aef; color: white; }
     .danger { background: #d9534f; color: white; }
     #addBox { margin-top: 20px; }
+    select { padding: 6px; }
   </style>
 </head>
 <body>
@@ -81,7 +82,9 @@
 
   const myRole = permission[0].role;
 
-  // 🔹 Función para cargar el staff actual
+  // =====================================================
+  // 🔥 Cargar staff
+  // =====================================================
   async function loadStaff() {
     const container = document.getElementById("staffList");
     container.innerText = "Cargando...";
@@ -104,42 +107,100 @@
       const div = document.createElement("div");
       div.className = "staff-card";
 
+      // selector de roles + botón guardar
+      const roleEditor = `
+        <select class="roleSelect" data-id="${staff.id}">
+          <option value="principal" ${staff.role === "principal" ? "selected" : ""}>Principal</option>
+          <option value="segundo" ${staff.role === "segundo" ? "selected" : ""}>Segundo</option>
+          <option value="ayudante" ${staff.role === "ayudante" ? "selected" : ""}>Ayudante</option>
+        </select>
+        <button class="btn primary saveRoleBtn" data-id="${staff.id}">Guardar rol</button>
+      `;
+
       div.innerHTML = `
         <div>
           <strong>${staff.profiles?.email || "(sin email)"}</strong><br>
-          <small>Rol: ${staff.role}</small>
+          <small>Rol actual: ${staff.role}</small>
         </div>
-        <button class="btn danger" data-id="${staff.id}" data-user="${staff.user_id}">Eliminar</button>
+
+        <div style="display:flex; align-items:center;">
+          ${roleEditor}
+          <button class="btn danger deleteBtn" data-id="${staff.id}" data-user="${staff.user_id}">
+            Eliminar
+          </button>
+        </div>
       `;
 
-      const deleteBtn = div.querySelector(".danger");
+      const deleteBtn = div.querySelector(".deleteBtn");
+      const selectRole = div.querySelector(".roleSelect");
+      const saveRoleBtn = div.querySelector(".saveRoleBtn");
 
-      // 🔥 REGLAS DE VISIBILIDAD DEL BOTÓN ELIMINAR
+      // =====================================================
+      // 🔥 REGLAS DE PERMISOS PARA EDITAR ROLES / ELIMINAR
+      // =====================================================
 
-      // 1) Si no soy principal → no puedo eliminar a nadie
+      // 1) Si NO soy principal → no edito nada
       if (myRole !== "principal") {
         deleteBtn.style.display = "none";
-
-      // 2) Si soy principal:
-      } else {
-        // ⚠️ No puedo eliminarme a mí mismo
-        if (staff.user_id === user.id) {
-          deleteBtn.style.display = "none";
-        }
-        // Un principal sí puede borrar a segundos o ayudantes
+        selectRole.style.display = "none";
+        saveRoleBtn.style.display = "none";
       }
 
+      // 2) El principal NO puede cambiarse su propio rol
+      if (staff.user_id === user.id) {
+        selectRole.style.display = "none";
+        saveRoleBtn.style.display = "none";
+        deleteBtn.style.display = "none"; 
+      }
+
+      // Añadir tarjeta
       container.appendChild(div);
     });
 
-    // Botón eliminar
-    document.querySelectorAll("button.danger").forEach(btn => {
+    // =====================================================
+    // 🔥 Guardar cambios de rol
+    // =====================================================
+    document.querySelectorAll(".saveRoleBtn").forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.getAttribute("data-id");
+        const newRole = btn.parentElement.querySelector(".roleSelect").value;
+
+        // Evitar que el principal cambie su propio rol
+        const { data: staffRow } = await supabase
+          .from("team_staff")
+          .select("user_id")
+          .eq("id", id)
+          .single();
+
+        if (staffRow.user_id === user.id) {
+          alert("No puedes cambiar tu propio rol porque eres el entrenador principal.");
+          return;
+        }
+
+        const { error } = await supabase
+          .from("team_staff")
+          .update({ role: newRole })
+          .eq("id", id);
+
+        if (error) {
+          alert("Error actualizando rol: " + error.message);
+          return;
+        }
+
+        alert("Rol actualizado correctamente.");
+        loadStaff();
+      };
+    });
+
+    // =====================================================
+    // 🔥 Eliminar miembro del staff
+    // =====================================================
+    document.querySelectorAll(".deleteBtn").forEach(btn => {
       btn.onclick = async () => {
         const userIdToDelete = btn.getAttribute("data-user");
 
-        // ⚠️ Protección adicional (doble check)
         if (userIdToDelete === user.id) {
-          alert("No puedes eliminarte a ti mismo porque eres el entrenador principal.");
+          alert("No puedes eliminarte a ti mismo.");
           return;
         }
 
@@ -164,7 +225,9 @@
 
   loadStaff();
 
-  // 🔹 Añadir entrenador
+  // =====================================================
+  // 🔥 Añadir entrenador
+  // =====================================================
   document.getElementById("addBtn").onclick = async () => {
     const email = document.getElementById("emailInput").value.trim();
     const role = document.getElementById("roleInput").value;
