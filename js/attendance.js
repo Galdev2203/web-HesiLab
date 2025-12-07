@@ -321,8 +321,7 @@ async function saveAllChanges() {
     const recordsToUpsert = attendanceRecords.map(record => {
       const pending = pendingChanges.get(record.player_id);
       
-      return {
-        id: record.id || undefined,
+      const baseRecord = {
         team_id: teamId,
         player_id: record.player_id,
         date: currentDate,
@@ -331,11 +330,21 @@ async function saveAllChanges() {
         status: pending?.status || record.status,
         notes: pending?.notes !== undefined ? pending.notes : record.notes
       };
+      
+      // Solo incluir id si existe (para updates)
+      if (record.id) {
+        baseRecord.id = record.id;
+      }
+      
+      return baseRecord;
     });
 
     const { data, error } = await supabase
       .from('attendance')
-      .upsert(recordsToUpsert, { onConflict: 'id' })
+      .upsert(recordsToUpsert, { 
+        onConflict: 'id',
+        ignoreDuplicates: false 
+      })
       .select();
 
     if (error) throw error;

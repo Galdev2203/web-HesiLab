@@ -296,13 +296,114 @@ function createStaffCard(staff) {
 }
 
 /**
- * Abrir modal de permisos (simulado con confirm/prompt)
+ * Abrir modal de permisos
  */
 async function openPermissionsModal(staff) {
   const profile = staff.profiles || {};
   const name = profile.full_name || profile.email || 'Usuario';
   
-  alert(`Configurando permisos para: ${name}\n\nPermisos actuales:\n${staff.permissions.map(p => `✓ ${PERMISSION_LABELS[p]}`).join('\n') || '(ninguno)'}\n\n⚠️ Usa los checkboxes del formulario de abajo para cambiar permisos (funcionalidad completa próximamente).`);
+  document.getElementById('modalTitle').textContent = `Permisos de ${name}`;
+  document.getElementById('modalStaffInfo').innerHTML = `
+    <strong>${escapeHtml(name)}</strong><br>
+    <small>${escapeHtml(profile.email || '')}</small><br>
+    <small>Rol: ${ROLE_LABELS[staff.role] || staff.role}</small>
+  `;
+  
+  // Crear checkboxes de permisos
+  const container = document.getElementById('modalPermissions');
+  container.innerHTML = '';
+  
+  Object.entries(PERMISSION_LABELS).forEach(([perm, label]) => {
+    // HEAD_COACH no puede cambiar MANAGE_STAFF_PERMISSIONS de otros
+    if (perm === 'MANAGE_STAFF_PERMISSIONS' && staff.role !== 'HEAD_COACH') {
+      return;
+    }
+    
+    const isChecked = staff.permissions.includes(perm);
+    
+    const permItem = document.createElement('label');
+    permItem.className = 'permission-item';
+    permItem.innerHTML = `
+      <input 
+        type="checkbox" 
+        value="${perm}" 
+        ${isChecked ? 'checked' : ''}
+        data-staff-id="${staff.id}"
+      >
+      <span>${label}</span>
+    `;
+    container.appendChild(permItem);
+  });
+  
+  // Mostrar modal
+  document.getElementById('permissionsModal').style.display = 'flex';
+  
+  // Configurar botón guardar
+  const saveBtn = document.getElementById('savePermissionsBtn');
+  saveBtn.onclick = () => savePermissions(staff.id);
+}
+
+/**
+ * Cerrar modal de permisos
+ */
+window.closePermissionsModal = function() {
+  document.getElementById('permissionsModal').style.display = 'none';
+}
+
+/**
+ * Guardar permisos
+ */
+async function savePermissions(staffId) {
+  if (!canManagePermissions) {
+    alert('No tienes permiso para gestionar permisos');
+    return;
+  }
+  
+  const saveBtn = document.getElementById('savePermissionsBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = '💾 Guardando...';
+  
+  try {
+    // Obtener permisos seleccionados
+    const selectedPermissions = [];
+    document.querySelectorAll(`#modalPermissions input[type="checkbox"]:checked`).forEach(cb => {
+      selectedPermissions.push(cb.value);
+    });
+    
+    // 1. Eliminar todos los permisos actuales
+    const { error: deleteError } = await supabase
+      .from('team_staff_permissions')
+      .delete()
+      .eq('team_staff_id', staffId);
+    
+    if (deleteError) throw deleteError;
+    
+    // 2. Insertar nuevos permisos
+    if (selectedPermissions.length > 0) {
+      const permissionsToInsert = selectedPermissions.map(perm => ({
+        team_staff_id: staffId,
+        permission: perm,
+        value: true
+      }));
+      
+      const { error: insertError } = await supabase
+        .from('team_staff_permissions')
+        .insert(permissionsToInsert);
+      
+      if (insertError) throw insertError;
+    }
+    
+    alert('✅ Permisos actualizados correctamente');
+    window.closePermissionsModal();
+    await loadStaff();
+    
+  } catch (error) {
+    console.error('Error saving permissions:', error);
+    alert(`Error: ${error.message}`);
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = '💾 Guardar cambios';
+  }
 }
 
 /**

@@ -104,6 +104,24 @@
   </div>
 </main>
 
+<!-- Modal de permisos -->
+<div id="permissionsModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">Configurar permisos</h3>
+      <button class="modal-close" onclick="closePermissionsModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="modalStaffInfo"></p>
+      <div class="permissions-checklist" id="modalPermissions"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="savePermissionsBtn" class="btn btn-primary">💾 Guardar cambios</button>
+      <button class="btn btn-outline" onclick="closePermissionsModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- JS -->
 <script type="module" src="../js/staff.js"></script>
 </body>
