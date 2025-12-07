@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eventos - HesiLab</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/players.css">
+  
+  <!-- Analytics -->
+  <script src="../js/analytics.js"></script>
+</head>
+<body>
+
+<!-- Header -->
+<header class="page-header">
+  <div class="container">
+    <h2>📅 Eventos del equipo</h2>
+    <a href="#" class="back-link" onclick="history.back(); return false;">Volver</a>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="players-main">
+  <div class="container">
+    <p id="errorMsg" class="error-message" style="display:none;"></p>
+
+    <div class="info-box">
+      <p>⚽ Gestiona partidos, reuniones, torneos y otros eventos únicos del equipo.</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="search-bar">
+      <select id="typeFilter" class="filter-select">
+        <option value="">Todos los tipos</option>
+        <option value="MATCH">Partidos</option>
+        <option value="FRIENDLY">Amistosos</option>
+        <option value="TOURNAMENT">Torneos</option>
+        <option value="TRAINING">Entrenamientos</option>
+        <option value="MEETING">Reuniones</option>
+        <option value="OTHER">Otros</option>
+      </select>
+      <button id="refreshBtn" class="btn">🔄 Refrescar</button>
+    </div>
+
+    <!-- Lista de eventos -->
+    <div id="eventsList">
+      Cargando eventos...
+    </div>
+
+    <!-- Formulario -->
+    <div id="formBox" class="add-player-section">
+      <h3 id="formTitle">Añadir evento</h3>
+
+      <div class="form-grid">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="eventType">Tipo <span class="required">*</span></label>
+            <select id="eventType" required>
+              <option value="">Selecciona tipo</option>
+              <option value="MATCH">⚽ Partido oficial</option>
+              <option value="FRIENDLY">🤝 Amistoso</option>
+              <option value="TOURNAMENT">🏆 Torneo</option>
+              <option value="TRAINING">⚽ Entrenamiento especial</option>
+              <option value="MEETING">👥 Reunión</option>
+              <option value="OTHER">📌 Otro</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="eventDate">Fecha <span class="required">*</span></label>
+            <input id="eventDate" type="date" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="startTime">Hora inicio</label>
+            <input id="startTime" type="time" />
+          </div>
+
+          <div class="form-group">
+            <label for="endTime">Hora fin</label>
+            <input id="endTime" type="time" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="title">Título</label>
+            <input id="title" placeholder="Ej: vs Equipo Rival" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="location">Ubicación</label>
+            <input id="location" placeholder="Ej: Pabellón Municipal" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="notes">Notas</label>
+            <textarea id="notes" placeholder="Observaciones adicionales" rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button id="saveBtn" class="btn btn-primary">➕ Añadir evento</button>
+          <button id="cancelBtn" class="btn btn-outline" style="display:none;">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- JS -->
+<script type="module" src="../js/events.js"></script>
+</body>
+</html>
