@@ -83,13 +83,23 @@ document.getElementById('createBtn').onclick = async () => {
   if (!name) return alert('Pon un nombre al equipo');
 
   // Insertar en teams
+  console.log('Creando equipo con user.id:', user.id);
   const { data: newTeam, error } = await supabase
     .from('teams')
-    .insert({ name, category, created_by: user.id })
+    .insert({ 
+      name: name, 
+      category: category || null, 
+      created_by: user.id 
+    })
     .select()
     .single();
 
-  if (error) return alert('Error creando equipo: ' + error.message);
+  if (error) {
+    console.error('Error creando equipo:', error);
+    return alert('Error creando equipo: ' + error.message);
+  }
+  
+  console.log('Equipo creado:', newTeam);
 
   // Añadir como staff principal
   const { error: err2 } = await supabase
