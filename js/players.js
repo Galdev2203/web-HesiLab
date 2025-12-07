@@ -42,210 +42,248 @@ if (!canManage) {
 let editingId = null;
 let allPlayers = [];
 
-// Carga y render
+/**
+ * Cargar jugadores del equipo
+ */
 async function loadPlayers() {
-  await loadMyRole();
-
   const container = document.getElementById('playersList');
-  container.innerHTML = 'Cargando...';
+  container.innerHTML = '<div class="loading">Cargando jugadores...</div>';
 
-  // Traer jugadores del equipo
-  const { data, error } = await supabase
-    .from('players')
-    .select('id, name, number, position, notes, active, created_at')
-    .eq('team_id', teamId)
-    .order('number', { ascending: true });
+  try {
+    const { data, error } = await supabase
+      .from('players')
+      .select('*')
+      .eq('team_id', teamId)
+      .eq('active', true)
+      .order('number', { ascending: true });
 
-  if (error) {
-    container.innerText = 'Error cargando jugadores: ' + error.message;
-    console.error(error);
-    return;
+    if (error) throw error;
+
+    allPlayers = data || [];
+    renderPlayers();
+  } catch (error) {
+    container.innerHTML = `<div class="error-state">Error: ${error.message}</div>`;
+    console.error('Error loading players:', error);
   }
+}
 
-  const { q } = getFilters();
-  let list = data || [];
-  if (q) {
-    list = list.filter(x =>
-      (x.name || '').toLowerCase().includes(q) ||
-      (x.number !== null && String(x.number).includes(q))
+/**
+ * Renderizar lista de jugadores
+ */
+function renderPlayers() {
+  const container = document.getElementById('playersList');
+  const searchTerm = document.getElementById('searchInput')?.value.trim().toLowerCase() || '';
+
+  let filteredPlayers = allPlayers;
+  if (searchTerm) {
+    filteredPlayers = allPlayers.filter(p =>
+      p.name.toLowerCase().includes(searchTerm) ||
+      (p.number && String(p.number).includes(searchTerm)) ||
+      (p.position && p.position.toLowerCase().includes(searchTerm))
     );
   }
 
-  if (list.length === 0) {
-    container.innerHTML = '<div class="empty-state"><p>No hay jugadores en este equipo.</p></div>';
+  if (filteredPlayers.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <p>${searchTerm ? 'No se encontraron jugadores' : 'Aún no hay jugadores'}</p>
+      </div>
+    `;
     return;
   }
 
   container.innerHTML = '';
-  list.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'player-card';
-
-    const playerInfo = document.createElement('div');
-    playerInfo.className = 'player-info';
-
-    const playerNumber = document.createElement('div');
-    playerNumber.className = 'player-number';
-    playerNumber.textContent = p.number ?? '-';
-
-    const playerDetails = document.createElement('div');
-    playerDetails.className = 'player-details';
-
-    const playerName = document.createElement('div');
-    playerName.className = 'player-name';
-    playerName.textContent = p.name || 'Sin nombre';
-
-    const playerPosition = document.createElement('div');
-    playerPosition.className = 'player-position';
-    playerPosition.textContent = p.position || 'Sin posición';
-
-    playerDetails.appendChild(playerName);
-    playerDetails.appendChild(playerPosition);
-
-    if (p.notes) {
-      const playerNotes = document.createElement('div');
-      playerNotes.className = 'player-notes';
-      playerNotes.textContent = p.notes;
-      playerDetails.appendChild(playerNotes);
-    }
-
-    playerInfo.appendChild(playerNumber);
-    playerInfo.appendChild(playerDetails);
-
-    const playerActions = document.createElement('div');
-    playerActions.className = 'player-actions';
-
-    // Editar (principal/segundo)
-    if (myRole === 'principal' || myRole === 'segundo') {
-      const editBtn = document.createElement('button');
-      editBtn.className = 'btn btn-outline';
-      editBtn.textContent = '✏️ Editar';
-      editBtn.onclick = () => openEditForm(p);
-      playerActions.appendChild(editBtn);
-    }
-
-    // Eliminar (solo principal)
-    if (myRole === 'principal') {
-      const delBtn = document.createElement('button');
-      delBtn.className = 'btn btn-danger';
-      delBtn.textContent = '🗑️ Eliminar';
-      delBtn.onclick = async () => {
-        if (!confirm('¿Eliminar jugador? Esta acción es irreversible.')) return;
-        
-        // Limpiar UI rápidamente
-        document.getElementById('playersList').innerHTML = 'Actualizando...';
-        const { error } = await supabase.from('players').delete().eq('id', p.id);
-        if (error) {
-          alert('Error eliminando: ' + error.message);
-          loadPlayers();
-          return;
-        }
-        loadPlayers();
-      };
-      playerActions.appendChild(delBtn);
-    }
-
-    card.appendChild(playerInfo);
-    card.appendChild(playerActions);
+  filteredPlayers.forEach(player => {
+    const card = createPlayerCard(player);
     container.appendChild(card);
   });
 }
 
-// Abrir formulario para editar
+/**
+ * Crear card de jugador
+ */
+function createPlayerCard(player) {
+  const card = document.createElement('div');
+  card.className = 'player-card fade-in';
+
+  card.innerHTML = `
+    <div class="player-info">
+      <div class="player-number">${player.number || '-'}</div>
+      <div class="player-details">
+        <div class="player-name">${escapeHtml(player.name)}</div>
+        <div class="player-position">${escapeHtml(player.position) || 'Sin posición'}</div>
+        ${player.birthdate ? `<div class="player-meta">📅 ${formatDate(player.birthdate)}</div>` : ''}
+        ${player.notes ? `<div class="player-notes">${escapeHtml(player.notes)}</div>` : ''}
+      </div>
+    </div>
+    <div class="player-actions" id="actions-${player.id}"></div>
+  `;
+
+  if (canManage) {
+    const actionsContainer = card.querySelector(`#actions-${player.id}`);
+    
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn btn-outline btn-sm';
+    editBtn.textContent = '✏️ Editar';
+    editBtn.onclick = () => openEditForm(player);
+    actionsContainer.appendChild(editBtn);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn btn-danger btn-sm';
+    deleteBtn.textContent = '🗑️';
+    deleteBtn.onclick = () => deletePlayer(player.id, player.name);
+    actionsContainer.appendChild(deleteBtn);
+  }
+
+  return card;
+}
+
+/**
+ * Abrir formulario para editar
+ */
 function openEditForm(player) {
   editingId = player.id;
-  document.getElementById('formTitle').innerText = 'Editar jugador';
+  document.getElementById('formTitle').textContent = 'Editar jugador';
   document.getElementById('playerName').value = player.name || '';
   document.getElementById('playerNumber').value = player.number ?? '';
   document.getElementById('playerPosition').value = player.position || '';
+  document.getElementById('playerBirthdate').value = player.birthdate || '';
   document.getElementById('playerNotes').value = player.notes || '';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  document.getElementById('cancelEditBtn').style.display = 'inline-block';
+  document.getElementById('savePlayerBtn').textContent = '💾 Guardar';
+  
+  document.getElementById('addPlayerSection').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Cancelar edición
-document.getElementById('cancelEditBtn').onclick = (e) => {
-  e.preventDefault();
-  resetForm();
-};
-
+/**
+ * Resetear formulario
+ */
 function resetForm() {
   editingId = null;
-  document.getElementById('formTitle').innerText = 'Añadir jugador';
-  document.getElementById('playerName').value = '';
-  document.getElementById('playerNumber').value = '';
-  document.getElementById('playerPosition').value = '';
-  document.getElementById('playerNotes').value = '';
+  document.getElementById('formTitle').textContent = 'Añadir jugador';
+  document.getElementById('playerForm').reset();
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  document.getElementById('savePlayerBtn').textContent = '➕ Añadir';
 }
 
-// Guardar (crear o actualizar)
-document.getElementById('savePlayerBtn').onclick = async () => {
-  // Validar permisos
-  await loadMyRole();
-  if (!(myRole === 'principal' || myRole === 'segundo')) {
-    alert('No tienes permiso para añadir/editar jugadores.');
+/**
+ * Guardar jugador
+ */
+async function savePlayer(e) {
+  e.preventDefault();
+
+  if (!canManage) {
+    alert('No tienes permiso para gestionar jugadores');
     return;
   }
 
   const name = document.getElementById('playerName').value.trim();
-  const numberRaw = document.getElementById('playerNumber').value.trim();
+  const numberStr = document.getElementById('playerNumber').value.trim();
   const position = document.getElementById('playerPosition').value.trim();
+  const birthdate = document.getElementById('playerBirthdate').value || null;
   const notes = document.getElementById('playerNotes').value.trim();
 
-  // Validaciones: name + dorsal obligatorios
-  if (!name) { alert('El nombre es obligatorio.'); return; }
-  if (!numberRaw) { alert('El dorsal es obligatorio.'); return; }
-  const number = parseInt(numberRaw, 10);
-  if (Number.isNaN(number) || number < 0) { alert('Dorsal inválido.'); return; }
+  if (!name) {
+    alert('El nombre es obligatorio');
+    return;
+  }
 
-  // Preparar payload
-  const payload = {
+  let number = null;
+  if (numberStr) {
+    number = parseInt(numberStr, 10);
+    if (isNaN(number) || number < 0) {
+      alert('El dorsal debe ser un número válido');
+      return;
+    }
+  }
+
+  const playerData = {
     team_id: teamId,
     name,
     number,
     position: position || null,
+    birthdate,
     notes: notes || null,
     active: true
   };
 
-  // Limpiar UI inmediatamente
-  document.getElementById('playersList').innerHTML = 'Actualizando...';
+  try {
+    if (editingId) {
+      const { error } = await supabase
+        .from('players')
+        .update(playerData)
+        .eq('id', editingId);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase
+        .from('players')
+        .insert(playerData);
+      if (error) throw error;
+    }
 
-  if (editingId) {
-    // Update
-    const { error } = await supabase.from('players').update(payload).eq('id', editingId);
-    if (error) {
-      alert('Error actualizando jugador: ' + error.message);
-      loadPlayers();
-      return;
-    }
-    alert('Jugador actualizado.');
     resetForm();
     await loadPlayers();
-    return;
-  } else {
-    // Insert
-    const { error } = await supabase.from('players').insert(payload);
-    if (error) {
-      alert('Error añadiendo jugador: ' + error.message);
-      loadPlayers();
-      return;
+  } catch (error) {
+    console.error('Error saving player:', error);
+    if (error.code === '23505') {
+      alert('Ya existe un jugador con ese dorsal');
+    } else {
+      alert(`Error: ${error.message}`);
     }
-    alert('Jugador añadido.');
-    resetForm();
-    await loadPlayers();
-    return;
   }
-};
-
-// Filtros y eventos
-document.getElementById('refreshBtn').onclick = () => loadPlayers();
-document.getElementById('searchInput').oninput = debounce(() => loadPlayers(), 300);
-
-// Debounce
-function debounce(fn, wait) {
-  let t;
-  return (...a) => { clearTimeout(t); t = setTimeout(()=>fn(...a), wait); };
 }
 
-// Inicial
+/**
+ * Eliminar jugador
+ */
+async function deletePlayer(playerId, playerName) {
+  if (!confirm(`¿Eliminar a ${playerName}?`)) return;
+
+  try {
+    const { error } = await supabase
+      .from('players')
+      .update({ active: false })
+      .eq('id', playerId);
+
+    if (error) throw error;
+    await loadPlayers();
+  } catch (error) {
+    console.error('Error deleting player:', error);
+    alert(`Error: ${error.message}`);
+  }
+}
+
+/**
+ * Helpers
+ */
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+// Event listeners
+document.getElementById('savePlayerBtn')?.addEventListener('click', savePlayer);
+document.getElementById('cancelEditBtn')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  resetForm();
+});
+
+let searchTimeout;
+document.getElementById('searchInput')?.addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => renderPlayers(), 300);
+});
+
+document.getElementById('refreshBtn')?.addEventListener('click', () => loadPlayers());
+
+// Cargar inicial
 loadPlayers();
