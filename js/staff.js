@@ -294,12 +294,18 @@ async function addStaff(e) {
     // 1. Buscar usuario por email en profiles
     const { data: profiles, error: profileError } = await supabase
       .from('profiles')
-      .select('id')
+      .select('id, email, full_name')
       .eq('email', email)
-      .single();
+      .maybeSingle();
 
-    if (profileError || !profiles) {
-      alert(`No se encontró ningún usuario con el email: ${email}\n\nEl usuario debe estar registrado en HesiLab primero.`);
+    if (profileError) {
+      console.error('Error buscando usuario:', profileError);
+      alert(`Error al buscar usuario: ${profileError.message}`);
+      return;
+    }
+
+    if (!profiles) {
+      alert(`No se encontró ningún usuario con el email: ${email}\n\nEl usuario debe estar registrado en HesiLab primero.\n\nVerifica que:\n- El email esté escrito correctamente\n- El usuario se haya registrado en la aplicación`);
       return;
     }
 
