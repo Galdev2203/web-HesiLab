@@ -1145,6 +1145,60 @@ textarea:focus {
   font-style: italic;
 }
 
+.users-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-top: 4px;
+  max-height: 250px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.dropdown-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--bg-light);
+  transition: background 0.2s ease;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: var(--bg-light);
+}
+
+.dropdown-item.disabled {
+  cursor: default;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.dropdown-item.disabled:hover {
+  background: white;
+}
+
+.dropdown-item strong {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.dropdown-item small {
+  color: var(--text-secondary);
+  font-size: 0.813rem;
+}
+
+.form-group {
+  position: relative;
+}
+
 /* Responsive para staff */
 @media (max-width: 768px) {
   .staff-header {

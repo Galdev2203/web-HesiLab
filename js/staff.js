@@ -81,15 +81,55 @@ async function loadAvailableUsers() {
 
     allUsers = data || [];
     
-    // Rellenar datalist
-    const datalist = document.getElementById('usersList');
-    if (datalist) {
-      datalist.innerHTML = '';
-      allUsers.forEach(user => {
-        const option = document.createElement('option');
-        option.value = user.email;
-        option.textContent = user.full_name ? `${user.full_name} (${user.email})` : user.email;
-        datalist.appendChild(option);
+    // Configurar búsqueda en tiempo real
+    const emailInput = document.getElementById('staffEmail');
+    const dropdown = document.getElementById('usersDropdown');
+    
+    if (emailInput && dropdown) {
+      emailInput.addEventListener('input', () => {
+        const query = emailInput.value.toLowerCase().trim();
+        
+        if (query.length === 0) {
+          dropdown.style.display = 'none';
+          return;
+        }
+        
+        // Filtrar usuarios
+        const filtered = allUsers.filter(u => 
+          u.email.toLowerCase().includes(query) ||
+          (u.full_name && u.full_name.toLowerCase().includes(query))
+        );
+        
+        if (filtered.length === 0) {
+          dropdown.innerHTML = '<div class="dropdown-item disabled">No se encontraron usuarios</div>';
+          dropdown.style.display = 'block';
+          return;
+        }
+        
+        // Mostrar resultados
+        dropdown.innerHTML = '';
+        filtered.forEach(user => {
+          const item = document.createElement('div');
+          item.className = 'dropdown-item';
+          item.innerHTML = `
+            <strong>${user.email}</strong>
+            ${user.full_name ? `<br><small>${user.full_name}</small>` : ''}
+          `;
+          item.onclick = () => {
+            emailInput.value = user.email;
+            dropdown.style.display = 'none';
+          };
+          dropdown.appendChild(item);
+        });
+        
+        dropdown.style.display = 'block';
+      });
+      
+      // Cerrar dropdown al hacer clic fuera
+      document.addEventListener('click', (e) => {
+        if (!emailInput.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.style.display = 'none';
+        }
       });
     }
   } catch (error) {
@@ -323,11 +363,15 @@ async function addStaff(e) {
 
   try {
     // 1. Buscar usuario por email en profiles
+    console.log('Buscando usuario con email:', email);
+    
     const { data: profiles, error: profileError } = await supabase
       .from('profiles')
       .select('id, email, full_name')
       .eq('email', email)
       .maybeSingle();
+
+    console.log('Resultado búsqueda:', { profiles, profileError });
 
     if (profileError) {
       console.error('Error buscando usuario:', profileError);
@@ -336,11 +380,12 @@ async function addStaff(e) {
     }
 
     if (!profiles) {
-      alert(`No se encontró ningún usuario con el email: ${email}\n\nEl usuario debe estar registrado en HesiLab primero.\n\nVerifica que:\n- El email esté escrito correctamente\n- El usuario se haya registrado en la aplicación`);
+      alert(`No se encontró ningún usuario con el email: ${email}\n\nEl usuario debe estar registrado en HesiLab primero.\n\nVerifica que:\n- El email esté escrito correctamente\n- El usuario se haya registrado en la aplicación\n\nEmails disponibles:\n${allUsers.map(u => '- ' + u.email).join('\n')}`);
       return;
     }
 
     const userId = profiles.id;
+    console.log('Usuario encontrado, ID:', userId);
 
     // 2. Verificar que no esté ya en el equipo
     const { data: existing, error: existingError } = await supabase
