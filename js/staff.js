@@ -46,6 +46,7 @@ if (canManageStaff) {
 
 // Estado
 let allStaff = [];
+let allUsers = []; // Todos los usuarios disponibles
 
 const ROLE_LABELS = {
   'HEAD_COACH': '👔 Entrenador principal',
@@ -65,6 +66,36 @@ const PERMISSION_LABELS = {
   'MANAGE_TRAININGS': 'Gestionar entrenamientos',
   'MANAGE_ATTENDANCE': 'Gestionar asistencia'
 };
+
+/**
+ * Cargar usuarios disponibles para autocompletar
+ */
+async function loadAvailableUsers() {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, email, full_name')
+      .order('email');
+
+    if (error) throw error;
+
+    allUsers = data || [];
+    
+    // Rellenar datalist
+    const datalist = document.getElementById('usersList');
+    if (datalist) {
+      datalist.innerHTML = '';
+      allUsers.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user.email;
+        option.textContent = user.full_name ? `${user.full_name} (${user.email})` : user.email;
+        datalist.appendChild(option);
+      });
+    }
+  } catch (error) {
+    console.error('Error loading users:', error);
+  }
+}
 
 /**
  * Cargar staff del equipo
@@ -384,4 +415,5 @@ function escapeHtml(text) {
 document.getElementById('addBtn')?.addEventListener('click', addStaff);
 
 // Cargar inicial
+loadAvailableUsers();
 loadStaff();

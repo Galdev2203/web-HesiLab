@@ -44,8 +44,9 @@
         <div class="form-row">
           <div class="form-group">
             <label for="staffEmail">Email del usuario <span class="required">*</span></label>
-            <input id="staffEmail" type="email" placeholder="usuario@ejemplo.com" required />
-            <small class="form-hint">El usuario debe estar registrado en HesiLab</small>
+            <input id="staffEmail" type="email" placeholder="usuario@ejemplo.com" list="usersList" required autocomplete="off" />
+            <datalist id="usersList"></datalist>
+            <small class="form-hint">Empieza a escribir para ver usuarios disponibles</small>
           </div>
         </div>
 
