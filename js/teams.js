@@ -100,24 +100,12 @@ document.getElementById('createBtn').onclick = async () => {
   }
   
   console.log('Equipo creado:', newTeam);
-
-  // Añadir como staff principal - usar upsert para evitar duplicados
-  const { error: err2 } = await supabase
-    .from('team_staff')
-    .upsert(
-      { team_id: newTeam.id, user_id: user.id, role: 'principal', active: true },
-      { onConflict: 'team_id,user_id' }
-    );
-
-  if (err2) {
-    console.error('Error asignando staff:', err2);
-    alert('Equipo creado pero no se pudo asignar staff: ' + err2.message);
-  } else {
-    console.log('Staff asignado correctamente');
-    document.getElementById('teamName').value = '';
-    document.getElementById('teamCategory').value = '';
-    loadTeams();
-  }
+  
+  // El trigger automáticamente añade al creador como staff, no necesitamos hacer nada más
+  console.log('Staff asignado automáticamente por trigger');
+  document.getElementById('teamName').value = '';
+  document.getElementById('teamCategory').value = '';
+  loadTeams();
 };
 
 // Cargar inicial
