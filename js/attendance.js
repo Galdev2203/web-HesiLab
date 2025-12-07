@@ -146,7 +146,7 @@ function generateLazyAttendance() {
     date: currentDate,
     session_id: currentSession?.id || null,
     event_id: currentEvent?.id || null,
-    status: 'PENDING',
+    attendance_status: 'PENDING',
     notes: null,
     _isNew: true,
     _playerData: player
@@ -194,7 +194,7 @@ function createAttendanceCard(record) {
 
   // Aplicar cambios pendientes si existen
   const pending = pendingChanges.get(player.id);
-  const displayStatus = pending?.status || record.status;
+  const displayStatus = pending?.status || record.attendance_status;
   const displayNotes = pending?.notes !== undefined ? pending.notes : record.notes;
 
   let statusClass = 'status-pending';
@@ -310,7 +310,7 @@ async function saveAllChanges() {
         date: currentDate,
         session_id: currentSession?.id || null,
         event_id: currentEvent?.id || null,
-        status: pending?.status || record.status,
+        attendance_status: pending?.status || record.attendance_status,
         notes: pending?.notes !== undefined ? pending.notes : record.notes
       };
     });
