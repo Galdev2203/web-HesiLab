@@ -80,7 +80,7 @@ if (activePermissions.length > 0) {
 
 // Configurar navegación con permisos
 document.getElementById("playersBtn").href = `/pages/players.html?team_id=${teamId}`;
-document.getElementById("staffBtn").href = `/pages/team_staff.html?team_id=${teamId}`;
+document.getElementById("staffBtn").href = `/pages/staff.html?team_id=${teamId}`;
 document.getElementById("trainingsBtn").href = `/pages/trainings.html?team_id=${teamId}`;
 document.getElementById("eventsBtn").href = `/pages/events.html?team_id=${teamId}`;
 document.getElementById("attendanceBtn").href = `/pages/attendance.html?team_id=${teamId}`;

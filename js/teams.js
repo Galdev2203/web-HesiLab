@@ -83,7 +83,6 @@ document.getElementById('createBtn').onclick = async () => {
   if (!name) return alert('Pon un nombre al equipo');
 
   // Insertar en teams
-  console.log('Creando equipo con user.id:', user.id);
   const { data: newTeam, error } = await supabase
     .from('teams')
     .insert({ 
@@ -99,10 +98,7 @@ document.getElementById('createBtn').onclick = async () => {
     return alert('Error creando equipo: ' + error.message);
   }
   
-  console.log('Equipo creado:', newTeam);
-  
   // El trigger automáticamente añade al creador como staff, no necesitamos hacer nada más
-  console.log('Staff asignado automáticamente por trigger');
   document.getElementById('teamName').value = '';
   document.getElementById('teamCategory').value = '';
   loadTeams();

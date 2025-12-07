@@ -100,7 +100,7 @@ async function loadAttendanceForDate() {
       .select('*')
       .eq('team_id', teamId)
       .eq('active', true)
-      .order('dorsal');
+      .order('number');
 
     if (playersError) throw playersError;
 
@@ -217,7 +217,7 @@ function createAttendanceCard(record) {
 
   card.innerHTML = `
     <div class="attendance-player-info">
-      <div class="attendance-dorsal">#${player.dorsal || '?'}</div>
+      <div class="attendance-dorsal">#${player.number || '?'}</div>
       <div class="attendance-player-name">
         <div class="player-full-name">${escapeHtml(player.name)} ${escapeHtml(player.surname)}</div>
         ${player.position ? `<div class="player-position-tag">${escapeHtml(player.position)}</div>` : ''}
