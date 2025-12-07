@@ -37,7 +37,7 @@
     <div id="playersList">Cargando jugadores...</div>
 
     <!-- Form Box -->
-    <div id="formBox">
+    <div id="formBox" class="add-player-section">
       <h3 id="formTitle">Añadir jugador</h3>
 
       <div class="form-grid">
@@ -60,8 +60,15 @@
           </div>
 
           <div class="form-group">
+            <label for="playerBirthdate">Fecha de nacimiento</label>
+            <input id="playerBirthdate" type="date" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
             <label for="playerNotes">Notas</label>
-            <input id="playerNotes" placeholder="Observaciones" />
+            <textarea id="playerNotes" placeholder="Observaciones" rows="3"></textarea>
           </div>
         </div>
 

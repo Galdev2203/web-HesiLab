@@ -35,7 +35,8 @@ const userRole = await getUserRole(teamId);
 if (!canManage) {
   document.getElementById('errorMsg').style.display = 'block';
   document.getElementById('errorMsg').innerText = `No tienes permiso para gestionar jugadores. Tu rol: ${getRoleLabel(userRole)}`;
-  document.getElementById('addPlayerSection').style.display = 'none';
+  const formBox = document.getElementById('formBox');
+  if (formBox) formBox.style.display = 'none';
 }
 
 // Estado
@@ -147,13 +148,15 @@ function openEditForm(player) {
   document.getElementById('playerName').value = player.name || '';
   document.getElementById('playerNumber').value = player.number ?? '';
   document.getElementById('playerPosition').value = player.position || '';
-  document.getElementById('playerBirthdate').value = player.birthdate || '';
+  const birthdateInput = document.getElementById('playerBirthdate');
+  if (birthdateInput) birthdateInput.value = player.birthdate || '';
   document.getElementById('playerNotes').value = player.notes || '';
   
   document.getElementById('cancelEditBtn').style.display = 'inline-block';
   document.getElementById('savePlayerBtn').textContent = '💾 Guardar';
   
-  document.getElementById('addPlayerSection').scrollIntoView({ behavior: 'smooth' });
+  const formBox = document.getElementById('formBox');
+  if (formBox) formBox.scrollIntoView({ behavior: 'smooth' });
 }
 
 /**
@@ -162,7 +165,12 @@ function openEditForm(player) {
 function resetForm() {
   editingId = null;
   document.getElementById('formTitle').textContent = 'Añadir jugador';
-  document.getElementById('playerForm').reset();
+  document.getElementById('playerName').value = '';
+  document.getElementById('playerNumber').value = '';
+  document.getElementById('playerPosition').value = '';
+  const birthdateInput = document.getElementById('playerBirthdate');
+  if (birthdateInput) birthdateInput.value = '';
+  document.getElementById('playerNotes').value = '';
   document.getElementById('cancelEditBtn').style.display = 'none';
   document.getElementById('savePlayerBtn').textContent = '➕ Añadir';
 }
@@ -181,7 +189,8 @@ async function savePlayer(e) {
   const name = document.getElementById('playerName').value.trim();
   const numberStr = document.getElementById('playerNumber').value.trim();
   const position = document.getElementById('playerPosition').value.trim();
-  const birthdate = document.getElementById('playerBirthdate').value || null;
+  const birthdateInput = document.getElementById('playerBirthdate');
+  const birthdate = birthdateInput ? birthdateInput.value || null : null;
   const notes = document.getElementById('playerNotes').value.trim();
 
   if (!name) {
