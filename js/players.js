@@ -1,7 +1,13 @@
-// players.js - Lógica para gestión de jugadores
+// players.js - Gestión de jugadores con sistema de permisos
 import { supabase } from '../js/supabaseClient.js';
+import { 
+  initPermissions, 
+  hasPermission, 
+  getUserRole,
+  getRoleLabel 
+} from '../js/permissionsHelper.js';
 
-// Sesión
+// Validar sesión
 const { data: sessionData } = await supabase.auth.getSession();
 if (!sessionData.session) {
   window.location.href = '/pages/index.html';
@@ -9,47 +15,32 @@ if (!sessionData.session) {
 }
 const user = sessionData.session.user;
 
-// team_id desde querystring
+// Inicializar permisos
+await initPermissions();
+
+// Obtener team_id de la URL
 const params = new URLSearchParams(window.location.search);
 const teamId = params.get('team_id');
+
 if (!teamId) {
+  document.getElementById('errorMsg').style.display = 'block';
   document.getElementById('errorMsg').innerText = 'Error: falta team_id en la URL.';
   throw new Error('Missing team_id');
 }
 
-// Mi rol actual
-let myRole = null;
+// Verificar permisos
+const canManage = await hasPermission(teamId, 'MANAGE_PLAYERS');
+const userRole = await getUserRole(teamId);
 
-async function loadMyRole() {
-  const { data, error } = await supabase
-    .from('team_staff')
-    .select('role')
-    .eq('team_id', teamId)
-    .eq('user_id', user.id)
-    .eq('active', true)
-    .single();
-
-  if (error || !data) {
-    document.getElementById('errorMsg').innerText = 'No tienes permiso para ver este equipo.';
-    throw new Error('No permission');
-  }
-
-  myRole = data.role;
+if (!canManage) {
+  document.getElementById('errorMsg').style.display = 'block';
+  document.getElementById('errorMsg').innerText = `No tienes permiso para gestionar jugadores. Tu rol: ${getRoleLabel(userRole)}`;
+  document.getElementById('addPlayerSection').style.display = 'none';
 }
 
-// Estado de edición
+// Estado
 let editingId = null;
-
-// Helpers
-function escapeHtml(s) {
-  if (!s) return '';
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function getFilters() {
-  const q = document.getElementById('searchInput').value.trim().toLowerCase();
-  return { q };
-}
+let allPlayers = [];
 
 // Carga y render
 async function loadPlayers() {

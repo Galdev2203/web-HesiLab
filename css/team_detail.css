@@ -80,6 +80,89 @@ body {
 }
 
 /* Actions Grid */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+  max-width: 1200px;
+}
+
+/* User Info Card */
+.user-info-card {
+  background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  color: white;
+  margin-bottom: var(--spacing-2xl);
+  box-shadow: var(--shadow-xl);
+}
+
+.user-info-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 var(--spacing-md) 0;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.2);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-full);
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-lg);
+  backdrop-filter: blur(10px);
+}
+
+.role-icon {
+  font-size: 1.5rem;
+}
+
+.permissions-section {
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+}
+
+.permissions-section h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 var(--spacing-sm) 0;
+  opacity: 0.9;
+}
+
+.permissions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--spacing-xs);
+}
+
+.permissions-list li {
+  font-size: 0.813rem;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.permissions-list li::before {
+  content: '✓';
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+/* Actions Grid */
 #actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -175,7 +258,7 @@ body {
 }
 
 /* Error message */
-#errorMessage {
+.error-message {
   background: #fee;
   color: var(--danger-600);
   padding: var(--spacing-md);
@@ -187,7 +270,7 @@ body {
   gap: var(--spacing-sm);
 }
 
-#errorMessage::before {
+.error-message::before {
   content: '⚠️';
   font-size: 1.5rem;
 }
