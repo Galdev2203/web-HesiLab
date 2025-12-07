@@ -111,22 +111,30 @@ async function loadAttendanceForDate() {
       return;
     }
 
-    // 6. Cargar registros de asistencia existentes
+    // 6. Cargar registros de asistencia existentes (primero verificar estructura)
     const { data: existingAttendance, error: attendanceError } = await supabase
       .from('attendance')
       .select('*')
       .eq('team_id', teamId)
-      .eq('date', selectedDate);
+      .eq('date', selectedDate)
+      .limit(1);
 
     if (attendanceError) throw attendanceError;
 
-    attendanceRecords = existingAttendance || [];
+    // Si hay registros, cargar todos
+    if (existingAttendance && existingAttendance.length > 0) {
+      const { data: allAttendance, error: allError } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('team_id', teamId)
+        .eq('date', selectedDate);
 
-    // 7. Si no hay registros, generar lazy (solo renderizar vacío)
-    if (attendanceRecords.length === 0) {
-      generateLazyAttendance();
-    } else {
+      if (allError) throw allError;
+      attendanceRecords = allAttendance || [];
       renderAttendanceList();
+    } else {
+      // 7. Si no hay registros, generar lazy
+      generateLazyAttendance();
     }
 
   } catch (error) {
@@ -146,7 +154,7 @@ function generateLazyAttendance() {
     date: currentDate,
     session_id: currentSession?.id || null,
     event_id: currentEvent?.id || null,
-    attendance_status: 'PENDING',
+    status: 'PRESENT',
     notes: null,
     _isNew: true,
     _playerData: player
@@ -194,12 +202,12 @@ function createAttendanceCard(record) {
 
   // Aplicar cambios pendientes si existen
   const pending = pendingChanges.get(player.id);
-  const displayStatus = pending?.status || record.attendance_status;
+  const displayStatus = pending?.status || record.status;
   const displayNotes = pending?.notes !== undefined ? pending.notes : record.notes;
 
-  let statusClass = 'status-pending';
-  let statusIcon = '⏳';
-  let statusText = 'Pendiente';
+  let statusClass = 'status-present';
+  let statusIcon = '✅';
+  let statusText = 'Presente';
 
   if (displayStatus === 'PRESENT') {
     statusClass = 'status-present';
@@ -209,10 +217,18 @@ function createAttendanceCard(record) {
     statusClass = 'status-absent';
     statusIcon = '❌';
     statusText = 'Ausente';
+  } else if (displayStatus === 'LATE') {
+    statusClass = 'status-late';
+    statusIcon = '⏰';
+    statusText = 'Retrasado';
   } else if (displayStatus === 'EXCUSED') {
     statusClass = 'status-excused';
     statusIcon = '📝';
     statusText = 'Justificado';
+  } else if (displayStatus === 'INJURED') {
+    statusClass = 'status-injured';
+    statusIcon = '🤕';
+    statusText = 'Lesionado';
   }
 
   card.innerHTML = `
@@ -232,7 +248,9 @@ function createAttendanceCard(record) {
       <div class="attendance-status-buttons" id="buttons-${player.id}">
         <button class="status-btn status-present-btn" data-status="PRESENT" title="Presente">✅</button>
         <button class="status-btn status-absent-btn" data-status="ABSENT" title="Ausente">❌</button>
+        <button class="status-btn status-late-btn" data-status="LATE" title="Retrasado">⏰</button>
         <button class="status-btn status-excused-btn" data-status="EXCUSED" title="Justificado">📝</button>
+        <button class="status-btn status-injured-btn" data-status="INJURED" title="Lesionado">🤕</button>
       </div>
       
       <div class="attendance-notes-section">
@@ -304,13 +322,13 @@ async function saveAllChanges() {
       const pending = pendingChanges.get(record.player_id);
       
       return {
-        id: record.id || undefined, // undefined para nuevos registros
+        id: record.id || undefined,
         team_id: teamId,
         player_id: record.player_id,
         date: currentDate,
         session_id: currentSession?.id || null,
         event_id: currentEvent?.id || null,
-        attendance_status: pending?.status || record.attendance_status,
+        status: pending?.status || record.status,
         notes: pending?.notes !== undefined ? pending.notes : record.notes
       };
     });

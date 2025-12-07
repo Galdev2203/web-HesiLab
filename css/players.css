@@ -875,9 +875,20 @@ textarea:focus {
   color: #f57c00;
 }
 
+.status-late {
+  background: #fff9c4;
+  color: #f57f17;
+}
+
+.status-injured {
+  background: #fce4ec;
+  color: #c2185b;
+}
+
 .attendance-status-buttons {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .status-btn {
@@ -907,6 +918,16 @@ textarea:focus {
 .status-excused-btn:hover {
   background: #fff3e0;
   border-color: #f57c00;
+}
+
+.status-late-btn:hover {
+  background: #fff9c4;
+  border-color: #f57f17;
+}
+
+.status-injured-btn:hover {
+  background: #fce4ec;
+  border-color: #c2185b;
 }
 
 .attendance-notes-section {

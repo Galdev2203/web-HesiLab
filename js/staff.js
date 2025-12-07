@@ -74,24 +74,36 @@ async function loadStaff() {
   container.innerHTML = '<div class="loading">Cargando...</div>';
 
   try {
-    // Obtener staff con datos de profiles
+    // Obtener staff del equipo
     const { data: staffData, error: staffError } = await supabase
       .from('team_staff')
-      .select(`
-        id,
-        user_id,
-        role,
-        profiles!team_staff_user_id_fkey (
-          id,
-          email,
-          full_name
-        )
-      `)
+      .select('id, user_id, role')
       .eq('team_id', teamId);
 
     if (staffError) throw staffError;
 
-    allStaff = staffData || [];
+    if (!staffData || staffData.length === 0) {
+      allStaff = [];
+      renderStaff();
+      return;
+    }
+
+    // Obtener datos de usuarios
+    const userIds = staffData.map(s => s.user_id);
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id, email, full_name')
+      .in('id', userIds);
+
+    if (profilesError) throw profilesError;
+
+    // Combinar staff con profiles
+    const staffWithProfiles = staffData.map(staff => ({
+      ...staff,
+      profiles: profiles?.find(p => p.id === staff.user_id) || null
+    }));
+
+    allStaff = staffWithProfiles;
 
     // Para cada staff, obtener sus permisos
     const staffWithPermissions = await Promise.all(
