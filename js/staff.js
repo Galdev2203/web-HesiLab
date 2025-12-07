@@ -111,7 +111,7 @@ async function loadStaff() {
         const { data: permissions, error: permError } = await supabase
           .from('team_staff_permissions')
           .select('permission')
-          .eq('staff_id', staff.id);
+          .eq('team_staff_id', staff.id);
 
         if (permError) throw permError;
 
@@ -336,8 +336,9 @@ async function addStaff(e) {
     // 4. Añadir permisos si hay seleccionados
     if (selectedPermissions.length > 0) {
       const permissionsToInsert = selectedPermissions.map(perm => ({
-        staff_id: newStaff.id,
-        permission: perm
+        team_staff_id: newStaff.id,
+        permission: perm,
+        value: true
       }));
 
       const { error: permError } = await supabase
