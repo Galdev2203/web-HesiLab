@@ -68,7 +68,7 @@ async function loadAttendanceForDate() {
       .from('team_training_sessions')
       .select('*')
       .eq('team_id', teamId)
-      .eq('day_of_week', dayOfWeek);
+      .eq('weekday', dayOfWeek);
 
     if (sessionsError) throw sessionsError;
 
@@ -396,7 +396,7 @@ function displaySessionInfo() {
     details.innerHTML = detailsHtml;
   } else if (currentSession) {
     const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    badge.textContent = `⚽ Entrenamiento - ${weekdays[currentSession.day_of_week]}`;
+    badge.textContent = `⚽ Entrenamiento - ${weekdays[currentSession.weekday]}`;
     badge.className = 'session-type-badge training-badge';
     
     let detailsHtml = '';
