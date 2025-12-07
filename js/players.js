@@ -81,36 +81,63 @@ async function loadPlayers() {
   }
 
   if (list.length === 0) {
-    container.innerHTML = '<p class="muted">No hay jugadores.</p>';
+    container.innerHTML = '<div class="empty-state"><p>No hay jugadores en este equipo.</p></div>';
     return;
   }
 
   container.innerHTML = '';
   list.forEach(p => {
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'player-card';
 
-    const left = document.createElement('div');
-    left.innerHTML = `<strong>${escapeHtml(p.name)}</strong> <span class="muted">#${p.number ?? '-'}</span><br>
-                      <span class="muted">${p.position ? escapeHtml(p.position) + ' • ' : ''}${p.notes ? escapeHtml(p.notes) : ''}</span>`;
+    const playerInfo = document.createElement('div');
+    playerInfo.className = 'player-info';
 
-    const right = document.createElement('div');
+    const playerNumber = document.createElement('div');
+    playerNumber.className = 'player-number';
+    playerNumber.textContent = p.number ?? '-';
+
+    const playerDetails = document.createElement('div');
+    playerDetails.className = 'player-details';
+
+    const playerName = document.createElement('div');
+    playerName.className = 'player-name';
+    playerName.textContent = p.name || 'Sin nombre';
+
+    const playerPosition = document.createElement('div');
+    playerPosition.className = 'player-position';
+    playerPosition.textContent = p.position || 'Sin posición';
+
+    playerDetails.appendChild(playerName);
+    playerDetails.appendChild(playerPosition);
+
+    if (p.notes) {
+      const playerNotes = document.createElement('div');
+      playerNotes.className = 'player-notes';
+      playerNotes.textContent = p.notes;
+      playerDetails.appendChild(playerNotes);
+    }
+
+    playerInfo.appendChild(playerNumber);
+    playerInfo.appendChild(playerDetails);
+
+    const playerActions = document.createElement('div');
+    playerActions.className = 'player-actions';
 
     // Editar (principal/segundo)
     if (myRole === 'principal' || myRole === 'segundo') {
       const editBtn = document.createElement('button');
-      editBtn.className = 'btn small';
-      editBtn.textContent = 'Editar';
+      editBtn.className = 'btn btn-outline';
+      editBtn.textContent = '✏️ Editar';
       editBtn.onclick = () => openEditForm(p);
-      right.appendChild(editBtn);
+      playerActions.appendChild(editBtn);
     }
 
     // Eliminar (solo principal)
     if (myRole === 'principal') {
       const delBtn = document.createElement('button');
-      delBtn.className = 'btn danger';
-      delBtn.style.marginLeft = '8px';
-      delBtn.textContent = 'Eliminar';
+      delBtn.className = 'btn btn-danger';
+      delBtn.textContent = '🗑️ Eliminar';
       delBtn.onclick = async () => {
         if (!confirm('¿Eliminar jugador? Esta acción es irreversible.')) return;
         
@@ -124,11 +151,11 @@ async function loadPlayers() {
         }
         loadPlayers();
       };
-      right.appendChild(delBtn);
+      playerActions.appendChild(delBtn);
     }
 
-    card.appendChild(left);
-    card.appendChild(right);
+    card.appendChild(playerInfo);
+    card.appendChild(playerActions);
     container.appendChild(card);
   });
 }

@@ -57,62 +57,91 @@ async function loadStaff() {
     return;
   }
 
+  if (data.length === 0) {
+    container.innerHTML = '<div class="empty-state"><p>No hay entrenadores en este equipo.</p></div>';
+    return;
+  }
+
   container.innerHTML = "";
 
   data.forEach(staff => {
-    const div = document.createElement("div");
-    div.className = "staff-card";
+    const card = document.createElement("div");
+    card.className = "staff-card";
 
-    // Selector + botón
-    const roleEditor = `
-      <select class="roleSelect" data-id="${staff.id}">
-        <option value="principal" ${staff.role === "principal" ? "selected" : ""}>Principal</option>
-        <option value="segundo" ${staff.role === "segundo" ? "selected" : ""}>Segundo</option>
-        <option value="ayudante" ${staff.role === "ayudante" ? "selected" : ""}>Ayudante</option>
-      </select>
-      <button class="btn primary saveRoleBtn" data-id="${staff.id}">Guardar rol</button>
+    const staffInfo = document.createElement("div");
+    staffInfo.className = "staff-info";
+
+    const staffAvatar = document.createElement("div");
+    staffAvatar.className = "staff-avatar";
+    staffAvatar.textContent = staff.role === 'principal' ? '👔' : staff.role === 'segundo' ? '🎽' : '🏃';
+
+    const staffDetails = document.createElement("div");
+    staffDetails.className = "staff-details";
+
+    const staffEmail = document.createElement("div");
+    staffEmail.className = "staff-email";
+    staffEmail.textContent = staff.profiles?.email || "(sin email)";
+
+    const staffRoleDisplay = document.createElement("div");
+    staffRoleDisplay.className = "staff-role-display";
+
+    const roleSelect = document.createElement("select");
+    roleSelect.className = "roleSelect";
+    roleSelect.setAttribute("data-id", staff.id);
+    roleSelect.innerHTML = `
+      <option value="principal" ${staff.role === "principal" ? "selected" : ""}>👔 Principal</option>
+      <option value="segundo" ${staff.role === "segundo" ? "selected" : ""}>🎽 Segundo</option>
+      <option value="ayudante" ${staff.role === "ayudante" ? "selected" : ""}>🏃 Ayudante</option>
     `;
 
-    div.innerHTML = `
-      <div>
-        <strong>${staff.profiles?.email || "(sin email)"}</strong><br>
-        <small>Rol actual: ${staff.role}</small>
-      </div>
+    staffRoleDisplay.appendChild(roleSelect);
+    staffDetails.appendChild(staffEmail);
+    staffDetails.appendChild(staffRoleDisplay);
+    staffInfo.appendChild(staffAvatar);
+    staffInfo.appendChild(staffDetails);
 
-      <div style="display:flex; gap:12px; align-items:center;">
-        ${roleEditor}
-        <button class="btn danger deleteBtn" data-id="${staff.id}" data-user="${staff.user_id}">
-          Eliminar
-        </button>
-      </div>
-    `;
+    const staffActions = document.createElement("div");
+    staffActions.className = "staff-actions";
 
-    const deleteBtn = div.querySelector(".deleteBtn");
-    const selectRole = div.querySelector(".roleSelect");
-    const saveRoleBtn = div.querySelector(".saveRoleBtn");
+    const saveRoleBtn = document.createElement("button");
+    saveRoleBtn.className = "btn btn-primary saveRoleBtn";
+    saveRoleBtn.setAttribute("data-id", staff.id);
+    saveRoleBtn.textContent = "💾 Guardar rol";
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "btn btn-danger deleteBtn";
+    deleteBtn.setAttribute("data-id", staff.id);
+    deleteBtn.setAttribute("data-user", staff.user_id);
+    deleteBtn.textContent = "🗑️ Eliminar";
+
+    staffActions.appendChild(saveRoleBtn);
+    staffActions.appendChild(deleteBtn);
+
+    card.appendChild(staffInfo);
+    card.appendChild(staffActions);
 
     // Permisos
     if (myRole !== "principal") {
       deleteBtn.style.display = "none";
-      selectRole.style.display = "none";
+      roleSelect.style.display = "none";
       saveRoleBtn.style.display = "none";
     }
 
     // No puedo editarme a mí mismo
     if (staff.user_id === user.id) {
       deleteBtn.style.display = "none";
-      selectRole.style.display = "none";
+      roleSelect.style.display = "none";
       saveRoleBtn.style.display = "none";
     }
 
-    container.appendChild(div);
+    container.appendChild(card);
   });
 
   // Guardar cambios de rol (usando RPC)
   document.querySelectorAll(".saveRoleBtn").forEach(btn => {
     btn.onclick = async () => {
       const id = btn.getAttribute("data-id");
-      const newRole = btn.parentElement.querySelector(".roleSelect").value;
+      const newRole = btn.parentElement.parentElement.querySelector(".roleSelect").value;
 
       const { data: staffRow } = await supabase
         .from("team_staff")

@@ -28,7 +28,7 @@ async function loadTeams() {
   }
   
   if (!data || data.length === 0) {
-    document.getElementById('teamsContainer').innerHTML = '<p>No tienes equipos todavía.</p>';
+    document.getElementById('teamsContainer').innerHTML = '<div class="empty-state"><p>No tienes equipos todavía. ¡Crea tu primer equipo!</p></div>';
     return;
   }
 
@@ -38,15 +38,16 @@ async function loadTeams() {
   data.forEach(row => {
     const team = row.teams;
     const div = document.createElement('div');
-    div.className = 'team-card';
+    div.className = 'team-card fade-in';
     div.innerHTML = `
-      <div>
-        <strong>${team.name}</strong><br/><small>${team.category || ''}</small>
+      <div class="team-info">
+        <div class="team-name">${team.name}</div>
+        <div class="team-category">${team.category || 'Sin categoría'}</div>
       </div>
-      <div>
-        <button class="primary-btn" data-teamid="${team.id}">Entrar</button>
+      <div class="team-actions">
+        <button class="primary-btn" data-teamid="${team.id}">➜ Entrar</button>
         ${row.role === 'principal' 
-          ? `<button class="danger-btn" data-teamid="${team.id}" data-action="delete">Eliminar</button>` 
+          ? `<button class="danger-btn" data-teamid="${team.id}" data-action="delete">🗑️ Eliminar</button>` 
           : ``}
       </div>
     `;

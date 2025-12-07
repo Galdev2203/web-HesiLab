@@ -13,15 +13,35 @@
   <script src="../js/analytics.js"></script>
 </head>
 <body>
-  <h2>Mis equipos</h2>
-  <div id="teamsContainer">Cargando equipos...</div>
+  <!-- Header -->
+  <header class="page-header">
+    <div class="container">
+      <h2>Mis equipos</h2>
+      <a href="/pages/dashboard.html" class="back-link">Volver al panel</a>
+    </div>
+  </header>
 
-  <div id="createForm">
-    <h3>Crear equipo</h3>
-    <input id="teamName" placeholder="Nombre del equipo" />
-    <input id="teamCategory" placeholder="Categoría (opcional)" />
-    <button id="createBtn" class="primary-btn">Crear</button>
-  </div>
+  <!-- Main Content -->
+  <main class="teams-main">
+    <div class="container">
+      <div class="teams-list">
+        <div id="teamsContainer">Cargando equipos...</div>
+      </div>
+
+      <div id="createForm">
+        <h3>Crear nuevo equipo</h3>
+        <div class="form-group">
+          <label for="teamName">Nombre del equipo *</label>
+          <input id="teamName" placeholder="Ej: Lakers Sub-17" />
+        </div>
+        <div class="form-group">
+          <label for="teamCategory">Categoría (opcional)</label>
+          <input id="teamCategory" placeholder="Ej: Sub-17, Senior, Femenino" />
+        </div>
+        <button id="createBtn" class="primary-btn">✨ Crear equipo</button>
+      </div>
+    </div>
+  </main>
 
   <!-- JS -->
   <script type="module" src="../js/teams.js"></script>

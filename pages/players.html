@@ -14,53 +14,66 @@
 </head>
 <body>
 
-<h2>Jugadores del equipo</h2>
-<p id="errorMsg" style="color:red;"></p>
+<!-- Header -->
+<header class="page-header">
+  <div class="container">
+    <h2>Jugadores del equipo</h2>
+    <a href="#" class="back-link" onclick="history.back(); return false;">Volver</a>
+  </div>
+</header>
 
-<div class="grid">
-  <input id="searchInput" placeholder="Buscar por nombre o dorsal" style="flex:1" />
-  <button id="refreshBtn" class="btn small">Refrescar</button>
-</div>
+<!-- Main Content -->
+<main class="players-main">
+  <div class="container">
+    <p id="errorMsg" style="display:none;"></p>
 
-<div id="playersList">Cargando jugadores...</div>
-
-<!-- Formulario: crear / editar -->
-<div id="formBox">
-  <h3 id="formTitle">Añadir jugador</h3>
-
-  <div style="display:grid; gap:10px;">
-    <div class="row">
-      <div class="field">
-        <label for="playerName">Nombre <span style="color:red;">*</span></label>
-        <input id="playerName" placeholder="Nombre completo" />
-      </div>
-
-      <div class="field" style="max-width:140px;">
-        <label for="playerNumber">Dorsal <span style="color:red;">*</span></label>
-        <input id="playerNumber" placeholder="Número" inputmode="numeric" />
-      </div>
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <input id="searchInput" placeholder="🔍 Buscar por nombre o dorsal" />
+      <button id="refreshBtn" class="btn">Refrescar</button>
     </div>
 
-    <div class="row">
-      <div class="field">
-        <label for="playerPosition">Posición (opcional)</label>
-        <input id="playerPosition" placeholder="Ej: Alero, Base..." />
-      </div>
+    <!-- Players List -->
+    <div id="playersList">Cargando jugadores...</div>
 
-      <div class="field">
-        <label for="playerNotes">Notas (opcional)</label>
-        <input id="playerNotes" placeholder="Notas" />
-      </div>
-    </div>
+    <!-- Form Box -->
+    <div id="formBox">
+      <h3 id="formTitle">Añadir jugador</h3>
 
-    <div style="display:flex; gap:8px;">
-      <button id="savePlayerBtn" class="btn primary">Guardar jugador</button>
-      <button id="cancelEditBtn" class="btn">Cancelar</button>
-      <div style="flex:1"></div>
-      <small class="muted">Campos con <span style="color:red">*</span> obligatorios</small>
+      <div class="form-grid">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="playerName">Nombre <span class="required">*</span></label>
+            <input id="playerName" placeholder="Nombre completo" />
+          </div>
+
+          <div class="form-group" style="max-width:160px;">
+            <label for="playerNumber">Dorsal <span class="required">*</span></label>
+            <input id="playerNumber" placeholder="#" inputmode="numeric" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="playerPosition">Posición</label>
+            <input id="playerPosition" placeholder="Ej: Alero, Base, Pívot..." />
+          </div>
+
+          <div class="form-group">
+            <label for="playerNotes">Notas</label>
+            <input id="playerNotes" placeholder="Observaciones" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button id="savePlayerBtn" class="btn btn-primary">Guardar jugador</button>
+          <button id="cancelEditBtn" class="btn btn-outline">Cancelar</button>
+          <small class="form-hint">Campos con <span class="required">*</span> obligatorios</small>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+</main>
 
 <!-- JS -->
 <script type="module" src="../js/players.js"></script>

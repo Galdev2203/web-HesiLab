@@ -14,22 +14,42 @@
 </head>
 <body>
 
-<h2>Entrenadores del equipo</h2>
-<p id="errorMsg" style="color:red;"></p>
+<!-- Header -->
+<header class="page-header">
+  <div class="container">
+    <h2>Entrenadores del equipo</h2>
+    <a href="#" class="back-link" onclick="history.back(); return false;">Volver</a>
+  </div>
+</header>
 
-<div id="staffList">Cargando staff...</div>
+<!-- Main Content -->
+<main class="staff-main">
+  <div class="container">
+    <p id="errorMsg" style="display:none;"></p>
 
-<hr>
+    <!-- Staff List -->
+    <div id="staffList">Cargando staff...</div>
 
-<div id="addBox">
-  <h3>Añadir entrenador</h3>
-  <input id="emailInput" placeholder="Email del entrenador" style="width:60%; padding:6px;" />
-  <select id="roleInput" style="padding:6px;">
-    <option value="segundo">Segundo</option>
-    <option value="ayudante" selected>Ayudante</option>
-  </select>
-  <button id="addBtn" class="btn primary">Añadir</button>
-</div>
+    <!-- Add Box -->
+    <div id="addBox">
+      <h3>Añadir entrenador</h3>
+      <div class="add-form">
+        <div class="form-group">
+          <label for="emailInput">Email del entrenador</label>
+          <input id="emailInput" type="email" placeholder="email@ejemplo.com" />
+        </div>
+        <div class="form-group">
+          <label for="roleInput">Rol</label>
+          <select id="roleInput">
+            <option value="segundo">Segundo</option>
+            <option value="ayudante" selected>Ayudante</option>
+          </select>
+        </div>
+        <button id="addBtn" class="btn btn-primary">Añadir</button>
+      </div>
+    </div>
+  </div>
+</main>
 
 <!-- JS -->
 <script type="module" src="../js/team_staff.js"></script>

@@ -14,16 +14,46 @@
 </head>
 
 <body>
-  <h2 id="teamTitle">Cargando equipo...</h2>
-  <p id="teamCategory"></p>
+  <!-- Header -->
+  <header class="page-header">
+    <div class="container">
+      <div class="team-header-info">
+        <h2 id="teamTitle">Cargando equipo...</h2>
+        <p id="teamCategory"></p>
+      </div>
+      <a href="/pages/teams.html" class="back-link">Volver a equipos</a>
+    </div>
+  </header>
 
-  <div id="actions" style="display:none;">
-    <a id="playersBtn" class="btn">Jugadores</a>
-    <a id="staffBtn" class="btn">Entrenadores</a>
-    <a id="attendanceBtn" class="btn">Pasar asistencia</a>
-  </div>
+  <!-- Main Content -->
+  <main class="team-detail-main">
+    <div class="container">
+      <p id="errorMessage" style="display:none;"></p>
 
-  <p id="errorMessage" style="color:red;"></p>
+      <div id="actions" style="display:none;">
+        <a id="playersBtn" class="action-card">
+          <div class="action-icon">👥</div>
+          <h3>Jugadores</h3>
+          <p>Gestiona la plantilla de jugadores del equipo</p>
+          <div class="action-arrow">Ver jugadores</div>
+        </a>
+
+        <a id="staffBtn" class="action-card">
+          <div class="action-icon">👨‍🏫</div>
+          <h3>Entrenadores</h3>
+          <p>Administra el cuerpo técnico del equipo</p>
+          <div class="action-arrow">Ver entrenadores</div>
+        </a>
+
+        <a id="attendanceBtn" class="action-card">
+          <div class="action-icon">✅</div>
+          <h3>Pasar asistencia</h3>
+          <p>Registra la asistencia de jugadores y staff</p>
+          <div class="action-arrow">Pasar lista</div>
+        </a>
+      </div>
+    </div>
+  </main>
 
   <!-- JS -->
   <script type="module" src="../js/team_detail.js"></script>
