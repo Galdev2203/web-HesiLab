@@ -446,3 +446,97 @@ textarea:focus {
     flex: 1;
   }
 }
+
+/* ========================================
+   TRAININGS STYLES
+   ======================================== */
+
+.info-box {
+  background: linear-gradient(135deg, #e0f2fe, #dbeafe);
+  border-left: 4px solid var(--primary-600);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.info-box p {
+  margin: 0;
+  color: var(--gray-700);
+  font-size: 0.875rem;
+}
+
+.trainings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.training-day-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--gray-200);
+}
+
+.training-day-header {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-700);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--primary-200);
+}
+
+.training-item {
+  background: var(--gray-50);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.training-item:last-child {
+  margin-bottom: 0;
+}
+
+.training-time {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.time-badge {
+  background: var(--primary-600);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.training-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.training-location {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+}
+
+.training-notes {
+  font-size: 0.813rem;
+  color: var(--gray-500);
+  font-style: italic;
+}
+
+.training-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}

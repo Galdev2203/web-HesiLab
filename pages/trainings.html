@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrenamientos - HesiLab</title>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/players.css">
+  
+  <!-- Analytics -->
+  <script src="../js/analytics.js"></script>
+</head>
+<body>
+
+<!-- Header -->
+<header class="page-header">
+  <div class="container">
+    <h2>⚽ Entrenamientos recurrentes</h2>
+    <a href="#" class="back-link" onclick="history.back(); return false;">Volver</a>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="players-main">
+  <div class="container">
+    <p id="errorMsg" class="error-message" style="display:none;"></p>
+
+    <div class="info-box">
+      <p>📅 Configura los horarios semanales de entrenamientos. Estos horarios se repetirán automáticamente cada semana.</p>
+    </div>
+
+    <!-- Lista de entrenamientos -->
+    <div id="trainingsList" class="trainings-grid">
+      Cargando entrenamientos...
+    </div>
+
+    <!-- Formulario -->
+    <div id="formBox" class="add-player-section">
+      <h3 id="formTitle">Añadir entrenamiento</h3>
+
+      <div class="form-grid">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="weekday">Día de la semana <span class="required">*</span></label>
+            <select id="weekday" required>
+              <option value="">Selecciona un día</option>
+              <option value="1">Lunes</option>
+              <option value="2">Martes</option>
+              <option value="3">Miércoles</option>
+              <option value="4">Jueves</option>
+              <option value="5">Viernes</option>
+              <option value="6">Sábado</option>
+              <option value="0">Domingo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="startTime">Hora inicio <span class="required">*</span></label>
+            <input id="startTime" type="time" required />
+          </div>
+
+          <div class="form-group">
+            <label for="endTime">Hora fin <span class="required">*</span></label>
+            <input id="endTime" type="time" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="location">Ubicación</label>
+            <input id="location" placeholder="Ej: Pabellón Municipal" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="notes">Notas</label>
+            <textarea id="notes" placeholder="Observaciones adicionales" rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button id="saveBtn" class="btn btn-primary">➕ Añadir entrenamiento</button>
+          <button id="cancelBtn" class="btn btn-outline" style="display:none;">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- JS -->
+<script type="module" src="../js/trainings.js"></script>
+</body>
+</html>

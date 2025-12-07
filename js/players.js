@@ -235,10 +235,16 @@ async function savePlayer(e) {
     await loadPlayers();
   } catch (error) {
     console.error('Error saving player:', error);
+    
+    // Manejar errores específicos
     if (error.code === '23505') {
-      alert('Ya existe un jugador con ese dorsal');
+      if (error.message.includes('uniq_player_number_per_team')) {
+        alert(`El dorsal ${number} ya está siendo usado por otro jugador en este equipo`);
+      } else {
+        alert('Ya existe un jugador con esos datos en este equipo');
+      }
     } else {
-      alert(`Error: ${error.message}`);
+      alert(`Error guardando jugador: ${error.message}`);
     }
   }
 }
