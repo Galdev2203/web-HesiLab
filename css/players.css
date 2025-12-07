@@ -708,3 +708,265 @@ textarea:focus {
   }
 }
 
+/* ===== Attendance (attendance.html) ===== */
+.attendance-selector {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.date-selector-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.date-selector-box label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.date-selector-box input[type="date"] {
+  padding: 10px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  flex: 1;
+  max-width: 200px;
+}
+
+.session-info {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 12px;
+  background: var(--bg-light);
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.session-type-badge {
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.training-badge {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.event-badge {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.session-details {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.attendance-list-container {
+  margin-bottom: 24px;
+}
+
+.attendance-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.attendance-card {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.attendance-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.attendance-player-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.attendance-dorsal {
+  min-width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.attendance-player-name {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.player-full-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.player-position-tag {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  background: var(--bg-secondary);
+  color: var(--primary-color);
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.attendance-status-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.attendance-status-badge {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  width: fit-content;
+}
+
+.status-pending {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.status-present {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-absent {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.status-excused {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.attendance-status-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.status-btn {
+  padding: 8px 16px;
+  border: 2px solid var(--border-color);
+  background: white;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-btn:hover {
+  transform: scale(1.1);
+}
+
+.status-present-btn:hover {
+  background: #e8f5e9;
+  border-color: #2e7d32;
+}
+
+.status-absent-btn:hover {
+  background: #ffebee;
+  border-color: #c62828;
+}
+
+.status-excused-btn:hover {
+  background: #fff3e0;
+  border-color: #f57c00;
+}
+
+.attendance-notes-section {
+  width: 100%;
+}
+
+.attendance-notes-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.attendance-notes-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.attendance-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive para asistencia */
+@media (max-width: 768px) {
+  .attendance-card {
+    flex-direction: column;
+  }
+  
+  .attendance-player-info {
+    width: 100%;
+  }
+  
+  .date-selector-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .date-selector-box input[type="date"] {
+    max-width: 100%;
+  }
+  
+  .session-info {
+    flex-direction: column;
+  }
+  
+  .attendance-actions {
+    flex-direction: column;
+  }
+  
+  .attendance-status-buttons {
+    justify-content: space-between;
+  }
+}
+
