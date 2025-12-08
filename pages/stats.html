@@ -29,8 +29,8 @@
         <div class="filter-group">
           <label for="periodFilter">Período:</label>
           <select id="periodFilter" class="filter-select">
-            <option value="week">Esta semana</option>
-            <option value="month" selected>Este mes</option>
+            <option value="week" selected>Esta semana</option>
+            <option value="month">Este mes</option>
             <option value="season">Esta temporada</option>
             <option value="custom">Personalizado</option>
           </select>
@@ -45,10 +45,10 @@
           <label for="endDate">Hasta:</label>
           <input type="date" id="endDate" class="filter-input">
         </div>
-        
-        <div class="filter-group">
-          <button id="applyFiltersBtn" class="btn btn-primary">Aplicar</button>
-        </div>
+      </div>
+      
+      <div class="filter-actions" style="margin-top: 1rem;">
+        <button id="applyFiltersBtn" class="btn btn-primary" style="display:none;">Aplicar Filtros</button>
       </div>
     </div>
 

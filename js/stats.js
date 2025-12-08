@@ -40,11 +40,10 @@ async function loadData() {
       .from('players')
       .select('id, name, surname, number, position')
       .eq('team_id', currentTeamId)
-      .eq('active', true)
-      .order('number', { ascending: true });
+      .eq('active', true);
 
     if (playersError) throw playersError;
-    allPlayers = players || [];
+    allPlayers = (players || []).sort((a, b) => (a.number || 999) - (b.number || 999));
     
     console.log('Jugadores cargados:', allPlayers.length);
 
@@ -70,14 +69,19 @@ async function loadData() {
 function setupFilters() {
   const periodFilter = document.getElementById('periodFilter');
   const customDatesGroup = document.getElementById('customDatesGroup');
+  const customDatesGroupEnd = document.getElementById('customDatesGroupEnd');
   const applyFiltersBtn = document.getElementById('applyFiltersBtn');
 
   // Mostrar/ocultar fechas personalizadas
   periodFilter.addEventListener('change', (e) => {
     if (e.target.value === 'custom') {
-      customDatesGroup.style.display = 'grid';
+      customDatesGroup.style.display = 'flex';
+      customDatesGroupEnd.style.display = 'flex';
+      applyFiltersBtn.style.display = 'block';
     } else {
       customDatesGroup.style.display = 'none';
+      customDatesGroupEnd.style.display = 'none';
+      applyFiltersBtn.style.display = 'none';
       // Cargar estadísticas automáticamente
       loadStatistics(e.target.value);
     }
@@ -269,7 +273,11 @@ function calculatePlayerStats(attendance) {
 
 // Renderizar tabla de estadísticas de jugadores
 function renderPlayerStatsTable(playerStats) {
-  const tbody = document.getElementById('playerStatsBody');
+  const tbody = document.getElementById('playersStatsTable');
+  if (!tbody) {
+    console.error('No se encontró el elemento playersStatsTable');
+    return;
+  }
   tbody.innerHTML = '';
 
   if (playerStats.length === 0) {
@@ -319,9 +327,12 @@ function renderPlayerStatsTable(playerStats) {
 
 // Mostrar error
 function showError(message) {
-  const main = document.querySelector('.stats-main');
-  const errorDiv = document.createElement('div');
-  errorDiv.className = 'error-message';
-  errorDiv.textContent = message;
-  main.insertBefore(errorDiv, main.firstChild);
+  console.error('showError:', message);
+  const errorMsg = document.getElementById('errorMsg');
+  if (errorMsg) {
+    errorMsg.textContent = message;
+    errorMsg.style.display = 'block';
+  } else {
+    alert(message);
+  }
 }
