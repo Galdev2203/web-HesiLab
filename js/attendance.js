@@ -138,7 +138,35 @@ async function loadAttendanceForDate() {
         .eq('date', selectedDate);
 
       if (allError) throw allError;
-      attendanceRecords = allAttendance || [];
+      
+      // Combinar registros de asistencia con datos de jugadores
+      const attendanceMap = new Map(allAttendance.map(a => [a.player_id, a]));
+      
+      attendanceRecords = activePlayers.map(player => {
+        const existingRecord = attendanceMap.get(player.id);
+        if (existingRecord) {
+          // Jugador con registro existente
+          return {
+            ...existingRecord,
+            _playerData: player
+          };
+        } else {
+          // Jugador nuevo sin registro todavía
+          return {
+            id: null,
+            team_id: teamId,
+            player_id: player.id,
+            date: currentDate,
+            session_id: currentSession?.id || null,
+            event_id: currentEvent?.id || null,
+            status: 'PRESENT',
+            notes: null,
+            _isNew: true,
+            _playerData: player
+          };
+        }
+      });
+      
       renderAttendanceList();
     } else {
       // 7. Si no hay registros, generar lazy

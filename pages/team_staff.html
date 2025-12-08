@@ -40,11 +40,40 @@
         <div class="form-group">
           <label for="roleInput">Rol</label>
           <select id="roleInput">
-            <option value="segundo">Segundo</option>
+            <option value="segundo">Segundo Entrenador</option>
             <option value="ayudante" selected>Ayudante</option>
           </select>
         </div>
-        <button id="addBtn" class="btn btn-primary">Añadir</button>
+        <div class="form-group">
+          <label>Permisos:</label>
+          <div class="permissions-grid">
+            <label class="permission-item">
+              <input type="checkbox" id="perm_MANAGE_PLAYERS" value="MANAGE_PLAYERS" checked>
+              <span>Gestionar jugadores</span>
+            </label>
+            <label class="permission-item">
+              <input type="checkbox" id="perm_MANAGE_TRAININGS" value="MANAGE_TRAININGS" checked>
+              <span>Gestionar entrenamientos</span>
+            </label>
+            <label class="permission-item">
+              <input type="checkbox" id="perm_MANAGE_EVENTS" value="MANAGE_EVENTS" checked>
+              <span>Gestionar eventos</span>
+            </label>
+            <label class="permission-item">
+              <input type="checkbox" id="perm_MANAGE_ATTENDANCE" value="MANAGE_ATTENDANCE" checked>
+              <span>Gestionar asistencia</span>
+            </label>
+            <label class="permission-item">
+              <input type="checkbox" id="perm_MANAGE_STAFF" value="MANAGE_STAFF">
+              <span>Gestionar entrenadores</span>
+            </label>
+            <label class="permission-item">
+              <input type="checkbox" id="perm_MANAGE_TEAM" value="MANAGE_TEAM">
+              <span>Gestionar equipo</span>
+            </label>
+          </div>
+        </div>
+        <button id="addBtn" class="btn btn-primary">Añadir Entrenador</button>
       </div>
     </div>
   </div>

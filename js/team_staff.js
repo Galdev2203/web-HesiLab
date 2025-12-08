@@ -254,6 +254,13 @@ document.getElementById("addBtn").onclick = async () => {
     return;
   }
 
+  // Obtener permisos seleccionados
+  const selectedPermissions = [];
+  const permCheckboxes = document.querySelectorAll('.permissions-grid input[type="checkbox"]:checked');
+  permCheckboxes.forEach(checkbox => {
+    selectedPermissions.push(checkbox.value);
+  });
+
   const { data: usr, error } = await supabase.rpc("get_user_by_email", { p_email: email });
 
   if (error || !usr || usr.length === 0) {
@@ -263,19 +270,46 @@ document.getElementById("addBtn").onclick = async () => {
 
   const userIdToAdd = usr[0].id;
 
-  const { error: insertErr } = await supabase
+  // Insertar entrenador
+  const { data: staffData, error: insertErr } = await supabase
     .from("team_staff")
     .insert({
       team_id: teamId,
       user_id: userIdToAdd,
       role: role
-    });
+    })
+    .select()
+    .single();
 
   if (insertErr) {
-    alert("No tienes permiso para añadir entrenadores.");
+    alert("Error al añadir entrenador: " + insertErr.message);
     return;
   }
 
+  // Insertar permisos seleccionados
+  if (selectedPermissions.length > 0) {
+    const permissionsToInsert = selectedPermissions.map(perm => ({
+      staff_id: staffData.id,
+      permission: perm,
+      value: true
+    }));
+
+    const { error: permErr } = await supabase
+      .from("team_staff_permissions")
+      .insert(permissionsToInsert);
+
+    if (permErr) {
+      console.error("Error al añadir permisos:", permErr);
+      alert("Entrenador añadido, pero hubo un error al asignar algunos permisos.");
+    }
+  }
+
+  // Limpiar formulario
   document.getElementById("emailInput").value = "";
+  document.querySelectorAll('.permissions-grid input[type="checkbox"]').forEach(cb => {
+    cb.checked = ['MANAGE_PLAYERS', 'MANAGE_TRAININGS', 'MANAGE_EVENTS', 'MANAGE_ATTENDANCE'].includes(cb.value);
+  });
+  
+  alert("Entrenador añadido correctamente.");
   loadStaff();
 };
