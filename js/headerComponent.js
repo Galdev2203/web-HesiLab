@@ -1,5 +1,6 @@
 // headerComponent.js - Componente reutilizable del header unificado
 import { supabase } from './supabaseClient.js';
+import { setupAuthListener, signOut } from './authGuard.js';
 
 /**
  * Inicializa el header unificado con sidebar
@@ -14,6 +15,12 @@ export async function initHeader(options = {}) {
     backUrl = null,
     activeNav = null
   } = options;
+
+  // Configurar listener de autenticación (solo una vez)
+  if (!window._authListenerSetup) {
+    setupAuthListener();
+    window._authListenerSetup = true;
+  }
 
   // Verificar sesión
   const { data: sessionData } = await supabase.auth.getSession();
@@ -158,8 +165,7 @@ function setupHeaderListeners(user) {
   // Logout
   document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-      await supabase.auth.signOut();
-      window.location.href = '/pages/index.html';
+      await signOut();
     }
   });
 
