@@ -22,7 +22,7 @@ class TeamNavigationManager {
     this.userPermissions = userPermissions;
     this.navigationButtons = {
       players: { id: 'playersBtn', permission: 'MANAGE_PLAYERS' },
-      staff: { id: 'staffBtn', permission: ['MANAGE_STAFF', 'MANAGE_STAFF_PERMISSIONS'] },
+      team_staff: { id: 'staffBtn', permission: ['MANAGE_STAFF', 'MANAGE_STAFF_PERMISSIONS'] },
       trainings: { id: 'trainingsBtn', permission: 'MANAGE_TRAININGS' },
       events: { id: 'eventsBtn', permission: 'MANAGE_EVENTS' },
       attendance: { id: 'attendanceBtn', permission: 'MANAGE_ATTENDANCE' },

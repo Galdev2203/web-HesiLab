@@ -159,9 +159,12 @@ function filterAttendanceByPeriod(attendance, period, customStart, customEnd) {
       }
       
       case 'month': {
-        const monthAgo = new Date(today);
-        monthAgo.setDate(monthAgo.getDate() - 30);
-        return recordDate >= monthAgo && recordDate <= today;
+        const now = new Date();
+        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        firstDayOfMonth.setHours(0, 0, 0, 0);
+        lastDayOfMonth.setHours(23, 59, 59, 999);
+        return recordDate >= firstDayOfMonth && recordDate <= lastDayOfMonth;
       }
       
       case 'season':
