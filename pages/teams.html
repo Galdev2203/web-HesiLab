@@ -23,12 +23,25 @@
   <!-- Main Content -->
   <main class="teams-main">
     <div class="container">
-      <div class="teams-list">
-        <div id="teamsContainer">Cargando equipos...</div>
+      <div class="teams-grid" id="teamsContainer">
+        Cargando equipos...
       </div>
+    </div>
+    
+    <!-- Botón flotante para añadir equipo -->
+    <button class="fab" id="fabBtn" title="Añadir equipo">
+      <span class="fab-icon">+</span>
+    </button>
+  </main>
 
-      <div id="createForm">
-        <h3>Crear nuevo equipo</h3>
+  <!-- Modal para crear/editar equipo -->
+  <div id="teamModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Crear nuevo equipo</h3>
+        <button class="close-modal" id="closeModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
         <div class="form-group">
           <label for="teamName">Nombre del equipo *</label>
           <input id="teamName" placeholder="Ej: Lakers Sub-17" />
@@ -37,31 +50,10 @@
           <label for="teamCategory">Categoría (opcional)</label>
           <input id="teamCategory" placeholder="Ej: Sub-17, Senior, Femenino" />
         </div>
-        <button id="createBtn" class="primary-btn">✨ Crear equipo</button>
-      </div>
-    </div>
-  </main>
-
-  <!-- Modal de edición -->
-  <div id="editModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Editar equipo</h3>
-        <button class="close-modal" onclick="document.getElementById('editModal').style.display='none'">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="editTeamName">Nombre del equipo *</label>
-          <input id="editTeamName" placeholder="Nombre del equipo" />
-        </div>
-        <div class="form-group">
-          <label for="editTeamCategory">Categoría (opcional)</label>
-          <input id="editTeamCategory" placeholder="Ej: Sub-17, Senior, Femenino" />
-        </div>
       </div>
       <div class="modal-footer">
-        <button class="secondary-btn" onclick="document.getElementById('editModal').style.display='none'">Cancelar</button>
-        <button id="saveEditBtn" class="primary-btn">Guardar cambios</button>
+        <button class="secondary-btn" id="cancelModalBtn">Cancelar</button>
+        <button id="saveTeamBtn" class="primary-btn">Guardar</button>
       </div>
     </div>
   </div>

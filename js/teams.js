@@ -24,7 +24,8 @@ const user = session.user;
 
 // Cargar equipos donde el usuario es staff
 async function loadTeams() {
-  document.getElementById('teamsContainer').innerText = 'Cargando equipos...';
+  const container = document.getElementById('teamsContainer');
+  container.innerText = 'Cargando equipos...';
   
   // Consultamos team_staff -> teams
   const { data, error } = await supabase
@@ -34,78 +35,198 @@ async function loadTeams() {
     .eq('active', true);
 
   if (error) {
-    document.getElementById('teamsContainer').innerText = 'Error al cargar: ' + error.message;
+    container.innerText = 'Error al cargar: ' + error.message;
     console.error(error);
     return;
   }
   
   if (!data || data.length === 0) {
-    document.getElementById('teamsContainer').innerHTML = '<div class="empty-state"><p>No tienes equipos todavía. ¡Crea tu primer equipo!</p></div>';
+    container.innerHTML = '<div class="empty-state"><p>No tienes equipos todavía. ¡Crea tu primer equipo!</p></div>';
     return;
   }
 
-  const container = document.getElementById('teamsContainer');
   container.innerHTML = '';
   
   data.forEach(row => {
     const team = row.teams;
-    const isHeadCoach = row.role === 'HEAD_COACH';
+    const isHeadCoach = row.role === 'HEAD_COACH' || row.role === 'principal';
+    
     const div = document.createElement('div');
     div.className = 'team-card fade-in';
+    div.dataset.teamid = team.id;
+    
     div.innerHTML = `
-      <div class="team-info">
-        <div class="team-name">${team.name}</div>
-        <div class="team-category">${team.category || 'Sin categoría'}</div>
-      </div>
-      <div class="team-actions">
-        <button class="primary-btn" data-teamid="${team.id}">➜ Entrar</button>
+      <div class="team-card-header">
+        <div class="team-info">
+          <div class="team-name">${team.name}</div>
+          <div class="team-category">${team.category || 'Sin categoría'}</div>
+        </div>
         ${isHeadCoach 
-          ? `<button class="secondary-btn" data-teamid="${team.id}" data-action="edit" data-name="${team.name}" data-category="${team.category || ''}">✏️ Editar</button>
-             <button class="danger-btn" data-teamid="${team.id}" data-action="delete">🗑️ Eliminar</button>` 
+          ? `<div class="team-menu">
+              <button class="menu-btn" data-teamid="${team.id}" data-name="${team.name}" data-category="${team.category || ''}">⋮</button>
+              <div class="menu-dropdown">
+                <button class="menu-item edit-item" data-teamid="${team.id}" data-name="${team.name}" data-category="${team.category || ''}">✏️ Editar</button>
+                <button class="menu-item delete delete-item" data-teamid="${team.id}">🗑️ Eliminar</button>
+              </div>
+            </div>` 
           : ``}
       </div>
+      <div class="team-stats">
+        <div class="stat-item"><strong>0</strong> jugadores</div>
+        <div class="stat-item"><strong>0</strong> entrenamientos</div>
+      </div>
     `;
+    
     container.appendChild(div);
   });
 
-  // Attach handlers para botones
-  document.querySelectorAll('button.primary-btn[data-teamid]').forEach(b => {
-    b.onclick = () => {
-      const id = b.getAttribute('data-teamid');
-      window.location.href = `/pages/team_detail.html?team_id=${id}`;
-    }
-  });
-
-  document.querySelectorAll('button.secondary-btn[data-action="edit"]').forEach(b => {
-    b.onclick = () => {
-      const teamId = b.getAttribute('data-teamid');
-      const teamName = b.getAttribute('data-name');
-      const teamCategory = b.getAttribute('data-category');
-      openEditModal(teamId, teamName, teamCategory);
-    }
-  });
-
-  document.querySelectorAll('button.danger-btn[data-action="delete"]').forEach(b => {
-    b.onclick = async () => {
-      if (!confirm('¿Eliminar equipo? Esta acción eliminará todos los datos relacionados (jugadores, entrenamientos, eventos, etc.). ¿Estás seguro?')) return;
-      const teamId = b.getAttribute('data-teamid');
+  // Hacer cards clickeables (excepto el menú)
+  document.querySelectorAll('.team-card').forEach(card => {
+    card.onclick = (e) => {
+      // Si el click es en el menú o sus items, no navegar
+      if (e.target.closest('.team-menu')) return;
       
-      // Borrar equipo (también se eliminarán filas relacionadas por FK con CASCADE)
+      const teamId = card.dataset.teamid;
+      window.location.href = `/pages/team_detail.html?team_id=${teamId}`;
+    };
+  });
+
+  // Manejadores para el menú de tres puntos
+  document.querySelectorAll('.menu-btn').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const dropdown = btn.nextElementSibling;
+      
+      // Cerrar otros menús abiertos
+      document.querySelectorAll('.menu-dropdown.show').forEach(menu => {
+        if (menu !== dropdown) menu.classList.remove('show');
+      });
+      
+      dropdown.classList.toggle('show');
+    };
+  });
+
+  // Editar equipo
+  document.querySelectorAll('.edit-item').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const teamId = btn.getAttribute('data-teamid');
+      const teamName = btn.getAttribute('data-name');
+      const teamCategory = btn.getAttribute('data-category');
+      openModal('edit', teamId, teamName, teamCategory);
+      // Cerrar dropdown
+      btn.closest('.menu-dropdown').classList.remove('show');
+    };
+  });
+
+  // Eliminar equipo
+  document.querySelectorAll('.delete-item').forEach(btn => {
+    btn.onclick = async (e) => {
+      e.stopPropagation();
+      const teamId = btn.getAttribute('data-teamid');
+      
+      if (!confirm('¿Eliminar equipo? Esta acción eliminará todos los datos relacionados (jugadores, entrenamientos, eventos, etc.). ¿Estás seguro?')) return;
+      
       const { error } = await supabase.from('teams').delete().eq('id', teamId);
       if (error) return alert('Error al eliminar: ' + error.message);
       alert('Equipo eliminado correctamente');
       loadTeams();
-    }
+      
+      // Cerrar dropdown
+      btn.closest('.menu-dropdown').classList.remove('show');
+    };
   });
 }
 
-// Crear equipo
-document.getElementById('createBtn').onclick = async () => {
-  const name = document.getElementById('teamName').value.trim();
-  const category = document.getElementById('teamCategory').value.trim();
-  
-  if (!name) return alert('Pon un nombre al equipo');
+// Cerrar dropdowns al hacer clic fuera
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.team-menu')) {
+    document.querySelectorAll('.menu-dropdown.show').forEach(menu => {
+      menu.classList.remove('show');
+    });
+  }
+});
 
+// ============================================
+// MODAL PARA CREAR/EDITAR EQUIPO
+// ============================================
+
+let currentEditTeamId = null;
+let currentMode = 'create'; // 'create' o 'edit'
+
+const modal = document.getElementById('teamModal');
+const modalTitle = document.getElementById('modalTitle');
+const teamNameInput = document.getElementById('teamName');
+const teamCategoryInput = document.getElementById('teamCategory');
+const saveBtn = document.getElementById('saveTeamBtn');
+const closeBtn = document.getElementById('closeModalBtn');
+const cancelBtn = document.getElementById('cancelModalBtn');
+const fabBtn = document.getElementById('fabBtn');
+
+// Abrir modal
+function openModal(mode = 'create', teamId = null, name = '', category = '') {
+  currentMode = mode;
+  currentEditTeamId = teamId;
+  
+  if (mode === 'create') {
+    modalTitle.textContent = 'Crear nuevo equipo';
+    teamNameInput.value = '';
+    teamCategoryInput.value = '';
+  } else {
+    modalTitle.textContent = 'Editar equipo';
+    teamNameInput.value = name;
+    teamCategoryInput.value = category;
+  }
+  
+  modal.classList.add('show');
+  modal.style.display = 'flex';
+  teamNameInput.focus();
+}
+
+// Cerrar modal
+function closeModal() {
+  modal.classList.remove('show');
+  setTimeout(() => {
+    modal.style.display = 'none';
+  }, 200);
+  currentEditTeamId = null;
+}
+
+// FAB - Abrir modal para crear
+fabBtn.onclick = () => openModal('create');
+
+// Cerrar modal
+closeBtn.onclick = closeModal;
+cancelBtn.onclick = closeModal;
+
+// Cerrar al hacer clic fuera
+modal.onclick = (e) => {
+  if (e.target === modal) closeModal();
+};
+
+// Cerrar con ESC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modal.style.display === 'flex') {
+    closeModal();
+  }
+});
+
+// Guardar (crear o editar)
+saveBtn.onclick = async () => {
+  const name = teamNameInput.value.trim();
+  const category = teamCategoryInput.value.trim();
+  
+  if (!name) return alert('El nombre del equipo es obligatorio');
+
+  if (currentMode === 'create') {
+    await createTeam(name, category);
+  } else {
+    await updateTeam(currentEditTeamId, name, category);
+  }
+};
+
+// Crear equipo
+async function createTeam(name, category) {
   try {
     // 1. Insertar en teams
     const { data: newTeam, error: teamError } = await supabase
@@ -164,68 +285,40 @@ document.getElementById('createBtn').onclick = async () => {
 
     if (permError) {
       console.error('Error creando permisos:', permError);
-      // No lanzar error, el equipo ya está creado
       alert('Equipo creado, pero hubo un problema al asignar permisos. Contacta con soporte.');
     } else {
       console.log('Permisos asignados correctamente');
     }
 
-    // 5. Limpiar formulario y recargar
-    document.getElementById('teamName').value = '';
-    document.getElementById('teamCategory').value = '';
     alert('¡Equipo creado con éxito!');
+    closeModal();
     loadTeams();
 
   } catch (error) {
     console.error('Error creando equipo:', error);
     alert('Error creando equipo: ' + error.message);
   }
-};
-
-// Variables para edición
-let currentEditTeamId = null;
-
-// Abrir modal de edición
-function openEditModal(teamId, name, category) {
-  currentEditTeamId = teamId;
-  document.getElementById('editTeamName').value = name;
-  document.getElementById('editTeamCategory').value = category || '';
-  document.getElementById('editModal').style.display = 'flex';
 }
 
-// Guardar edición
-document.getElementById('saveEditBtn').onclick = async () => {
-  if (!currentEditTeamId) return;
-  
-  const name = document.getElementById('editTeamName').value.trim();
-  const category = document.getElementById('editTeamCategory').value.trim();
-  
-  if (!name) return alert('El nombre del equipo es obligatorio');
-  
+// Actualizar equipo
+async function updateTeam(teamId, name, category) {
   const { error } = await supabase
     .from('teams')
     .update({ 
       name: name, 
       category: category || null 
     })
-    .eq('id', currentEditTeamId);
+    .eq('id', teamId);
   
   if (error) {
     console.error('Error actualizando equipo:', error);
     return alert('Error al actualizar: ' + error.message);
   }
   
-  document.getElementById('editModal').style.display = 'none';
-  currentEditTeamId = null;
+  alert('Equipo actualizado correctamente');
+  closeModal();
   loadTeams();
-};
-
-// Cerrar modal al hacer clic fuera
-document.getElementById('editModal').onclick = (e) => {
-  if (e.target.id === 'editModal') {
-    document.getElementById('editModal').style.display = 'none';
-  }
-};
+}
 
 // Cargar inicial
 loadTeams();
