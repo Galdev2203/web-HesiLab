@@ -20,7 +20,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Inicializar header
-  initHeader('📊 Estadísticas', true);
+  await initHeader({
+    title: '📊 Estadísticas',
+    backUrl: true,
+    activeNav: null
+  });
 
   // Cargar datos iniciales
   await loadData();
