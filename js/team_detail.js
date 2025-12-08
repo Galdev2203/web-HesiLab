@@ -127,12 +127,14 @@ async function loadTeamDetails(teamId, user, teamData) {
     const trainingsBtn = document.getElementById("trainingsBtn");
     const eventsBtn = document.getElementById("eventsBtn");
     const attendanceBtn = document.getElementById("attendanceBtn");
+    const statsBtn = document.getElementById("statsBtn");
 
     if (playersBtn) playersBtn.href = `/pages/players.html?team_id=${teamId}`;
     if (staffBtn) staffBtn.href = `/pages/team_staff.html?team_id=${teamId}`;
     if (trainingsBtn) trainingsBtn.href = `/pages/trainings.html?team_id=${teamId}`;
     if (eventsBtn) eventsBtn.href = `/pages/events.html?team_id=${teamId}`;
     if (attendanceBtn) attendanceBtn.href = `/pages/attendance.html?team_id=${teamId}`;
+    if (statsBtn) statsBtn.href = `/pages/stats.html?team_id=${teamId}`;
 
     // Mostrar/ocultar botones según permisos
     if (playersBtn) {
@@ -158,11 +160,14 @@ async function loadTeamDetails(teamId, user, teamData) {
       toggleElementByPermission(attendanceBtn, userPermissions['MANAGE_ATTENDANCE']);
     }
 
+    // Estadísticas siempre visible (lectura para todos)
+    if (statsBtn) {
+      statsBtn.style.display = 'flex';
+    }
+
     // Mostrar secciones
-    const userInfo = document.getElementById("userInfo");
     const actions = document.getElementById("actions");
     
-    if (userInfo) userInfo.style.display = "block";
     if (actions) actions.style.display = "grid";
     
     console.log("Detalles cargados, secciones visibles");

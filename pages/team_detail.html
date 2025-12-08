@@ -26,56 +26,39 @@
     <div class="container">
       <p id="errorMessage" class="error-message" style="display:none;"></p>
 
-      <!-- Información del usuario -->
-      <div id="userInfo" class="user-info-card" style="display:none;">
-        <h3>Tu rol en este equipo</h3>
-        <div class="role-badge">
-          <span class="role-icon">👤</span>
-          <span id="userRole">Cargando...</span>
-        </div>
-        <div class="permissions-section">
-          <h4>Tus permisos:</h4>
-          <ul id="permissionsList" class="permissions-list">
-            <li>Cargando...</li>
-          </ul>
-        </div>
-      </div>
-
       <!-- Acciones disponibles -->
-      <div id="actions" class="actions-grid" style="display:none;">
-        <a id="playersBtn" class="action-card">
-          <div class="action-icon">👥</div>
-          <h3>Jugadores</h3>
-          <p>Gestiona la plantilla de jugadores del equipo</p>
-          <div class="action-arrow">➜</div>
+      <div class="section-title">
+        <h2>⚡ Acciones Rápidas</h2>
+      </div>
+      <div id="actions" class="actions-grid-compact" style="display:none;">
+        <a id="playersBtn" class="action-card-compact">
+          <div class="action-icon-small">👥</div>
+          <span class="action-text">Jugadores</span>
         </a>
 
-        <a id="trainingsBtn" class="action-card">
-          <div class="action-icon">⚽</div>
-          <h3>Entrenamientos</h3>
-          <p>Configura los horarios de entrenamientos recurrentes</p>
-          <div class="action-arrow">➜</div>
+        <a id="trainingsBtn" class="action-card-compact">
+          <div class="action-icon-small">⚽</div>
+          <span class="action-text">Entrenamientos</span>
         </a>
 
-        <a id="eventsBtn" class="action-card">
-          <div class="action-icon">📅</div>
-          <h3>Eventos</h3>
-          <p>Crea y gestiona partidos, reuniones y otros eventos</p>
-          <div class="action-arrow">➜</div>
+        <a id="eventsBtn" class="action-card-compact">
+          <div class="action-icon-small">📅</div>
+          <span class="action-text">Eventos</span>
         </a>
 
-        <a id="attendanceBtn" class="action-card">
-          <div class="action-icon">✅</div>
-          <h3>Asistencia</h3>
-          <p>Registra la asistencia de jugadores</p>
-          <div class="action-arrow">➜</div>
+        <a id="attendanceBtn" class="action-card-compact">
+          <div class="action-icon-small">✅</div>
+          <span class="action-text">Asistencia</span>
         </a>
 
-        <a id="staffBtn" class="action-card">
-          <div class="action-icon">👨‍🏫</div>
-          <h3>Cuerpo técnico</h3>
-          <p>Administra entrenadores y sus permisos</p>
-          <div class="action-arrow">➜</div>
+        <a id="staffBtn" class="action-card-compact">
+          <div class="action-icon-small">👨‍🏫</div>
+          <span class="action-text">Staff</span>
+        </a>
+
+        <a id="statsBtn" class="action-card-compact">
+          <div class="action-icon-small">📊</div>
+          <span class="action-text">Estadísticas</span>
         </a>
       </div>
     </div>

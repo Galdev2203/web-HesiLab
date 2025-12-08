@@ -76,10 +76,63 @@ body {
 
 /* Main Content */
 .team-detail-main {
-  padding: 0 var(--spacing-lg) var(--spacing-2xl);
+  padding: var(--spacing-xl) var(--spacing-lg);
 }
 
-/* Actions Grid */
+.section-title {
+  margin-bottom: var(--spacing-lg);
+}
+
+.section-title h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0;
+}
+
+/* Actions Grid Compacto */
+.actions-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--spacing-md);
+  max-width: 1200px;
+}
+
+.action-card-compact {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-decoration: none;
+  transition: all 0.2s;
+  border: 2px solid var(--gray-200);
+  cursor: pointer;
+  min-height: 120px;
+  justify-content: center;
+}
+
+.action-card-compact:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-500);
+}
+
+.action-icon-small {
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.action-text {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  text-align: center;
+}
+
+/* Actions Grid Original (mantener por compatibilidad) */
 .actions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
