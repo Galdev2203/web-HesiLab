@@ -89,62 +89,87 @@ async function init() {
 
 // Cargar detalles del equipo
 async function loadTeamDetails(teamId, user, teamData) {
-  // Mostrar rol y permisos del usuario
-  const userRole = await getUserRole(teamId);
-  const userPermissions = await getAllUserPermissions(teamId);
+  console.log("Cargando detalles del equipo...");
+  
+  try {
+    // Mostrar rol y permisos del usuario
+    const userRole = await getUserRole(teamId);
+    const userPermissions = await getAllUserPermissions(teamId);
+    
+    console.log("Rol del usuario:", userRole);
+    console.log("Permisos del usuario:", userPermissions);
 
-  document.getElementById("userRole").innerText = getRoleLabel(userRole);
+    // Actualizar rol
+    const userRoleElement = document.getElementById("userRole");
+    if (userRoleElement) {
+      userRoleElement.innerText = getRoleLabel(userRole);
+    }
 
-  // Mostrar permisos
-  const permissionsList = document.getElementById("permissionsList");
-  const activePermissions = Object.entries(userPermissions)
-    .filter(([_, value]) => value === true)
-    .map(([key, _]) => getPermissionLabel(key));
+    // Mostrar permisos
+    const permissionsList = document.getElementById("permissionsList");
+    if (permissionsList) {
+      const activePermissions = Object.entries(userPermissions)
+        .filter(([_, value]) => value === true)
+        .map(([key, _]) => getPermissionLabel(key));
 
-  if (activePermissions.length > 0) {
-    permissionsList.innerHTML = activePermissions
-      .map(p => `<li>${p}</li>`)
-      .join('');
-  } else {
-    permissionsList.innerHTML = '<li>Sin permisos asignados</li>';
+      if (activePermissions.length > 0) {
+        permissionsList.innerHTML = activePermissions
+          .map(p => `<li>${p}</li>`)
+          .join('');
+      } else {
+        permissionsList.innerHTML = '<li>Sin permisos asignados</li>';
+      }
+    }
+
+    // Configurar navegación con permisos
+    const playersBtn = document.getElementById("playersBtn");
+    const staffBtn = document.getElementById("staffBtn");
+    const trainingsBtn = document.getElementById("trainingsBtn");
+    const eventsBtn = document.getElementById("eventsBtn");
+    const attendanceBtn = document.getElementById("attendanceBtn");
+
+    if (playersBtn) playersBtn.href = `/pages/players.html?team_id=${teamId}`;
+    if (staffBtn) staffBtn.href = `/pages/team_staff.html?team_id=${teamId}`;
+    if (trainingsBtn) trainingsBtn.href = `/pages/trainings.html?team_id=${teamId}`;
+    if (eventsBtn) eventsBtn.href = `/pages/events.html?team_id=${teamId}`;
+    if (attendanceBtn) attendanceBtn.href = `/pages/attendance.html?team_id=${teamId}`;
+
+    // Mostrar/ocultar botones según permisos
+    if (playersBtn) {
+      toggleElementByPermission(playersBtn, userPermissions['MANAGE_PLAYERS']);
+    }
+
+    if (staffBtn) {
+      toggleElementByPermission(
+        staffBtn, 
+        userPermissions['MANAGE_STAFF'] || userPermissions['MANAGE_STAFF_PERMISSIONS']
+      );
+    }
+
+    if (trainingsBtn) {
+      toggleElementByPermission(trainingsBtn, userPermissions['MANAGE_TRAININGS']);
+    }
+
+    if (eventsBtn) {
+      toggleElementByPermission(eventsBtn, userPermissions['MANAGE_EVENTS']);
+    }
+
+    if (attendanceBtn) {
+      toggleElementByPermission(attendanceBtn, userPermissions['MANAGE_ATTENDANCE']);
+    }
+
+    // Mostrar secciones
+    const userInfo = document.getElementById("userInfo");
+    const actions = document.getElementById("actions");
+    
+    if (userInfo) userInfo.style.display = "block";
+    if (actions) actions.style.display = "grid";
+    
+    console.log("Detalles cargados, secciones visibles");
+  } catch (error) {
+    console.error("Error al cargar detalles:", error);
+    throw error;
   }
-
-  // Configurar navegación con permisos
-  document.getElementById("playersBtn").href = `/pages/players.html?team_id=${teamId}`;
-  document.getElementById("staffBtn").href = `/pages/team_staff.html?team_id=${teamId}`;
-  document.getElementById("trainingsBtn").href = `/pages/trainings.html?team_id=${teamId}`;
-  document.getElementById("eventsBtn").href = `/pages/events.html?team_id=${teamId}`;
-  document.getElementById("attendanceBtn").href = `/pages/attendance.html?team_id=${teamId}`;
-
-  // Mostrar/ocultar botones según permisos
-  toggleElementByPermission(
-    document.getElementById("playersBtn"), 
-    userPermissions['MANAGE_PLAYERS']
-  );
-
-  toggleElementByPermission(
-    document.getElementById("staffBtn"), 
-    userPermissions['MANAGE_STAFF'] || userPermissions['MANAGE_STAFF_PERMISSIONS']
-  );
-
-  toggleElementByPermission(
-    document.getElementById("trainingsBtn"), 
-    userPermissions['MANAGE_TRAININGS']
-  );
-
-  toggleElementByPermission(
-    document.getElementById("eventsBtn"), 
-    userPermissions['MANAGE_EVENTS']
-  );
-
-  toggleElementByPermission(
-    document.getElementById("attendanceBtn"), 
-    userPermissions['MANAGE_ATTENDANCE']
-  );
-
-  // Mostrar secciones
-  document.getElementById("userInfo").style.display = "block";
-  document.getElementById("actions").style.display = "grid";
 }
 
 // Iniciar la aplicación
