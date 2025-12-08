@@ -106,26 +106,80 @@ document.getElementById('createBtn').onclick = async () => {
   
   if (!name) return alert('Pon un nombre al equipo');
 
-  // Insertar en teams
-  const { data: newTeam, error } = await supabase
-    .from('teams')
-    .insert({ 
-      name: name, 
-      category: category || null, 
-      created_by: user.id 
-    })
-    .select()
-    .single();
+  try {
+    // 1. Insertar en teams
+    const { data: newTeam, error: teamError } = await supabase
+      .from('teams')
+      .insert({ 
+        name: name, 
+        category: category || null, 
+        created_by: user.id 
+      })
+      .select()
+      .single();
 
-  if (error) {
+    if (teamError) throw teamError;
+
+    console.log('Equipo creado:', newTeam);
+
+    // 2. El trigger automáticamente añade al creador como staff con rol 'principal'
+    // Esperar un momento para que el trigger se ejecute
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // 3. Obtener el registro de staff creado por el trigger
+    const { data: staffData, error: staffError } = await supabase
+      .from('team_staff')
+      .select('id')
+      .eq('team_id', newTeam.id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (staffError) {
+      console.error('Error obteniendo staff:', staffError);
+      throw new Error('No se pudo obtener el staff del equipo');
+    }
+
+    console.log('Staff creado:', staffData);
+
+    // 4. Crear todos los permisos para el principal
+    const allPermissions = [
+      'MANAGE_TEAM',
+      'MANAGE_STAFF',
+      'MANAGE_STAFF_PERMISSIONS',
+      'MANAGE_PLAYERS',
+      'MANAGE_EVENTS',
+      'MANAGE_TRAININGS',
+      'MANAGE_ATTENDANCE'
+    ];
+
+    const permissionsToInsert = allPermissions.map(permission => ({
+      team_staff_id: staffData.id,
+      permission: permission,
+      value: true
+    }));
+
+    const { error: permError } = await supabase
+      .from('team_staff_permissions')
+      .insert(permissionsToInsert);
+
+    if (permError) {
+      console.error('Error creando permisos:', permError);
+      // No lanzar error, el equipo ya está creado
+      alert('Equipo creado, pero hubo un problema al asignar permisos. Contacta con soporte.');
+    } else {
+      console.log('Permisos asignados correctamente');
+    }
+
+    // 5. Limpiar formulario y recargar
+    document.getElementById('teamName').value = '';
+    document.getElementById('teamCategory').value = '';
+    alert('¡Equipo creado con éxito!');
+    loadTeams();
+
+  } catch (error) {
     console.error('Error creando equipo:', error);
-    return alert('Error creando equipo: ' + error.message);
+    alert('Error creando equipo: ' + error.message);
   }
-  
-  // El trigger automáticamente añade al creador como staff, no necesitamos hacer nada más
-  document.getElementById('teamName').value = '';
-  document.getElementById('teamCategory').value = '';
-  loadTeams();
 };
 
 // Variables para edición
