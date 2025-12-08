@@ -8,6 +8,9 @@ import { FormValidator, getFormValue, setFormValue, clearForm } from './utils/fo
 import { requireSession, requireTeamId, loadData, insertData, updateData, deleteData } from './utils/supabaseHelpers.js';
 import { escapeHtml, showError, hideError, showLoading, getDayName, formatTime } from './utils/domHelpers.js';
 
+// Indicador visual de versión refactorizada
+console.log('✅ VERSIÓN REFACTORIZADA - Usando arquitectura modular con utilidades reutilizables');
+
 // Validar sesión y obtener team_id
 await requireSession();
 const teamId = requireTeamId();
