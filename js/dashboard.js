@@ -170,10 +170,10 @@ async function loadWeeklyCalendar() {
 
   console.log('Semana:', weekStart.toISOString().split('T')[0], 'a', weekEnd.toISOString().split('T')[0]);
 
-  // Cargar todos los entrenamientos de la semana
+  // Cargar todos los entrenamientos de la semana (solo usan weekday, son recurrentes)
   const { data: trainingsData, error: trainingsError } = await supabase
     .from('team_training_sessions')
-    .select('id, team_id, date, start_time, end_time, weekday, teams(name)')
+    .select('id, team_id, start_time, end_time, weekday, teams(name)')
     .in('team_id', teamIds);
 
   console.log('Entrenamientos cargados:', trainingsData);
@@ -182,7 +182,7 @@ async function loadWeeklyCalendar() {
   // Cargar todos los eventos de la semana
   const { data: eventsData, error: eventsError } = await supabase
     .from('team_events')
-    .select('id, team_id, title, date, time, teams(name)')
+    .select('id, team_id, title, event_date, event_time, teams(name)')
     .in('team_id', teamIds);
 
   console.log('Eventos cargados:', eventsData);
@@ -215,21 +215,18 @@ async function loadWeeklyCalendar() {
 
     const eventsContainer = document.getElementById(`events-${dateStr}`);
 
-    // Filtrar entrenamientos por fecha o por día de la semana
+    // Filtrar entrenamientos por día de la semana (son recurrentes)
     const dayOfWeek = currentDate.getDay(); // 0 = Domingo, 1 = Lunes, etc.
     const dayTrainingsFiltered = trainingsData?.filter(t => {
-      // Si tiene fecha específica, usar esa
-      if (t.date) {
-        return t.date === dateStr;
-      }
-      // Si solo tiene weekday (entrenamientos recurrentes), usar ese
-      if (t.weekday !== null && t.weekday !== undefined) {
-        return t.weekday === dayOfWeek;
-      }
-      return false;
+      return t.weekday === dayOfWeek;
     }) || [];
 
-    if (dayTrainingsFiltered.length === 0 && dayEvents.length === 0) {
+    // Filtrar eventos por fecha específica
+    const dayEventsFiltered = eventsData?.filter(e => {
+      return e.event_date === dateStr;
+    }) || [];
+
+    if (dayTrainingsFiltered.length === 0 && dayEventsFiltered.length === 0) {
       eventsContainer.innerHTML = '<span class="no-events">Sin eventos</span>';
     } else {
       // Agregar entrenamientos
@@ -248,11 +245,11 @@ async function loadWeeklyCalendar() {
       });
 
       // Agregar eventos
-      dayEvents.forEach(event => {
+      dayEventsFiltered.forEach(event => {
         const eventDiv = document.createElement('div');
         eventDiv.className = 'event-item event';
         eventDiv.innerHTML = `
-          <span class="event-time">📅 ${event.time?.substring(0, 5) || 'Todo el día'}</span>
+          <span class="event-time">📅 ${event.event_time?.substring(0, 5) || 'Todo el día'}</span>
           <span class="event-title">${event.title}</span>
           <span class="event-team">${event.teams.name}</span>
         `;
@@ -275,8 +272,9 @@ async function loadWeeklyCalendar() {
 // VERIFICAR ENTRENAMIENTO DE HOY
 // ============================================
 async function checkTodayTraining(trainingsData) {
-  const today = new Date().toISOString().split('T')[0];
-  const todayTrainings = trainingsData?.filter(t => t.date === today) || [];
+  const today = new Date();
+  const todayWeekday = today.getDay(); // 0 = Domingo, 1 = Lunes, etc.
+  const todayTrainings = trainingsData?.filter(t => t.weekday === todayWeekday) || [];
 
   const todaySection = document.getElementById('todayTrainingSection');
   
