@@ -298,11 +298,35 @@ async function createTeam(name, category) {
       'MANAGE_ATTENDANCE'
     ];
 
-    const permissionsToInsert = allPermissions.map(permission => ({
-      team_staff_id: staffData.id,
-      permission: permission,
-      value: true
-    }));
+    // Verificar qué permisos ya existen
+    const { data: existingPerms, error: checkError } = await supabase
+      .from('team_staff_permissions')
+      .select('permission')
+      .eq('team_staff_id', staffData.id);
+
+    if (checkError) {
+      console.error('Error verificando permisos existentes:', checkError);
+    }
+
+    const existingPermissions = existingPerms ? existingPerms.map(p => p.permission) : [];
+    console.log('Permisos existentes:', existingPermissions);
+
+    // Solo insertar los permisos que NO existen
+    const permissionsToInsert = allPermissions
+      .filter(perm => !existingPermissions.includes(perm))
+      .map(permission => ({
+        team_staff_id: staffData.id,
+        permission: permission,
+        value: true
+      }));
+
+    if (permissionsToInsert.length === 0) {
+      console.log('Todos los permisos ya existen');
+      alert('¡Equipo creado con éxito!');
+      closeModal();
+      loadTeams();
+      return;
+    }
 
     console.log('Insertando permisos:', permissionsToInsert);
 
