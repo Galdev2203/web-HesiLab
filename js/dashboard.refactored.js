@@ -242,6 +242,8 @@ class CalendarManager {
   renderEvents(container, trainings, events) {
     // Entrenamientos
     trainings.forEach(training => {
+      if (!training.teams?.name) return; // Skip si no tiene nombre de equipo
+      
       const eventDiv = document.createElement('div');
       eventDiv.className = 'event-item training';
       eventDiv.innerHTML = `
@@ -257,6 +259,8 @@ class CalendarManager {
 
     // Eventos
     events.forEach(event => {
+      if (!event.title || !event.teams?.name) return; // Skip si faltan datos
+      
       const eventDiv = document.createElement('div');
       eventDiv.className = 'event-item event';
       eventDiv.innerHTML = `
