@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Perfil - HesiLab</title>
+
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8303721499770704"
+       crossorigin="anonymous"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/profile.css">
+  
+  <!-- Analytics -->
+  <script src="../js/analytics.js"></script>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="page-header">
+    <div class="container">
+      <div class="header-content">
+        <h2>Mi Perfil</h2>
+        <a href="/pages/dashboard.html" class="back-link">Volver al panel</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="profile-main">
+    <div class="container">
+      
+      <!-- Sección de foto de perfil -->
+      <div class="profile-card">
+        <div class="profile-header">
+          <div class="avatar-section">
+            <div class="avatar-container">
+              <img id="avatarImg" src="" alt="Foto de perfil" class="avatar">
+              <div class="avatar-overlay">
+                <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                <button id="changeAvatarBtn" class="change-avatar-btn">
+                  <span>📷</span>
+                  <span>Cambiar foto</span>
+                </button>
+              </div>
+            </div>
+            <div class="profile-welcome">
+              <h3 id="userName">Cargando...</h3>
+              <p id="userEmail">email@ejemplo.com</p>
+              <span class="member-since">Miembro desde <span id="memberSince">---</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información Personal -->
+      <div class="profile-card">
+        <div class="card-header">
+          <h3>📋 Información Personal</h3>
+          <button id="editInfoBtn" class="edit-btn">✏️ Editar</button>
+        </div>
+        <div class="card-body">
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Nombre completo</label>
+              <input type="text" id="fullName" disabled>
+            </div>
+            <div class="info-item">
+              <label>Teléfono</label>
+              <input type="tel" id="phone" disabled>
+            </div>
+            <div class="info-item">
+              <label>Fecha de nacimiento</label>
+              <input type="date" id="birthDate" disabled>
+            </div>
+            <div class="info-item">
+              <label>Ubicación</label>
+              <input type="text" id="location" disabled>
+            </div>
+            <div class="info-item full-width">
+              <label>Biografía</label>
+              <textarea id="bio" rows="3" disabled placeholder="Cuéntanos sobre ti..."></textarea>
+            </div>
+          </div>
+          <div class="card-actions" id="infoActions" style="display: none;">
+            <button id="cancelInfoBtn" class="secondary-btn">Cancelar</button>
+            <button id="saveInfoBtn" class="primary-btn">💾 Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seguridad -->
+      <div class="profile-card">
+        <div class="card-header">
+          <h3>🔒 Seguridad</h3>
+        </div>
+        <div class="card-body">
+          <div class="security-section">
+            <div class="security-item">
+              <div class="security-info">
+                <h4>Contraseña</h4>
+                <p>Última actualización hace <span id="lastPasswordChange">---</span></p>
+              </div>
+              <button id="changePasswordBtn" class="secondary-btn">Cambiar contraseña</button>
+            </div>
+            <div class="security-item">
+              <div class="security-info">
+                <h4>Correo electrónico</h4>
+                <p id="securityEmail">email@ejemplo.com</p>
+              </div>
+              <span class="verified-badge">✓ Verificado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estadísticas -->
+      <div class="profile-card">
+        <div class="card-header">
+          <h3>📊 Tus Estadísticas</h3>
+        </div>
+        <div class="card-body">
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-icon">👥</div>
+              <div class="stat-value" id="totalTeams">0</div>
+              <div class="stat-label">Equipos</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-icon">⚽</div>
+              <div class="stat-value" id="totalPlayers">0</div>
+              <div class="stat-label">Jugadores</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-icon">📅</div>
+              <div class="stat-value" id="totalEvents">0</div>
+              <div class="stat-label">Eventos</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-icon">✅</div>
+              <div class="stat-value" id="attendanceRate">0%</div>
+              <div class="stat-label">Asistencia</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zona de peligro -->
+      <div class="profile-card danger-card">
+        <div class="card-header">
+          <h3>⚠️ Zona de Peligro</h3>
+        </div>
+        <div class="card-body">
+          <div class="danger-section">
+            <div class="danger-info">
+              <h4>Eliminar cuenta</h4>
+              <p>Esta acción es permanente y no se puede deshacer. Se eliminarán todos tus datos.</p>
+            </div>
+            <button id="deleteAccountBtn" class="danger-btn">Eliminar mi cuenta</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Modal de cambio de contraseña -->
+  <div id="passwordModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🔒 Cambiar Contraseña</h3>
+        <button class="close-modal" onclick="document.getElementById('passwordModal').style.display='none'">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="newPassword">Nueva contraseña</label>
+          <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres">
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirmar contraseña</label>
+          <input type="password" id="confirmPassword" placeholder="Repite la contraseña">
+        </div>
+        <div class="password-requirements">
+          <p>La contraseña debe tener:</p>
+          <ul>
+            <li id="req-length">• Mínimo 6 caracteres</li>
+            <li id="req-match">• Las contraseñas coinciden</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="secondary-btn" onclick="document.getElementById('passwordModal').style.display='none'">Cancelar</button>
+        <button id="savePasswordBtn" class="primary-btn">Guardar contraseña</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script type="module" src="../js/profile.js"></script>
+</body>
+</html>
