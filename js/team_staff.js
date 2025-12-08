@@ -81,6 +81,7 @@ class StaffCardRenderer extends CardRenderer {
       <div class="item-menu">
         <button class="menu-btn" data-id="${staffId}" data-user="${userId}">⋮</button>
         <div class="menu-dropdown">
+          <button class="menu-item edit edit-item" data-id="${staffId}" data-user="${userId}">✏️ Editar</button>
           <button class="menu-item delete delete-item" data-id="${staffId}" data-user="${userId}">🗑️ Eliminar</button>
         </div>
       </div>
@@ -97,6 +98,17 @@ class StaffCardRenderer extends CardRenderer {
           if (menu !== dropdown) menu.classList.remove('show');
         });
         dropdown.classList.toggle('show');
+      };
+    });
+
+    // Edit buttons
+    document.querySelectorAll('.edit-item').forEach(btn => {
+      btn.onclick = async (e) => {
+        e.stopPropagation();
+        const staffId = parseInt(btn.dataset.id);
+        
+        if (this.editCallback) this.editCallback(staffId);
+        btn.closest('.menu-dropdown').classList.remove('show');
       };
     });
 
@@ -166,20 +178,60 @@ function openAddModal() {
   modal.open('create', 'Añadir entrenador');
   clearForm(['emailInput', 'roleInput']);
   
+  // Deshabilitar email para edición (se habilitará en añadir)
+  document.getElementById('emailInput').disabled = false;
+  
   // Marcar permisos por defecto
   document.querySelectorAll('.permissions-grid input[type="checkbox"]').forEach(cb => {
     cb.checked = ['MANAGE_PLAYERS', 'MANAGE_TRAININGS', 'MANAGE_EVENTS', 'MANAGE_ATTENDANCE'].includes(cb.value);
   });
 }
 
-// Añadir entrenador
-async function addStaff() {
+// Abrir modal para editar
+async function openEditModal(staffId) {
+  if (!canManageStaff) {
+    alert('No tienes permiso para editar entrenadores');
+    return;
+  }
+
+  const staff = allStaff.find(s => s.id === staffId);
+  if (!staff) {
+    alert('Entrenador no encontrado');
+    return;
+  }
+
+  modal.open('edit', 'Editar entrenador');
+  modal.currentEditId = staffId;
+  
+  // Rellenar datos
+  document.getElementById('emailInput').value = staff.profiles?.email || '';
+  document.getElementById('emailInput').disabled = true; // No permitir cambiar email
+  document.getElementById('roleInput').value = staff.role;
+  
+  // Cargar permisos actuales
+  const { data: permissions } = await supabase
+    .from('team_staff_permissions')
+    .select('permission, value')
+    .eq('team_staff_id', staffId);
+  
+  const permissionsMap = new Map((permissions || []).map(p => [p.permission, p.value]));
+  
+  document.querySelectorAll('.permissions-grid input[type="checkbox"]').forEach(cb => {
+    cb.checked = permissionsMap.get(cb.value) || false;
+  });
+}
+
+// Añadir o editar entrenador
+async function saveStaff() {
+  const isEdit = modal.mode === 'edit';
   const email = getFormValue('emailInput', 'trim');
   const role = getFormValue('roleInput');
 
   // Validar
   validator.reset();
-  validator.email(email, 'Email');
+  if (!isEdit) {
+    validator.email(email, 'Email');
+  }
   validator.required(role, 'Rol');
 
   if (!validator.isValid()) {
@@ -195,55 +247,99 @@ async function addStaff() {
   });
 
   try {
-    // Buscar usuario por email
-    const { data: usr, error } = await supabase.rpc('get_user_by_email', { p_email: email });
+    if (isEdit) {
+      // EDITAR
+      const staffId = modal.currentEditId;
+      
+      // Actualizar rol
+      const { error: updateErr } = await supabase
+        .from('team_staff')
+        .update({ role: role })
+        .eq('id', staffId);
 
-    if (error || !usr || usr.length === 0) {
-      alert('No existe ningún usuario con ese email.');
-      return;
-    }
-
-    const userIdToAdd = usr[0].id;
-
-    // Insertar entrenador
-    const { data: staffData, error: insertErr } = await supabase
-      .from('team_staff')
-      .insert({
-        team_id: teamId,
-        user_id: userIdToAdd,
-        role: role
-      })
-      .select()
-      .single();
-
-    if (insertErr) {
-      alert('Error al añadir entrenador: ' + insertErr.message);
-      return;
-    }
-
-    // Insertar permisos seleccionados
-    if (selectedPermissions.length > 0) {
-      const permissionsToInsert = selectedPermissions.map(perm => ({
-        team_staff_id: staffData.id,
-        permission: perm,
-        value: true
-      }));
-
-      const { error: permErr } = await supabase
-        .from('team_staff_permissions')
-        .insert(permissionsToInsert);
-
-      if (permErr) {
-        console.error('Error al añadir permisos:', permErr);
-        alert('Entrenador añadido, pero hubo un error al asignar algunos permisos.');
+      if (updateErr) {
+        alert('Error al actualizar entrenador: ' + updateErr.message);
+        return;
       }
+
+      // Eliminar permisos antiguos
+      await supabase
+        .from('team_staff_permissions')
+        .delete()
+        .eq('team_staff_id', staffId);
+
+      // Insertar nuevos permisos
+      if (selectedPermissions.length > 0) {
+        const permissionsToInsert = selectedPermissions.map(perm => ({
+          team_staff_id: staffId,
+          permission: perm,
+          value: true
+        }));
+
+        const { error: permErr } = await supabase
+          .from('team_staff_permissions')
+          .insert(permissionsToInsert);
+
+        if (permErr) {
+          console.error('Error al actualizar permisos:', permErr);
+          alert('Rol actualizado, pero hubo un error al asignar algunos permisos.');
+        }
+      }
+
+      alert('Entrenador actualizado correctamente.');
+    } else {
+      // AÑADIR (código existente)
+      // Buscar usuario por email
+      const { data: usr, error } = await supabase.rpc('get_user_by_email', { p_email: email });
+
+      if (error || !usr || usr.length === 0) {
+        alert('No existe ningún usuario con ese email.');
+        return;
+      }
+
+      const userIdToAdd = usr[0].id;
+
+      // Insertar entrenador
+      const { data: staffData, error: insertErr } = await supabase
+        .from('team_staff')
+        .insert({
+          team_id: teamId,
+          user_id: userIdToAdd,
+          role: role
+        })
+        .select()
+        .single();
+
+      if (insertErr) {
+        alert('Error al añadir entrenador: ' + insertErr.message);
+        return;
+      }
+
+      // Insertar permisos seleccionados
+      if (selectedPermissions.length > 0) {
+        const permissionsToInsert = selectedPermissions.map(perm => ({
+          team_staff_id: staffData.id,
+          permission: perm,
+          value: true
+        }));
+
+        const { error: permErr } = await supabase
+          .from('team_staff_permissions')
+          .insert(permissionsToInsert);
+
+        if (permErr) {
+          console.error('Error al añadir permisos:', permErr);
+          alert('Entrenador añadido, pero hubo un error al asignar algunos permisos.');
+        }
+      }
+
+      alert('Entrenador añadido correctamente.');
     }
 
-    alert('Entrenador añadido correctamente.');
     modal.close();
     await loadStaff();
   } catch (error) {
-    console.error('Error adding staff:', error);
+    console.error('Error saving staff:', error);
     alert('Error: ' + error.message);
   }
 }
@@ -266,7 +362,8 @@ async function init() {
   }
 
   // Configurar modal callbacks
-  modal.onSave = addStaff;
+  modal.onSave = saveStaff;
+  cardRenderer.onEdit(openEditModal);
   cardRenderer.onDelete(deleteStaff);
 
   // Cargar inicial
