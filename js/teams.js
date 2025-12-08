@@ -1,243 +1,208 @@
-// teams.js - Lógica para gestión de equipos
-import { supabase } from "../js/supabaseClient.js";
-import { initHeader } from "../js/headerComponent.js";
+// teams.js - Gestión de equipos
+import { supabase } from './supabaseClient.js';
+import { initHeader } from './headerComponent.js';
+import { ModalManager } from './utils/modalManager.js';
+import { CardRenderer } from './utils/cardRenderer.js';
+import { FormValidator, getFormValue, clearForm } from './utils/formValidator.js';
+import { requireSession } from './utils/supabaseHelpers.js';
 
-// Inicializar header unificado
+// Validar sesión
+await requireSession();
+const user = (await supabase.auth.getSession()).data.session.user;
+
+// Inicializar header
 await initHeader({
   title: 'Mis equipos',
   backUrl: '/pages/dashboard.html',
   activeNav: 'teams'
 });
 
-// Obtener sesión después de initHeader
-const { data: sessionData } = await supabase.auth.getSession();
-const session = sessionData.session;
-if (!session) {
-  window.location.href = "/pages/index.html";
-  throw new Error("No session");
-}
-const user = session.user;
+// Modal manager
+const modal = new ModalManager('teamModal');
+const validator = new FormValidator();
 
-// ============================================
-// GESTIÓN DE EQUIPOS
-// ============================================
-
-// Cargar equipos donde el usuario es staff
-async function loadTeams() {
-  const container = document.getElementById('teamsContainer');
-  container.innerText = 'Cargando equipos...';
-  
-  // Consultamos team_staff -> teams
-  const { data, error } = await supabase
-    .from('team_staff')
-    .select('team_id, role, teams(id,name,category)')
-    .eq('user_id', user.id)
-    .eq('active', true);
-
-  if (error) {
-    container.innerText = 'Error al cargar: ' + error.message;
-    console.error(error);
-    return;
-  }
-  
-  if (!data || data.length === 0) {
-    container.innerHTML = '<div class="empty-state"><p>No tienes equipos todavía. ¡Crea tu primer equipo!</p></div>';
-    return;
-  }
-
-  container.innerHTML = '';
-  
-  // Cargar stats para todos los equipos
-  for (const row of data) {
+// Card renderer para equipos
+class TeamCardRenderer extends CardRenderer {
+  async createCard(row) {
     const team = row.teams;
     const isHeadCoach = row.role === 'HEAD_COACH' || row.role === 'principal';
-    
-    // Obtener conteo de jugadores activos
+
+    // Obtener stats
     const { count: playersCount } = await supabase
       .from('players')
       .select('*', { count: 'exact', head: true })
       .eq('team_id', team.id)
       .eq('active', true);
-    
-    // Obtener conteo de entrenamientos (tabla correcta: team_training_sessions)
+
     const { count: trainingsCount } = await supabase
       .from('team_training_sessions')
       .select('*', { count: 'exact', head: true })
       .eq('team_id', team.id);
-    
-    const div = document.createElement('div');
-    div.className = 'team-card fade-in';
-    div.dataset.teamid = team.id;
-    
-    div.innerHTML = `
+
+    const card = document.createElement('div');
+    card.className = 'team-card fade-in';
+    card.dataset.teamid = team.id;
+
+    card.innerHTML = `
       <div class="team-card-header">
         <div class="team-info">
           <div class="team-name">${team.name}</div>
           <div class="team-category">${team.category || 'Sin categoría'}</div>
         </div>
-        ${isHeadCoach 
-          ? `<div class="team-menu">
-              <button class="menu-btn" data-teamid="${team.id}" data-name="${team.name}" data-category="${team.category || ''}">⋮</button>
-              <div class="menu-dropdown">
-                <button class="menu-item edit-item" data-teamid="${team.id}" data-name="${team.name}" data-category="${team.category || ''}">✏️ Editar</button>
-                <button class="menu-item delete delete-item" data-teamid="${team.id}">🗑️ Eliminar</button>
-              </div>
-            </div>` 
-          : ``}
+        ${isHeadCoach ? this.createMenuButton(team.id, team.name, team.category) : ''}
       </div>
       <div class="team-stats">
         <div class="stat-item"><strong>${playersCount || 0}</strong> ${playersCount === 1 ? 'jugador' : 'jugadores'}</div>
         <div class="stat-item"><strong>${trainingsCount || 0}</strong> ${trainingsCount === 1 ? 'entrenamiento' : 'entrenamientos'}</div>
       </div>
     `;
-    
-    container.appendChild(div);
+
+    return card;
   }
 
-  // Hacer cards clickeables (excepto el menú)
-  document.querySelectorAll('.team-card').forEach(card => {
-    card.onclick = (e) => {
-      // Si el click es en el menú o sus items, no navegar
-      if (e.target.closest('.team-menu')) return;
-      
-      const teamId = card.dataset.teamid;
-      window.location.href = `/pages/team_detail.html?team_id=${teamId}`;
-    };
-  });
+  createMenuButton(teamId, name, category) {
+    return `
+      <div class="team-menu">
+        <button class="menu-btn" data-teamid="${teamId}" data-name="${name}" data-category="${category || ''}">⋮</button>
+        <div class="menu-dropdown">
+          <button class="menu-item edit-item" data-teamid="${teamId}" data-name="${name}" data-category="${category || ''}">✏️ Editar</button>
+          <button class="menu-item delete delete-item" data-teamid="${teamId}">🗑️ Eliminar</button>
+        </div>
+      </div>
+    `;
+  }
 
-  // Manejadores para el menú de tres puntos
-  document.querySelectorAll('.menu-btn').forEach(btn => {
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      const dropdown = btn.nextElementSibling;
-      
-      // Cerrar otros menús abiertos
-      document.querySelectorAll('.menu-dropdown.show').forEach(menu => {
-        if (menu !== dropdown) menu.classList.remove('show');
-      });
-      
-      dropdown.classList.toggle('show');
-    };
-  });
+  async render(emptyMessage = 'No tienes equipos todavía. ¡Crea tu primer equipo!') {
+    const container = document.getElementById(this.containerId);
 
-  // Editar equipo
-  document.querySelectorAll('.edit-item').forEach(btn => {
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      const teamId = btn.getAttribute('data-teamid');
-      const teamName = btn.getAttribute('data-name');
-      const teamCategory = btn.getAttribute('data-category');
-      openModal('edit', teamId, teamName, teamCategory);
-      // Cerrar dropdown
-      btn.closest('.menu-dropdown').classList.remove('show');
-    };
-  });
+    if (!container) {
+      console.error('Container not found:', this.containerId);
+      return;
+    }
 
-  // Eliminar equipo
-  document.querySelectorAll('.delete-item').forEach(btn => {
-    btn.onclick = async (e) => {
-      e.stopPropagation();
-      const teamId = btn.getAttribute('data-teamid');
-      
-      if (!confirm('¿Eliminar equipo? Esta acción eliminará todos los datos relacionados (jugadores, entrenamientos, eventos, etc.). ¿Estás seguro?')) return;
-      
-      const { error } = await supabase.from('teams').delete().eq('id', teamId);
-      if (error) return alert('Error al eliminar: ' + error.message);
-      alert('Equipo eliminado correctamente');
-      loadTeams();
-      
-      // Cerrar dropdown
-      btn.closest('.menu-dropdown').classList.remove('show');
-    };
-  });
-}
+    if (this.items.length === 0) {
+      container.innerHTML = `<div class="empty-state"><p>${emptyMessage}</p></div>`;
+      return;
+    }
 
-// Cerrar dropdowns al hacer clic fuera
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('.team-menu')) {
-    document.querySelectorAll('.menu-dropdown.show').forEach(menu => {
-      menu.classList.remove('show');
+    container.innerHTML = '';
+
+    // Renderizar cards con stats
+    for (const row of this.items) {
+      const card = await this.createCard(row);
+      container.appendChild(card);
+    }
+
+    this.attachCardHandlers();
+    this.attachMenuHandlers();
+  }
+
+  attachCardHandlers() {
+    // Hacer cards clickeables (excepto el menú)
+    document.querySelectorAll('.team-card').forEach(card => {
+      card.onclick = (e) => {
+        if (e.target.closest('.team-menu')) return;
+        const teamId = card.dataset.teamid;
+        window.location.href = `/pages/team_detail.html?team_id=${teamId}`;
+      };
     });
   }
-});
 
-// ============================================
-// MODAL PARA CREAR/EDITAR EQUIPO
-// ============================================
+  attachMenuHandlers() {
+    // Menu buttons
+    document.querySelectorAll('.menu-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const dropdown = btn.nextElementSibling;
+        document.querySelectorAll('.menu-dropdown.show').forEach(menu => {
+          if (menu !== dropdown) menu.classList.remove('show');
+        });
+        dropdown.classList.toggle('show');
+      };
+    });
 
-let currentEditTeamId = null;
-let currentMode = 'create'; // 'create' o 'edit'
+    // Edit buttons
+    if (this.editCallback) {
+      document.querySelectorAll('.edit-item').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const team = {
+            id: btn.getAttribute('data-teamid'),
+            name: btn.getAttribute('data-name'),
+            category: btn.getAttribute('data-category')
+          };
+          this.editCallback(team);
+          btn.closest('.menu-dropdown').classList.remove('show');
+        };
+      });
+    }
 
-const modal = document.getElementById('teamModal');
-const modalTitle = document.getElementById('modalTitle');
-const teamNameInput = document.getElementById('teamName');
-const teamCategoryInput = document.getElementById('teamCategory');
-const saveBtn = document.getElementById('saveTeamBtn');
-const closeBtn = document.getElementById('closeModalBtn');
-const cancelBtn = document.getElementById('cancelModalBtn');
-const fabBtn = document.getElementById('fabBtn');
+    // Delete buttons
+    if (this.deleteCallback) {
+      document.querySelectorAll('.delete-item').forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          const teamId = btn.getAttribute('data-teamid');
+          this.deleteCallback(teamId);
+          btn.closest('.menu-dropdown').classList.remove('show');
+        };
+      });
+    }
 
-// Abrir modal
-function openModal(mode = 'create', teamId = null, name = '', category = '') {
-  currentMode = mode;
-  currentEditTeamId = teamId;
-  
-  if (mode === 'create') {
-    modalTitle.textContent = 'Crear nuevo equipo';
-    teamNameInput.value = '';
-    teamCategoryInput.value = '';
-  } else {
-    modalTitle.textContent = 'Editar equipo';
-    teamNameInput.value = name;
-    teamCategoryInput.value = category;
+    // Cerrar dropdowns al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.team-menu')) {
+        document.querySelectorAll('.menu-dropdown.show').forEach(menu => {
+          menu.classList.remove('show');
+        });
+      }
+    });
   }
-  
-  modal.classList.add('show');
-  modal.style.display = 'flex';
-  teamNameInput.focus();
 }
 
-// Cerrar modal
-function closeModal() {
-  modal.classList.remove('show');
-  setTimeout(() => {
-    modal.style.display = 'none';
-  }, 200);
-  currentEditTeamId = null;
+const cardRenderer = new TeamCardRenderer('teamsContainer');
+
+// Cargar equipos
+async function loadTeams() {
+  const container = document.getElementById('teamsContainer');
+  container.innerText = 'Cargando equipos...';
+
+  try {
+    const { data, error } = await supabase
+      .from('team_staff')
+      .select('team_id, role, teams(id,name,category)')
+      .eq('user_id', user.id)
+      .eq('active', true);
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      cardRenderer.setItems([]);
+      await cardRenderer.render();
+      return;
+    }
+
+    cardRenderer.setItems(data);
+    await cardRenderer.render();
+  } catch (error) {
+    container.innerText = 'Error al cargar: ' + error.message;
+    console.error(error);
+  }
 }
 
-// FAB - Abrir modal para crear
-fabBtn.onclick = () => openModal('create');
+// Abrir modal para crear
+function openCreateModal() {
+  modal.open('create', 'Crear nuevo equipo');
+  clearForm(['teamName', 'teamCategory']);
+}
 
-// Cerrar modal
-closeBtn.onclick = closeModal;
-cancelBtn.onclick = closeModal;
-
-// Cerrar al hacer clic fuera
-modal.onclick = (e) => {
-  if (e.target === modal) closeModal();
-};
-
-// Cerrar con ESC
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && modal.style.display === 'flex') {
-    closeModal();
-  }
-});
-
-// Guardar (crear o editar)
-saveBtn.onclick = async () => {
-  const name = teamNameInput.value.trim();
-  const category = teamCategoryInput.value.trim();
-  
-  if (!name) return alert('El nombre del equipo es obligatorio');
-
-  if (currentMode === 'create') {
-    await createTeam(name, category);
-  } else {
-    await updateTeam(currentEditTeamId, name, category);
-  }
-};
+// Abrir modal para editar
+function openEditModal(team) {
+  modal.open('edit', 'Editar equipo');
+  document.getElementById('teamName').value = team.name;
+  document.getElementById('teamCategory').value = team.category || '';
+  modal.currentEditId = team.id;
+}
 
 // Crear equipo
 async function createTeam(name, category) {
@@ -255,10 +220,7 @@ async function createTeam(name, category) {
 
     if (teamError) throw teamError;
 
-    console.log('Equipo creado:', newTeam);
-
-    // 2. El trigger automáticamente añade al creador como staff
-    // Esperar y hacer múltiples intentos para obtener el registro de staff
+    // 2. Esperar a que el trigger cree el staff
     let staffData = null;
     let attempts = 0;
     const maxAttempts = 5;
@@ -275,12 +237,10 @@ async function createTeam(name, category) {
 
       if (data) {
         staffData = data;
-        console.log('Staff encontrado:', staffData);
         break;
       }
       
       attempts++;
-      console.log(`Intento ${attempts}/${maxAttempts} - Esperando a que el trigger cree el staff...`);
     }
 
     if (!staffData) {
@@ -299,17 +259,12 @@ async function createTeam(name, category) {
     ];
 
     // Verificar qué permisos ya existen
-    const { data: existingPerms, error: checkError } = await supabase
+    const { data: existingPerms } = await supabase
       .from('team_staff_permissions')
       .select('permission')
       .eq('team_staff_id', staffData.id);
 
-    if (checkError) {
-      console.error('Error verificando permisos existentes:', checkError);
-    }
-
     const existingPermissions = existingPerms ? existingPerms.map(p => p.permission) : [];
-    console.log('Permisos existentes:', existingPermissions);
 
     // Solo insertar los permisos que NO existen
     const permissionsToInsert = allPermissions
@@ -320,54 +275,35 @@ async function createTeam(name, category) {
         value: true
       }));
 
-    if (permissionsToInsert.length === 0) {
-      console.log('Todos los permisos ya existen');
-      alert('¡Equipo creado con éxito!');
-      closeModal();
-      loadTeams();
-      return;
-    }
+    if (permissionsToInsert.length > 0) {
+      const { error: permError } = await supabase
+        .from('team_staff_permissions')
+        .insert(permissionsToInsert);
 
-    console.log('Insertando permisos:', permissionsToInsert);
-
-    const { data: insertedPerms, error: permError } = await supabase
-      .from('team_staff_permissions')
-      .insert(permissionsToInsert)
-      .select();
-
-    if (permError) {
-      console.error('Error creando permisos - Detalles:', permError);
-      console.error('team_staff_id:', staffData.id);
-      console.error('Permisos a insertar:', permissionsToInsert);
-      
-      // Intentar insertar permisos uno por uno para identificar cuál falla
-      console.log('Intentando inserción individual de permisos...');
-      let successCount = 0;
-      for (const perm of permissionsToInsert) {
-        const { error: singleError } = await supabase
-          .from('team_staff_permissions')
-          .insert(perm);
-        
-        if (singleError) {
-          console.error(`Error insertando permiso ${perm.permission}:`, singleError);
-        } else {
-          successCount++;
+      if (permError) {
+        console.error('Error creando permisos:', permError);
+        // Intentar inserción individual si falla
+        let successCount = 0;
+        for (const perm of permissionsToInsert) {
+          const { error: singleError } = await supabase
+            .from('team_staff_permissions')
+            .insert(perm);
+          
+          if (!singleError) successCount++;
         }
+        
+        if (successCount > 0) {
+          alert(`¡Equipo creado! (${successCount}/${allPermissions.length} permisos asignados)`);
+        } else {
+          alert('Equipo creado, pero hubo un problema al asignar permisos.');
+        }
+        return;
       }
-      
-      if (successCount > 0) {
-        console.log(`Se insertaron ${successCount}/${allPermissions.length} permisos`);
-        alert(`¡Equipo creado! (${successCount}/${allPermissions.length} permisos asignados)`);
-      } else {
-        alert('Equipo creado, pero hubo un problema al asignar permisos. Por favor, verifica los permisos manualmente.');
-      }
-    } else {
-      console.log('Permisos asignados correctamente:', insertedPerms);
-      alert('¡Equipo creado con éxito!');
     }
 
-    closeModal();
-    loadTeams();
+    alert('¡Equipo creado con éxito!');
+    modal.close();
+    await loadTeams();
 
   } catch (error) {
     console.error('Error creando equipo:', error);
@@ -377,32 +313,90 @@ async function createTeam(name, category) {
 
 // Actualizar equipo
 async function updateTeam(teamId, name, category) {
-  const { error } = await supabase
-    .from('teams')
-    .update({ 
-      name: name, 
-      category: category || null 
-    })
-    .eq('id', teamId);
-  
-  if (error) {
+  try {
+    const { error } = await supabase
+      .from('teams')
+      .update({ 
+        name: name, 
+        category: category || null 
+      })
+      .eq('id', teamId);
+    
+    if (error) throw error;
+    
+    alert('Equipo actualizado correctamente');
+    modal.close();
+    await loadTeams();
+  } catch (error) {
     console.error('Error actualizando equipo:', error);
-    return alert('Error al actualizar: ' + error.message);
+    alert('Error al actualizar: ' + error.message);
   }
-  
-  alert('Equipo actualizado correctamente');
-  closeModal();
-  loadTeams();
 }
 
-// Cargar inicial
-loadTeams();
-
-// Recargar equipos cuando la página se vuelve visible
-// (útil cuando vuelves de añadir jugadores o entrenamientos)
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) {
-    console.log('Página visible - recargando equipos...');
-    loadTeams();
+// Eliminar equipo
+async function deleteTeam(teamId) {
+  if (!confirm('¿Eliminar equipo? Esta acción eliminará todos los datos relacionados (jugadores, entrenamientos, eventos, etc.). ¿Estás seguro?')) {
+    return;
   }
-});
+
+  try {
+    const { error } = await supabase.from('teams').delete().eq('id', teamId);
+    if (error) throw error;
+    
+    alert('Equipo eliminado correctamente');
+    await loadTeams();
+  } catch (error) {
+    console.error('Error eliminando equipo:', error);
+    alert('Error al eliminar: ' + error.message);
+  }
+}
+
+// Guardar (crear o editar)
+async function saveTeam() {
+  const name = getFormValue('teamName', 'trim');
+  const category = getFormValue('teamCategory', 'trim');
+
+  // Validar
+  validator.reset();
+  validator.required(name, 'Nombre del equipo');
+
+  if (!validator.isValid()) {
+    validator.showErrors();
+    return;
+  }
+
+  if (modal.mode === 'edit') {
+    await updateTeam(modal.currentEditId, name, category);
+  } else {
+    await createTeam(name, category);
+  }
+}
+
+// Inicializar cuando el DOM esté listo
+async function init() {
+  const fabBtn = document.getElementById('fabBtn');
+  if (fabBtn) {
+    fabBtn.onclick = openCreateModal;
+  }
+
+  // Configurar callbacks
+  modal.onSave = saveTeam;
+  cardRenderer.onEdit(openEditModal);
+  cardRenderer.onDelete(deleteTeam);
+
+  // Cargar inicial
+  await loadTeams();
+
+  // Recargar equipos cuando la página se vuelve visible
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      loadTeams();
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

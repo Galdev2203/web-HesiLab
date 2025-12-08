@@ -1,29 +1,16 @@
 // events.js - Gestión de eventos del equipo
-import { supabase } from '../js/supabaseClient.js';
-import { initHeader } from '../js/headerComponent.js';
-import { 
-  initPermissions, 
-  hasPermission, 
-  getUserRole,
-  getRoleLabel 
-} from '../js/permissionsHelper.js';
+import { supabase } from './supabaseClient.js';
+import { initHeader } from './headerComponent.js';
+import { initPermissions, hasPermission, getUserRole, getRoleLabel } from './permissionsHelper.js';
+import { ModalManager } from './utils/modalManager.js';
+import { CardRenderer } from './utils/cardRenderer.js';
+import { FormValidator, getFormValue, setFormValue, clearForm } from './utils/formValidator.js';
+import { requireSession, requireTeamId, loadData, insertData, updateData, deleteData } from './utils/supabaseHelpers.js';
+import { escapeHtml, showError, hideError, formatDate } from './utils/domHelpers.js';
 
-// Validar sesión
-const { data: sessionData } = await supabase.auth.getSession();
-if (!sessionData.session) {
-  window.location.href = '/pages/index.html';
-  throw new Error('No session');
-}
-
-// Obtener team_id
-const params = new URLSearchParams(window.location.search);
-const teamId = params.get('team_id');
-
-if (!teamId) {
-  alert('Error: falta team_id');
-  window.location.href = '/pages/teams.html';
-  throw new Error('Missing team_id');
-}
+// Validar sesión y obtener team_id
+await requireSession();
+const teamId = requireTeamId();
 
 // Inicializar header
 await initHeader({
@@ -34,23 +21,14 @@ await initHeader({
 
 // Inicializar permisos
 await initPermissions();
-
-// Verificar permisos
 const canManage = await hasPermission(teamId, 'MANAGE_EVENTS');
 const userRole = await getUserRole(teamId);
 
 if (!canManage) {
-  document.getElementById('errorMsg').style.display = 'block';
-  document.getElementById('errorMsg').innerText = `No tienes permiso para gestionar eventos. Tu rol: ${getRoleLabel(userRole)}`;
-  const formBox = document.getElementById('formBox');
-  if (formBox) formBox.style.display = 'none';
+  showError(`No tienes permiso para gestionar eventos. Tu rol: ${getRoleLabel(userRole)}`);
 }
 
-// Estado
-let editingId = null;
-let currentMode = 'create';
-let allEvents = [];
-
+// Tipos de eventos
 const EVENT_TYPES = {
   'MATCH': '⚽ Partido oficial',
   'FRIENDLY': '🤝 Amistoso',
@@ -60,229 +38,163 @@ const EVENT_TYPES = {
   'OTHER': '📌 Otro'
 };
 
-// Elementos del modal
-const modal = document.getElementById('eventModal');
-const modalTitle = document.getElementById('modalTitle');
-const fabBtn = document.getElementById('fabBtn');
-const closeBtn = document.getElementById('closeModalBtn');
-const cancelBtn = document.getElementById('cancelModalBtn');
-const saveBtn = document.getElementById('saveBtn');
+// Estado
+let allEvents = [];
 
-/**
- * Cargar eventos
- */
-async function loadEvents() {
-  const container = document.getElementById('eventsList');
-  container.innerHTML = '<div class="loading">Cargando eventos...</div>';
+// Modal manager
+const modal = new ModalManager('eventModal');
+const validator = new FormValidator();
 
-  try {
-    const { data, error } = await supabase
-      .from('team_events')
-      .select('*')
-      .eq('team_id', teamId)
-      .order('event_date', { ascending: false })
-      .order('start_time', { ascending: true });
+// Card renderer para eventos
+class EventCardRenderer extends CardRenderer {
+  createCard(event) {
+    const card = document.createElement('div');
+    card.className = 'item-card fade-in';
 
-    if (error) throw error;
+    const eventDate = new Date(event.event_date);
+    const dateFormatted = eventDate.toLocaleDateString('es-ES', { 
+      weekday: 'short', 
+      day: 'numeric', 
+      month: 'short',
+      year: 'numeric'
+    });
 
-    allEvents = data || [];
-    renderEvents();
-  } catch (error) {
-    container.innerHTML = `<div class="error-state">Error: ${error.message}</div>`;
-    console.error('Error loading events:', error);
-  }
-}
+    let timeStr = '';
+    if (event.start_time) {
+      const start = event.start_time.substring(0, 5);
+      const end = event.end_time ? event.end_time.substring(0, 5) : null;
+      timeStr = end ? `${start} - ${end}` : start;
+    }
 
-/**
- * Renderizar eventos
- */
-function renderEvents() {
-  const container = document.getElementById('eventsList');
-  const typeFilter = document.getElementById('typeFilter').value;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const isPast = eventDate < today;
 
-  let filteredEvents = allEvents;
-  if (typeFilter) {
-    filteredEvents = allEvents.filter(e => e.type === typeFilter);
-  }
-
-  if (filteredEvents.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📅</div>
-        <p>${typeFilter ? 'No hay eventos de este tipo' : 'Aún no hay eventos programados'}</p>
-        ${!typeFilter ? '<p class="empty-hint">Usa el formulario de abajo para añadir eventos</p>' : ''}
+    card.innerHTML = `
+      <div class="item-card-header">
+        <div class="item-info">
+          <div class="item-title">${EVENT_TYPES[event.type] || event.type} ${event.title ? `- ${escapeHtml(event.title)}` : ''}</div>
+          <div class="item-subtitle">${dateFormatted}${timeStr ? ` • ${timeStr}` : ''}</div>
+        </div>
+        ${this.createMenuButton(event.id)}
       </div>
+      ${event.location || event.notes ? `
+        <div class="item-meta">
+          ${event.location ? `<div class="item-meta-row">📍 ${escapeHtml(event.location)}</div>` : ''}
+          ${event.notes ? `<div class="item-meta-row">${escapeHtml(event.notes)}</div>` : ''}
+        </div>
+      ` : ''}
+      ${isPast ? '<div class="item-badge">Pasado</div>' : ''}
     `;
-    return;
+
+    return card;
   }
 
-  container.innerHTML = '';
-  
-  // Agrupar por mes
-  const byMonth = {};
-  filteredEvents.forEach(event => {
-    const date = new Date(event.event_date);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    if (!byMonth[monthKey]) byMonth[monthKey] = [];
-    byMonth[monthKey].push(event);
-  });
+  render(emptyMessage = 'Aún no hay eventos programados') {
+    const container = document.getElementById(this.containerId);
+    
+    if (!container) {
+      console.error('Container not found:', this.containerId);
+      return;
+    }
 
-  // Renderizar por mes
-  Object.keys(byMonth).sort().reverse().forEach(monthKey => {
-    const [year, month] = monthKey.split('-');
-    const monthName = new Date(year, parseInt(month) - 1, 1).toLocaleDateString('es-ES', { 
-      month: 'long', 
-      year: 'numeric' 
+    const typeFilterEl = document.getElementById('typeFilter');
+    const typeFilter = typeFilterEl ? typeFilterEl.value : '';
+    let filteredEvents = this.items;
+    
+    if (typeFilter) {
+      filteredEvents = this.items.filter(e => e.type === typeFilter);
+    }
+    
+    if (filteredEvents.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📅</div>
+          <p>${typeFilter ? 'No hay eventos de este tipo' : emptyMessage}</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = '';
+
+    // Renderizar eventos
+    filteredEvents.forEach(event => {
+      const card = this.createCard(event);
+      container.appendChild(card);
     });
-    
-    const monthSection = document.createElement('div');
-    monthSection.className = 'events-month-section';
-    
-    const monthHeader = document.createElement('h3');
-    monthHeader.className = 'events-month-header';
-    monthHeader.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-    monthSection.appendChild(monthHeader);
-    
-    const eventsGrid = document.createElement('div');
-    eventsGrid.className = 'events-grid';
-    
-    byMonth[monthKey].forEach(event => {
-      const card = createEventCard(event);
-      eventsGrid.appendChild(card);
-    });
-    
-    monthSection.appendChild(eventsGrid);
-    container.appendChild(monthSection);
-  });
-}
 
-/**
- * Crear card de evento
- */
-function createEventCard(event) {
-  const card = document.createElement('div');
-  card.className = 'event-card fade-in';
-
-  const eventDate = new Date(event.event_date);
-  const dayOfWeek = eventDate.toLocaleDateString('es-ES', { weekday: 'short' });
-  const day = eventDate.getDate();
-  const month = eventDate.toLocaleDateString('es-ES', { month: 'short' });
-
-  let timeStr = '';
-  if (event.start_time) {
-    const start = event.start_time.substring(0, 5);
-    const end = event.end_time ? event.end_time.substring(0, 5) : null;
-    timeStr = end ? `${start} - ${end}` : start;
+    this.attachMenuHandlers();
+    this.attachCallbacks();
   }
+}
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const isPast = eventDate < today;
+const cardRenderer = new EventCardRenderer('eventsList');
+cardRenderer.setCanManage(canManage);
 
-  card.innerHTML = `
-    <div class="event-date ${isPast ? 'event-past' : ''}">
-      <div class="event-day">${day}</div>
-      <div class="event-month">${month}</div>
-      <div class="event-weekday">${dayOfWeek}</div>
-    </div>
-    <div class="event-content">
-      <div class="event-type">${EVENT_TYPES[event.type] || event.type}</div>
-      ${event.title ? `<div class="event-title">${escapeHtml(event.title)}</div>` : ''}
-      ${timeStr ? `<div class="event-time">🕐 ${timeStr}</div>` : ''}
-      ${event.location ? `<div class="event-location">📍 ${escapeHtml(event.location)}</div>` : ''}
-      ${event.notes ? `<div class="event-notes">${escapeHtml(event.notes)}</div>` : ''}
-    </div>
-    <div class="event-actions" id="actions-${event.id}"></div>
-  `;
+// Cargar eventos
+async function loadEvents() {
+  const query = supabase
+    .from('team_events')
+    .select('*')
+    .eq('team_id', teamId)
+    .order('event_date', { ascending: false })
+    .order('start_time', { ascending: true });
 
-  if (canManage) {
-    const actionsContainer = card.querySelector(`#actions-${event.id}`);
-    
-    const editBtn = document.createElement('button');
-    editBtn.className = 'btn btn-outline btn-sm';
-    editBtn.textContent = '✏️';
-    editBtn.onclick = () => openEditForm(event);
-    actionsContainer.appendChild(editBtn);
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'btn btn-danger btn-sm';
-    deleteBtn.textContent = '🗑️';
-    deleteBtn.onclick = () => deleteEvent(event.id);
-    actionsContainer.appendChild(deleteBtn);
+  const events = await loadData(query, 'Error al cargar eventos');
+  if (events) {
+    allEvents = events;
+    cardRenderer.setItems(events);
+    cardRenderer.render();
   }
-
-  return card;
 }
 
-/**
- * Abrir formulario para editar
- */
-function openEditForm(event) {
-  editingId = event.id;
-  document.getElementById('formTitle').textContent = 'Editar evento';
-  document.getElementById('eventType').value = event.type;
-  document.getElementById('eventDate').value = event.event_date;
-  document.getElementById('startTime').value = event.start_time || '';
-  document.getElementById('endTime').value = event.end_time || '';
-  document.getElementById('title').value = event.title || '';
-  document.getElementById('location').value = event.location || '';
-  document.getElementById('notes').value = event.notes || '';
-  
-  document.getElementById('cancelBtn').style.display = 'inline-block';
-  document.getElementById('saveBtn').textContent = '💾 Guardar';
-  
-  const formBox = document.getElementById('formBox');
-  if (formBox) formBox.scrollIntoView({ behavior: 'smooth' });
+// Abrir modal para crear
+function openCreateModal() {
+  modal.open('create', 'Añadir evento');
+  modal.currentEditId = null;
+  clearForm(['eventType', 'eventDate', 'startTime', 'endTime', 'title', 'location', 'notes']);
 }
 
-/**
- * Resetear formulario
- */
-function resetForm() {
-  editingId = null;
-  document.getElementById('formTitle').textContent = 'Añadir evento';
-  document.getElementById('eventType').value = '';
-  document.getElementById('eventDate').value = '';
-  document.getElementById('startTime').value = '';
-  document.getElementById('endTime').value = '';
-  document.getElementById('title').value = '';
-  document.getElementById('location').value = '';
-  document.getElementById('notes').value = '';
-  document.getElementById('cancelBtn').style.display = 'none';
-  document.getElementById('saveBtn').textContent = '➕ Añadir';
+// Abrir modal para editar
+function openEditModal(event) {
+  modal.open('edit', 'Editar evento');
+  modal.currentEditId = event.id;
+  setFormValue('eventType', event.type);
+  setFormValue('eventDate', event.event_date);
+  setFormValue('startTime', event.start_time || '');
+  setFormValue('endTime', event.end_time || '');
+  setFormValue('title', event.title || '');
+  setFormValue('location', event.location || '');
+  setFormValue('notes', event.notes || '');
 }
 
-/**
- * Guardar evento
- */
-async function saveEvent(e) {
-  e.preventDefault();
-
+// Guardar evento
+async function saveEvent() {
   if (!canManage) {
     alert('No tienes permiso para gestionar eventos');
     return;
   }
 
-  const type = document.getElementById('eventType').value;
-  const eventDate = document.getElementById('eventDate').value;
-  const startTime = document.getElementById('startTime').value || null;
-  const endTime = document.getElementById('endTime').value || null;
-  const title = document.getElementById('title').value.trim();
-  const location = document.getElementById('location').value.trim();
-  const notes = document.getElementById('notes').value.trim();
+  const type = getFormValue('eventType');
+  const eventDate = getFormValue('eventDate');
+  const startTime = getFormValue('startTime') || null;
+  const endTime = getFormValue('endTime') || null;
+  const title = getFormValue('title', 'trim');
+  const location = getFormValue('location', 'trim');
+  const notes = getFormValue('notes', 'trim');
 
-  if (!type) {
-    alert('Selecciona un tipo de evento');
-    return;
+  // Validar
+  validator.reset();
+  validator.required(type, 'Tipo de evento');
+  validator.required(eventDate, 'Fecha del evento');
+  
+  if (startTime && endTime) {
+    validator.timeRange(startTime, endTime);
   }
 
-  if (!eventDate) {
-    alert('Indica la fecha del evento');
-    return;
-  }
-
-  if (startTime && endTime && startTime >= endTime) {
-    alert('La hora de inicio debe ser anterior a la hora de fin');
+  if (!validator.isValid()) {
+    validator.showErrors();
     return;
   }
 
@@ -297,120 +209,60 @@ async function saveEvent(e) {
     notes: notes || null
   };
 
-  try {
-    if (editingId) {
-      const { error } = await supabase
-        .from('team_events')
-        .update(eventData)
-        .eq('id', editingId);
-      if (error) throw error;
-    } else {
-      const { error } = await supabase
-        .from('team_events')
-        .insert(eventData);
-      if (error) throw error;
-    }
+  let result;
+  if (modal.mode === 'edit') {
+    result = await updateData('team_events', modal.currentEditId, eventData, 'Evento actualizado');
+  } else {
+    result = await insertData('team_events', eventData, 'Evento creado');
+  }
 
-    resetForm();
+  if (result.success) {
+    modal.close();
     await loadEvents();
-  } catch (error) {
-    console.error('Error saving event:', error);
-    alert(`Error: ${error.message}`);
   }
 }
 
-/**
- * Eliminar evento
- */
+// Eliminar evento
 async function deleteEvent(eventId) {
   if (!confirm('¿Eliminar este evento?')) return;
 
-  try {
-    const { error } = await supabase
-      .from('team_events')
-      .delete()
-      .eq('id', eventId);
-
-    if (error) throw error;
+  const result = await deleteData('team_events', eventId, 'Evento eliminado');
+  if (result.success) {
     await loadEvents();
-  } catch (error) {
-    console.error('Error deleting event:', error);
-    alert(`Error: ${error.message}`);
   }
 }
 
-/**
- * Helpers
- */
-function escapeHtml(text) {
-  if (!text) return '';
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
+// Event listeners - Esperar a que el DOM esté listo
+async function init() {
+  const fabBtn = document.getElementById('fabBtn');
+  const typeFilter = document.getElementById('typeFilter');
+  const refreshBtn = document.getElementById('refreshBtn');
 
-/**
- * Abrir modal
- */
-function openModal(mode = 'create', event = null) {
-  currentMode = mode;
-  editingId = event ? event.id : null;
-  
-  if (mode === 'create') {
-    modalTitle.textContent = 'Añadir evento';
-    document.getElementById('eventType').value = '';
-    document.getElementById('eventDate').value = '';
-    document.getElementById('startTime').value = '';
-    document.getElementById('endTime').value = '';
-    document.getElementById('title').value = '';
-    document.getElementById('location').value = '';
-    document.getElementById('notes').value = '';
-  } else {
-    modalTitle.textContent = 'Editar evento';
-    document.getElementById('eventType').value = event.type;
-    document.getElementById('eventDate').value = event.event_date;
-    document.getElementById('startTime').value = event.start_time || '';
-    document.getElementById('endTime').value = event.end_time || '';
-    document.getElementById('title').value = event.title || '';
-    document.getElementById('location').value = event.location || '';
-    document.getElementById('notes').value = event.notes || '';
+  if (fabBtn) {
+    fabBtn.onclick = openCreateModal;
+    fabBtn.style.display = canManage ? 'flex' : 'none';
   }
   
-  modal.classList.add('show');
-  modal.style.display = 'flex';
-}
-
-/**
- * Cerrar modal
- */
-function closeModal() {
-  modal.classList.remove('show');
-  setTimeout(() => {
-    modal.style.display = 'none';
-  }, 200);
-  editingId = null;
-}
-
-// Event listeners
-fabBtn.onclick = () => openModal('create');
-closeBtn.onclick = closeModal;
-cancelBtn.onclick = closeModal;
-saveBtn.addEventListener('click', saveEvent);
-
-// Cerrar modal al hacer clic fuera
-modal.onclick = (e) => {
-  if (e.target === modal) closeModal();
-};
-
-// Cerrar con ESC
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && modal.style.display === 'flex') {
-    closeModal();
+  if (typeFilter) {
+    typeFilter.addEventListener('change', () => cardRenderer.render());
   }
-});
+  
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', loadEvents);
+  }
 
-document.getElementById('typeFilter')?.addEventListener('change', renderEvents);
-document.getElementById('refreshBtn')?.addEventListener('click', loadEvents);
+  // Configurar modal callbacks
+  modal.onSave = saveEvent;
+  cardRenderer.onEdit(openEditModal);
+  cardRenderer.onDelete(deleteEvent);
 
-// Cargar inicial
-loadEvents();
+  // Cargar inicial
+  await loadEvents();
+}
+
+// Inicializar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
