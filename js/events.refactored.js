@@ -52,12 +52,15 @@ const validator = new FormValidator();
 class EventCardRenderer extends CardRenderer {
   createCard(event) {
     const card = document.createElement('div');
-    card.className = 'event-card fade-in';
+    card.className = 'item-card fade-in';
 
     const eventDate = new Date(event.event_date);
-    const dayOfWeek = eventDate.toLocaleDateString('es-ES', { weekday: 'short' });
-    const day = eventDate.getDate();
-    const month = eventDate.toLocaleDateString('es-ES', { month: 'short' });
+    const dateFormatted = eventDate.toLocaleDateString('es-ES', { 
+      weekday: 'short', 
+      day: 'numeric', 
+      month: 'short',
+      year: 'numeric'
+    });
 
     let timeStr = '';
     if (event.start_time) {
@@ -71,24 +74,20 @@ class EventCardRenderer extends CardRenderer {
     const isPast = eventDate < today;
 
     card.innerHTML = `
-      <div class="event-date ${isPast ? 'event-past' : ''}">
-        <div class="event-day">${day}</div>
-        <div class="event-month">${month}</div>
-        <div class="event-weekday">${dayOfWeek}</div>
+      <div class="item-card-header">
+        <div class="item-info">
+          <div class="item-title">${EVENT_TYPES[event.type] || event.type} ${event.title ? `- ${escapeHtml(event.title)}` : ''}</div>
+          <div class="item-subtitle">${dateFormatted}${timeStr ? ` • ${timeStr}` : ''}</div>
+        </div>
+        ${this.createMenuButton(event.id)}
       </div>
-      <div class="event-content">
-        <div class="event-type">${EVENT_TYPES[event.type] || event.type}</div>
-        ${event.title ? `<div class="event-title">${escapeHtml(event.title)}</div>` : ''}
-        ${timeStr ? `<div class="event-time">🕐 ${timeStr}</div>` : ''}
-        ${event.location ? `<div class="event-location">📍 ${escapeHtml(event.location)}</div>` : ''}
-        ${event.notes ? `<div class="event-notes">${escapeHtml(event.notes)}</div>` : ''}
-      </div>
-      <div class="event-actions">
-        ${this.canManage ? `
-          <button class="btn btn-outline btn-sm edit-btn" data-id="${event.id}">✏️</button>
-          <button class="btn btn-danger btn-sm delete-btn" data-id="${event.id}">🗑️</button>
-        ` : ''}
-      </div>
+      ${event.location || event.notes ? `
+        <div class="item-meta">
+          ${event.location ? `<div class="item-meta-row">📍 ${escapeHtml(event.location)}</div>` : ''}
+          ${event.notes ? `<div class="item-meta-row">${escapeHtml(event.notes)}</div>` : ''}
+        </div>
+      ` : ''}
+      ${isPast ? '<div class="item-badge">Pasado</div>' : ''}
     `;
 
     return card;
@@ -120,71 +119,16 @@ class EventCardRenderer extends CardRenderer {
       return;
     }
 
-    // Agrupar por mes
-    const byMonth = {};
-    filteredEvents.forEach(event => {
-      const date = new Date(event.event_date);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      if (!byMonth[monthKey]) byMonth[monthKey] = [];
-      byMonth[monthKey].push(event);
-    });
-
     container.innerHTML = '';
 
-    // Renderizar por mes
-    Object.keys(byMonth).sort().reverse().forEach(monthKey => {
-      const [year, month] = monthKey.split('-');
-      const monthName = new Date(year, parseInt(month) - 1, 1).toLocaleDateString('es-ES', { 
-        month: 'long', 
-        year: 'numeric' 
-      });
-      
-      const monthSection = document.createElement('div');
-      monthSection.className = 'events-month-section';
-      
-      const monthHeader = document.createElement('h3');
-      monthHeader.className = 'events-month-header';
-      monthHeader.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-      monthSection.appendChild(monthHeader);
-      
-      const eventsGrid = document.createElement('div');
-      eventsGrid.className = 'events-grid';
-      
-      byMonth[monthKey].forEach(event => {
-        const card = this.createCard(event);
-        eventsGrid.appendChild(card);
-      });
-      
-      monthSection.appendChild(eventsGrid);
-      container.appendChild(monthSection);
+    // Renderizar eventos
+    filteredEvents.forEach(event => {
+      const card = this.createCard(event);
+      container.appendChild(card);
     });
 
-    this.attachEventHandlers();
-  }
-
-  attachEventHandlers() {
-    // Edit buttons
-    if (this.editCallback) {
-      document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.onclick = (e) => {
-          e.stopPropagation();
-          const id = parseInt(btn.dataset.id);
-          const event = this.items.find(ev => ev.id === id);
-          if (event) this.editCallback(event);
-        };
-      });
-    }
-
-    // Delete buttons
-    if (this.deleteCallback) {
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.onclick = (e) => {
-          e.stopPropagation();
-          const id = parseInt(btn.dataset.id);
-          this.deleteCallback(id);
-        };
-      });
-    }
+    this.attachMenuHandlers();
+    this.attachCallbacks();
   }
 }
 
@@ -211,12 +155,14 @@ async function loadEvents() {
 // Abrir modal para crear
 function openCreateModal() {
   modal.open('create', 'Añadir evento');
+  modal.currentEditId = null;
   clearForm(['eventType', 'eventDate', 'startTime', 'endTime', 'title', 'location', 'notes']);
 }
 
 // Abrir modal para editar
 function openEditModal(event) {
   modal.open('edit', 'Editar evento');
+  modal.currentEditId = event.id;
   setFormValue('eventType', event.type);
   setFormValue('eventDate', event.event_date);
   setFormValue('startTime', event.start_time || '');
@@ -268,13 +214,7 @@ async function saveEvent() {
 
   let result;
   if (modal.mode === 'edit') {
-    const eventId = allEvents.find(e => 
-      e.event_date === eventDate && 
-      e.type === type && 
-      (e.title || '') === (title || '')
-    )?.id;
-    
-    result = await updateData('team_events', eventId, eventData, 'Evento actualizado');
+    result = await updateData('team_events', modal.currentEditId, eventData, 'Evento actualizado');
   } else {
     result = await insertData('team_events', eventData, 'Evento creado');
   }
