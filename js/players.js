@@ -11,18 +11,9 @@ import {
 // Inicializar header unificado
 await initHeader({
   title: 'Jugadores',
-  backUrl: null, // Se usa history.back en el botón
+  backUrl: true, // Usa history.back()
   activeNav: null
 });
-
-// Usar history.back() para el botón de volver
-const backBtn = document.querySelector('.back-btn');
-if (backBtn) {
-  backBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    history.back();
-  });
-}
 
 // Validar sesión
 const { data: sessionData } = await supabase.auth.getSession();

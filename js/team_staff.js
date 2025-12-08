@@ -39,25 +39,16 @@ async function loadMyRole() {
   myRole = data.role;
 }
 
+// Inicializar header
+await initHeader({
+  title: 'Entrenadores',
+  backUrl: true, // Usa history.back()
+  activeNav: null
+});
+
 // Cargar staff
 async function loadStaff() {
   await loadMyRole();
-  
-  // Inicializar header
-  await initHeader({
-    title: 'Entrenadores',
-    backUrl: null, // Se usa history.back
-    activeNav: null
-  });
-  
-  // Usar history.back() para el botón de volver
-  const backBtn = document.querySelector('.back-btn');
-  if (backBtn) {
-    backBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      history.back();
-    });
-  }
 
   const container = document.getElementById("staffList");
   container.innerHTML = "Cargando...";

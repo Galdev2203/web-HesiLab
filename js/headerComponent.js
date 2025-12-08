@@ -5,7 +5,7 @@ import { supabase } from './supabaseClient.js';
  * Inicializa el header unificado con sidebar
  * @param {Object} options - Opciones de configuración
  * @param {string} options.title - Título a mostrar en el header
- * @param {string} options.backUrl - URL para el botón de volver (null para ocultar)
+ * @param {string|boolean} options.backUrl - URL para el botón de volver, true para history.back(), null/false para ocultar
  * @param {string} options.activeNav - ID del nav item activo ('dashboard', 'teams', 'profile')
  */
 export async function initHeader(options = {}) {
@@ -23,6 +23,16 @@ export async function initHeader(options = {}) {
   }
   const user = sessionData.session.user;
 
+  // Determinar el HTML del botón de volver
+  let backButtonHTML = '<div style="width: 40px;"></div>';
+  if (backUrl === true) {
+    // Usar history.back()
+    backButtonHTML = '<button class="back-btn" id="backBtn" title="Volver">←</button>';
+  } else if (backUrl) {
+    // Usar URL específica
+    backButtonHTML = `<a href="${backUrl}" class="back-btn" title="Volver">←</a>`;
+  }
+
   // Crear estructura del header
   const headerHTML = `
     <header class="unified-header">
@@ -33,7 +43,7 @@ export async function initHeader(options = {}) {
           <span></span>
         </button>
         
-        ${backUrl ? `<a href="${backUrl}" class="back-btn" title="Volver">←</a>` : '<div style="width: 40px;"></div>'}
+        ${backButtonHTML}
         
         <h1 class="header-title">${title}</h1>
 
@@ -110,6 +120,15 @@ function setupHeaderListeners(user) {
   const menuToggle = document.getElementById('menuToggle');
   const sidebar = document.getElementById('sidebar');
   const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const backBtn = document.getElementById('backBtn');
+
+  // Botón de volver con history.back()
+  if (backBtn) {
+    backBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      history.back();
+    });
+  }
 
   // Toggle del menú
   menuToggle?.addEventListener('click', () => {
