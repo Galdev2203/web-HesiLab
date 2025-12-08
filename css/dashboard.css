@@ -888,20 +888,68 @@ body {
   }
   
   .weekly-calendar {
-    grid-template-columns: repeat(7, minmax(110px, 120px));
-    gap: 8px;
+    gap: 6px;
   }
   
   .day-column {
-    min-width: 110px;
-    min-height: 140px;
-    padding: 8px;
+    min-height: 120px;
+    padding: 6px;
+    border-radius: var(--radius-md);
+  }
+  
+  .day-header {
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+  }
+  
+  .day-name {
+    font-size: 0.6rem;
+    margin-bottom: 2px;
+  }
+  
+  .day-number {
+    font-size: 1.1rem;
+  }
+  
+  .event-item {
+    padding: 4px 6px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+  }
+  
+  .event-time {
+    font-size: 0.6rem;
+    margin-bottom: 2px;
+  }
+  
+  .event-title {
+    font-size: 0.7rem;
+    line-height: 1.2;
+    margin-bottom: 2px;
+  }
+  
+  .event-team {
+    font-size: 0.6rem;
+  }
+  
+  .no-events {
+    font-size: 0.6rem;
+    padding: 8px 0;
   }
   
   .today-training-card {
     flex-direction: column;
     gap: var(--spacing-lg);
     text-align: center;
+    padding: var(--spacing-lg);
+  }
+  
+  .training-info h3 {
+    font-size: 1.25rem;
+  }
+  
+  .training-info p {
+    font-size: 0.875rem;
   }
   
   .quick-actions {
@@ -914,50 +962,86 @@ body {
 }
 
 @media (max-width: 480px) {
+  .dashboard-main {
+    padding: var(--spacing-lg) var(--spacing-sm);
+  }
+  
+  .section-header h2 {
+    font-size: 1.25rem;
+  }
+  
   .weekly-calendar {
-    grid-template-columns: repeat(7, minmax(100px, 110px));
-    gap: 6px;
-    padding-bottom: 8px;
+    gap: 4px;
   }
   
   .day-column {
-    min-width: 100px;
-    min-height: 120px;
-    padding: 6px;
+    min-height: 100px;
+    padding: 4px;
   }
   
   .day-header {
-    margin-bottom: 6px;
-    padding-bottom: 6px;
-  }
-  
-  .day-name {
-    font-size: 0.65rem;
-  }
-  
-  .day-number {
-    font-size: 1rem;
-  }
-  
-  .event-item {
-    padding: 6px;
+    padding-bottom: 4px;
     margin-bottom: 4px;
   }
   
+  .day-name {
+    font-size: 0.5rem;
+    margin-bottom: 1px;
+  }
+  
+  .day-number {
+    font-size: 0.95rem;
+  }
+  
+  .event-item {
+    padding: 3px 4px;
+    margin-bottom: 3px;
+  }
+  
   .event-time {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
+    margin-bottom: 1px;
   }
   
   .event-title {
-    font-size: 0.75rem;
+    font-size: 0.6rem;
+    line-height: 1.1;
+    margin-bottom: 1px;
   }
   
   .event-team {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
+  }
+  
+  .no-events {
+    font-size: 0.55rem;
+    padding: 6px 0;
   }
   
   #weekRange {
-    min-width: 150px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+  }
+  
+  .week-nav-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+  
+  .today-training-card {
+    padding: var(--spacing-md);
+  }
+  
+  .training-info h3 {
+    font-size: 1.1rem;
+  }
+  
+  .training-info p {
+    font-size: 0.8rem;
+  }
+  
+  .attendance-btn {
+    padding: 10px 16px;
+    font-size: 0.875rem;
   }
 }

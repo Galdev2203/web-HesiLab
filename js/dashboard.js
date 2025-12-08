@@ -182,7 +182,7 @@ async function loadWeeklyCalendar() {
   // Cargar todos los eventos de la semana
   const { data: eventsData, error: eventsError } = await supabase
     .from('team_events')
-    .select('id, team_id, title, event_date, event_time, teams(name)')
+    .select('id, team_id, title, event_date, start_time, teams(name)')
     .in('team_id', teamIds);
 
   console.log('Eventos cargados:', eventsData);
@@ -249,7 +249,7 @@ async function loadWeeklyCalendar() {
         const eventDiv = document.createElement('div');
         eventDiv.className = 'event-item event';
         eventDiv.innerHTML = `
-          <span class="event-time">📅 ${event.event_time?.substring(0, 5) || 'Todo el día'}</span>
+          <span class="event-time">📅 ${event.start_time?.substring(0, 5) || 'Todo el día'}</span>
           <span class="event-title">${event.title}</span>
           <span class="event-team">${event.teams.name}</span>
         `;
