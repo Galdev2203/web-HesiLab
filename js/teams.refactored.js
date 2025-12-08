@@ -366,20 +366,31 @@ async function saveTeam() {
   }
 }
 
-// Event listeners
-document.getElementById('fabBtn').onclick = openCreateModal;
-
-// Configurar callbacks
-modal.onSave = saveTeam;
-cardRenderer.onEdit(openEditModal);
-cardRenderer.onDelete(deleteTeam);
-
-// Cargar inicial
-loadTeams();
-
-// Recargar equipos cuando la página se vuelve visible
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) {
-    loadTeams();
+// Inicializar cuando el DOM esté listo
+async function init() {
+  const fabBtn = document.getElementById('fabBtn');
+  if (fabBtn) {
+    fabBtn.onclick = openCreateModal;
   }
-});
+
+  // Configurar callbacks
+  modal.onSave = saveTeam;
+  cardRenderer.onEdit(openEditModal);
+  cardRenderer.onDelete(deleteTeam);
+
+  // Cargar inicial
+  await loadTeams();
+
+  // Recargar equipos cuando la página se vuelve visible
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      loadTeams();
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

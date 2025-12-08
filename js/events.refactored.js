@@ -95,14 +95,20 @@ class EventCardRenderer extends CardRenderer {
   }
 
   render(emptyMessage = 'Aún no hay eventos programados') {
-    const typeFilter = document.getElementById('typeFilter').value;
+    const container = document.getElementById(this.containerId);
+    
+    if (!container) {
+      console.error('Container not found:', this.containerId);
+      return;
+    }
+
+    const typeFilterEl = document.getElementById('typeFilter');
+    const typeFilter = typeFilterEl ? typeFilterEl.value : '';
     let filteredEvents = this.items;
     
     if (typeFilter) {
       filteredEvents = this.items.filter(e => e.type === typeFilter);
     }
-
-    const container = document.getElementById(this.containerId);
     
     if (filteredEvents.length === 0) {
       container.innerHTML = `
@@ -285,18 +291,37 @@ async function deleteEvent(eventId) {
   }
 }
 
-// Event listeners
-document.getElementById('fabBtn').onclick = openCreateModal;
-document.getElementById('typeFilter')?.addEventListener('change', () => cardRenderer.render());
-document.getElementById('refreshBtn')?.addEventListener('click', loadEvents);
+// Event listeners - Esperar a que el DOM esté listo
+async function init() {
+  const fabBtn = document.getElementById('fabBtn');
+  const typeFilter = document.getElementById('typeFilter');
+  const refreshBtn = document.getElementById('refreshBtn');
 
-// Configurar modal callbacks
-modal.onSave = saveEvent;
-cardRenderer.onEdit(openEditModal);
-cardRenderer.onDelete(deleteEvent);
+  if (fabBtn) {
+    fabBtn.onclick = openCreateModal;
+    fabBtn.style.display = canManage ? 'flex' : 'none';
+  }
+  
+  if (typeFilter) {
+    typeFilter.addEventListener('change', () => cardRenderer.render());
+  }
+  
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', loadEvents);
+  }
 
-// Mostrar/ocultar FAB según permisos
-document.getElementById('fabBtn').style.display = canManage ? 'flex' : 'none';
+  // Configurar modal callbacks
+  modal.onSave = saveEvent;
+  cardRenderer.onEdit(openEditModal);
+  cardRenderer.onDelete(deleteEvent);
 
-// Cargar inicial
-loadEvents();
+  // Cargar inicial
+  await loadEvents();
+}
+
+// Inicializar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

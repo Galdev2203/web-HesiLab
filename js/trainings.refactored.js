@@ -198,14 +198,25 @@ async function handleDelete(trainingId) {
   }
 }
 
-// Configurar modal
-modal.onSave = saveTraining;
-modal.onClose = () => {
-  editingId = null;
-};
+// Inicializar cuando el DOM esté listo
+async function init() {
+  const fabBtn = document.getElementById('fabBtn');
+  if (fabBtn) {
+    fabBtn.onclick = openCreateModal;
+  }
 
-// FAB
-document.getElementById('fabBtn').onclick = openCreateModal;
+  // Configurar modal
+  modal.onSave = saveTraining;
+  modal.onClose = () => {
+    editingId = null;
+  };
 
-// Cargar inicial
-loadTrainings();
+  // Cargar inicial
+  await loadTrainings();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

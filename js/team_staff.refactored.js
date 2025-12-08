@@ -261,12 +261,23 @@ async function deleteStaff(staffId) {
   }
 }
 
-// Event listeners
-document.getElementById('fabBtn').onclick = openAddModal;
+// Inicializar cuando el DOM esté listo
+async function init() {
+  const fabBtn = document.getElementById('fabBtn');
+  if (fabBtn) {
+    fabBtn.onclick = openAddModal;
+  }
 
-// Configurar modal callbacks
-modal.onSave = addStaff;
-cardRenderer.onDelete(deleteStaff);
+  // Configurar modal callbacks
+  modal.onSave = addStaff;
+  cardRenderer.onDelete(deleteStaff);
 
-// Cargar inicial
-loadStaff();
+  // Cargar inicial
+  await loadStaff();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
