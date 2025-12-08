@@ -28,7 +28,7 @@ const canManage = await hasPermission(teamId, 'MANAGE_TRAININGS');
 const userRole = await getUserRole(teamId);
 
 if (!canManage) {
-  showError(`No tienes permiso para gestionar entrenamientos. Tu rol: ${getRoleLabel(userRole)}`);
+  console.log(`Modo solo lectura - No tienes permiso para gestionar entrenamientos. Tu rol: ${getRoleLabel(userRole)}`);
 }
 
 // Inicializar modal
@@ -89,6 +89,12 @@ async function loadTrainings() {
 
     cardRenderer.setItems(trainings);
     cardRenderer.render('Aún no hay entrenamientos configurados');
+    
+    // Ocultar FAB si no hay permisos de gestión
+    const fab = document.querySelector('.fab');
+    if (fab) {
+      fab.style.display = canManage ? 'flex' : 'none';
+    }
     
     // Configurar handlers
     cardRenderer.onEdit(openEditModal);

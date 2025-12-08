@@ -452,6 +452,19 @@ class AttendanceController {
       // Cargar/generar registros
       await this.recordsManager.loadForDate(date, this.sessionEventManager);
       this.renderer.render();
+      
+      // Ocultar controles de edición si no hay permisos
+      if (!canManage) {
+        const saveBtn = document.getElementById('saveAllBtn');
+        if (saveBtn) saveBtn.style.display = 'none';
+        
+        // Deshabilitar todos los botones de estado
+        document.querySelectorAll('.status-btn').forEach(btn => {
+          btn.disabled = true;
+          btn.style.cursor = 'not-allowed';
+          btn.style.opacity = '0.6';
+        });
+      }
 
     } catch (error) {
       console.error('Error loading attendance:', error);
@@ -527,8 +540,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userRole = await getUserRole(teamId);
 
     if (!canManage) {
-      document.getElementById('errorMsg').style.display = 'block';
-      document.getElementById('errorMsg').innerText = `No tienes permiso para gestionar asistencia. Tu rol: ${getRoleLabel(userRole)}`;
+      console.log(`Modo solo lectura - No tienes permiso para gestionar asistencia. Tu rol: ${getRoleLabel(userRole)}`);
     }
 
     // Crear controlador

@@ -25,7 +25,8 @@ const canManage = await hasPermission(teamId, 'MANAGE_PLAYERS');
 const userRole = await getUserRole(teamId);
 
 if (!canManage) {
-  showError(`No tienes permiso para gestionar jugadores. Tu rol: ${getRoleLabel(userRole)}`);
+  // Modo solo lectura
+  console.log(`Modo lectura: No tienes permiso para gestionar jugadores. Tu rol: ${getRoleLabel(userRole)}`);
 }
 
 // Estado
@@ -120,6 +121,12 @@ async function loadPlayers() {
     allPlayers = players;
     cardRenderer.setItems(players);
     cardRenderer.render();
+    
+    // Ocultar FAB si no hay permisos de gestión
+    const fab = document.querySelector('.fab');
+    if (fab) {
+      fab.style.display = canManage ? 'flex' : 'none';
+    }
   }
 }
 

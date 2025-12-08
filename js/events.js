@@ -25,7 +25,7 @@ const canManage = await hasPermission(teamId, 'MANAGE_EVENTS');
 const userRole = await getUserRole(teamId);
 
 if (!canManage) {
-  showError(`No tienes permiso para gestionar eventos. Tu rol: ${getRoleLabel(userRole)}`);
+  console.log(`Modo solo lectura - No tienes permiso para gestionar eventos. Tu rol: ${getRoleLabel(userRole)}`);
 }
 
 // Tipos de eventos
@@ -146,6 +146,12 @@ async function loadEvents() {
     allEvents = events;
     cardRenderer.setItems(events);
     cardRenderer.render();
+    
+    // Ocultar FAB si no hay permisos de gestión
+    const fab = document.querySelector('.fab');
+    if (fab) {
+      fab.style.display = canManage ? 'flex' : 'none';
+    }
   }
 }
 

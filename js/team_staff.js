@@ -147,6 +147,10 @@ async function loadStaff() {
   await loadMyRole();
   
   cardRenderer.setCanManage(canManageStaff);
+  
+  if (!canManageStaff) {
+    console.log(`Modo solo lectura - No tienes permiso para gestionar el staff.`);
+  }
 
   // Mostrar/ocultar FAB según permisos
   const fab = document.getElementById('fabBtn');
@@ -188,26 +192,21 @@ function openAddModal() {
 }
 
 // Abrir modal para editar
-async function openEditModal(staffId) {
+async function openEditModal(staff) {
   if (!canManageStaff) {
     alert('No tienes permiso para editar entrenadores');
     return;
   }
 
-  console.log('Editando staff ID:', staffId);
-  console.log('All staff:', allStaff);
-  
-  const staff = allStaff.find(s => s.id === staffId);
-  if (!staff) {
-    console.error('Staff no encontrado. ID buscado:', staffId, 'IDs disponibles:', allStaff.map(s => s.id));
+  if (!staff || !staff.id) {
     alert('Entrenador no encontrado');
     return;
   }
 
-  console.log('Staff encontrado:', staff);
+  console.log('Editando staff:', staff);
 
   modal.open('edit', 'Editar entrenador');
-  modal.currentEditId = staffId;
+  modal.currentEditId = staff.id;
   
   // Rellenar datos
   document.getElementById('emailInput').value = staff.profiles?.email || '';
@@ -218,7 +217,7 @@ async function openEditModal(staffId) {
   const { data: permissions } = await supabase
     .from('team_staff_permissions')
     .select('permission, value')
-    .eq('team_staff_id', staffId);
+    .eq('team_staff_id', staff.id);
   
   const permissionsMap = new Map((permissions || []).map(p => [p.permission, p.value]));
   
