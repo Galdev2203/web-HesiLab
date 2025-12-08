@@ -637,6 +637,170 @@ body {
   margin: 0;
 }
 
+/* Secciones Collapsables */
+.collapsible-section {
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-xl);
+  overflow: hidden;
+}
+
+.section-header-collapsible {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: linear-gradient(135deg, var(--primary-50), var(--primary-100));
+  border-bottom: 2px solid var(--primary-200);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.section-header-collapsible:hover {
+  background: linear-gradient(135deg, var(--primary-100), var(--primary-200));
+}
+
+.section-header-collapsible h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--gray-900);
+  font-weight: 700;
+}
+
+.header-actions-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.collapse-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  transition: transform 0.3s;
+}
+
+.collapse-icon {
+  font-size: 1.25rem;
+  color: var(--gray-600);
+  transition: transform 0.3s;
+}
+
+.collapsible-section.collapsed .collapse-icon {
+  transform: rotate(-90deg);
+}
+
+.section-content {
+  padding: var(--spacing-xl);
+  max-height: 2000px;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+}
+
+.collapsible-section.collapsed .section-content {
+  max-height: 0;
+  padding: 0 var(--spacing-xl);
+}
+
+/* Entrenamientos de Hoy */
+#todayTrainingsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.today-training-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg);
+  background: linear-gradient(135deg, var(--success-50), var(--success-100));
+  border-left: 4px solid var(--success-600);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+}
+
+.today-training-item:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+}
+
+.training-item-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 1;
+}
+
+.training-item-icon {
+  font-size: 2rem;
+  width: 50px;
+  height: 50px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.training-item-details {
+  flex: 1;
+}
+
+.training-item-team {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 4px;
+}
+
+.training-item-time {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.training-item-btn {
+  padding: 12px 24px;
+  background: var(--success-600);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.training-item-btn:hover {
+  background: var(--success-700);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.empty-message {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  color: var(--gray-500);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
+}
+
+.empty-message p {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
 /* Navegación de semana */
 .week-navigation {
   display: flex;

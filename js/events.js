@@ -1,5 +1,6 @@
 // events.js - Gestión de eventos del equipo
 import { supabase } from '../js/supabaseClient.js';
+import { initHeader } from '../js/headerComponent.js';
 import { 
   initPermissions, 
   hasPermission, 
@@ -14,18 +15,21 @@ if (!sessionData.session) {
   throw new Error('No session');
 }
 
-// Inicializar permisos
-await initPermissions();
-
 // Obtener team_id
 const params = new URLSearchParams(window.location.search);
 const teamId = params.get('team_id');
 
 if (!teamId) {
-  document.getElementById('errorMsg').style.display = 'block';
-  document.getElementById('errorMsg').innerText = 'Error: falta team_id';
+  alert('Error: falta team_id');
+  window.location.href = '/pages/teams.html';
   throw new Error('Missing team_id');
 }
+
+// Inicializar header
+await initHeader('📅 Eventos', true);
+
+// Inicializar permisos
+await initPermissions();
 
 // Verificar permisos
 const canManage = await hasPermission(teamId, 'MANAGE_EVENTS');

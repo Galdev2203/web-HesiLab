@@ -99,36 +99,52 @@
   <main class="dashboard-main">
     <div class="container">
       
-      <!-- Calendario Semanal -->
-      <div class="section-header">
-        <h2>Mi Semana</h2>
-        <div class="week-navigation">
-          <button id="prevWeek" class="week-btn">←</button>
-          <span id="weekRange">Cargando...</span>
-          <button id="nextWeek" class="week-btn">→</button>
+      <!-- Sección HOY -->
+      <div class="collapsible-section">
+        <div class="section-header-collapsible" id="todayHeader">
+          <h2>📅 Hoy</h2>
+          <button class="collapse-btn" aria-label="Colapsar sección">
+            <span class="collapse-icon">▼</span>
+          </button>
+        </div>
+        <div class="section-content" id="todayContent">
+          <div id="todayTrainingSection" style="display: none;">
+            <div id="todayTrainingsContainer">
+              <!-- Se genera dinámicamente -->
+            </div>
+          </div>
+          <div id="noTrainingsToday" class="empty-message">
+            <span class="empty-icon">😌</span>
+            <p>No hay entrenamientos programados para hoy</p>
+          </div>
         </div>
       </div>
 
-      <div class="weekly-calendar" id="weeklyCalendar">
-        <!-- Se genera dinámicamente con JavaScript -->
-      </div>
-
-      <!-- Botón de Asistencia (solo visible si hay entrenamiento hoy) -->
-      <div id="todayTrainingSection" style="display: none;">
-        <div class="today-training-card">
-          <div class="training-info">
-            <h3>🏃‍♂️ Entrenamiento de hoy</h3>
-            <p id="todayTrainingDetails"></p>
+      <!-- Sección SEMANA -->
+      <div class="collapsible-section">
+        <div class="section-header-collapsible" id="weekHeader">
+          <h2>📆 Mi Semana</h2>
+          <div class="header-actions-row">
+            <div class="week-navigation">
+              <button id="prevWeek" class="week-btn">←</button>
+              <span id="weekRange">Cargando...</span>
+              <button id="nextWeek" class="week-btn">→</button>
+            </div>
+            <button class="collapse-btn" aria-label="Colapsar sección">
+              <span class="collapse-icon">▼</span>
+            </button>
           </div>
-          <button id="takeAttendanceBtn" class="primary-btn-large">
-            Pasar Asistencia
-          </button>
+        </div>
+        <div class="section-content" id="weekContent">
+          <div class="weekly-calendar" id="weeklyCalendar">
+            <!-- Se genera dinámicamente con JavaScript -->
+          </div>
         </div>
       </div>
 
       <!-- Accesos Rápidos (minimalista) -->
       <div class="section-header">
-        <h3>Accesos Rápidos</h3>
+        <h3>⚡ Accesos Rápidos</h3>
       </div>
       
       <div class="quick-actions" id="quickActions">

@@ -277,22 +277,34 @@ async function checkTodayTraining(trainingsData) {
   const todayTrainings = trainingsData?.filter(t => t.weekday === todayWeekday) || [];
 
   const todaySection = document.getElementById('todayTrainingSection');
+  const todayContainer = document.getElementById('todayTrainingsContainer');
   
   if (todayTrainings.length > 0) {
-    const training = todayTrainings[0]; // Tomar el primero si hay varios
+    todayContainer.innerHTML = '';
     
-    document.getElementById('todayTrainingDetails').textContent = 
-      `${training.teams.name} - ${training.start_time.substring(0, 5)} a ${training.end_time.substring(0, 5)}`;
+    todayTrainings.forEach(training => {
+      const trainingCard = document.createElement('div');
+      trainingCard.className = 'today-training-item';
+      trainingCard.innerHTML = `
+        <div class="training-item-info">
+          <div class="training-item-icon">🏃</div>
+          <div class="training-item-details">
+            <div class="training-item-team">${training.teams.name}</div>
+            <div class="training-item-time">⏰ ${training.start_time.substring(0, 5)} - ${training.end_time.substring(0, 5)}</div>
+          </div>
+        </div>
+        <button class="training-item-btn" onclick="window.location.href='/pages/attendance.html?team_id=${training.team_id}'">
+          📋 Pasar lista
+        </button>
+      `;
+      todayContainer.appendChild(trainingCard);
+    });
     
     todaySection.style.display = 'block';
-
-    // Configurar botón de asistencia
-    const attendanceBtn = document.getElementById('takeAttendanceBtn');
-    attendanceBtn.onclick = () => {
-      window.location.href = `/pages/attendance.html?team_id=${training.team_id}`;
-    };
+    document.getElementById('noTrainingsToday').style.display = 'none';
   } else {
     todaySection.style.display = 'none';
+    document.getElementById('noTrainingsToday').style.display = 'block';
   }
 }
 
@@ -308,6 +320,43 @@ document.getElementById('nextWeek').addEventListener('click', () => {
   currentWeekStart.setDate(currentWeekStart.getDate() + 7);
   loadWeeklyCalendar();
 });
+
+// ============================================
+// SECCIONES COLLAPSABLES
+// ============================================
+function initCollapsibleSections() {
+  const collapsibleHeaders = document.querySelectorAll('.section-header-collapsible');
+  
+  collapsibleHeaders.forEach(header => {
+    header.addEventListener('click', (e) => {
+      // No colapsar si se hizo click en los botones de navegación
+      if (e.target.closest('.week-navigation') || e.target.closest('.week-btn')) {
+        return;
+      }
+      
+      const section = header.closest('.collapsible-section');
+      section.classList.toggle('collapsed');
+      
+      // Guardar estado en localStorage
+      const sectionId = header.id;
+      const isCollapsed = section.classList.contains('collapsed');
+      localStorage.setItem(`section_${sectionId}_collapsed`, isCollapsed);
+    });
+  });
+  
+  // Restaurar estados guardados
+  collapsibleHeaders.forEach(header => {
+    const sectionId = header.id;
+    const wasCollapsed = localStorage.getItem(`section_${sectionId}_collapsed`) === 'true';
+    
+    if (wasCollapsed) {
+      header.closest('.collapsible-section').classList.add('collapsed');
+    }
+  });
+}
+
+// Inicializar secciones collapsables
+initCollapsibleSections();
 
 // ============================================
 // CARGAR EQUIPOS EN ACCESOS RÁPIDOS
