@@ -1,0 +1,357 @@
+/* ============================================
+   ATTENDANCE - DISEÑO MINIMALISTA
+   ============================================ */
+
+.attendance-main {
+  padding: var(--spacing-xl) var(--spacing-md);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Selector de fecha */
+.attendance-selector {
+  background: white;
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.date-selector-box {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.date-selector-box label {
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.date-selector-box input[type="date"] {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+}
+
+.date-selector-box button {
+  padding: 10px 20px;
+  white-space: nowrap;
+}
+
+/* Info de sesión */
+.session-info {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--primary-50);
+  border-left: 4px solid var(--primary-600);
+  border-radius: var(--radius-md);
+}
+
+.session-type-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--primary-600);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+}
+
+.session-details {
+  font-size: 0.875rem;
+  color: var(--gray-700);
+}
+
+/* Lista de asistencia - MINIMALISTA */
+.attendance-list-container {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attendance-table thead {
+  background: var(--gray-100);
+  border-bottom: 2px solid var(--gray-200);
+}
+
+.attendance-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.attendance-table tbody tr {
+  border-bottom: 1px solid var(--gray-100);
+  transition: background 0.2s;
+}
+
+.attendance-table tbody tr:hover {
+  background: var(--gray-50);
+}
+
+.attendance-table td {
+  padding: 12px 16px;
+  font-size: 0.9375rem;
+}
+
+/* Columna de jugador */
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.player-number {
+  width: 36px;
+  height: 36px;
+  background: var(--primary-600);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.player-name {
+  font-weight: 500;
+  color: var(--gray-900);
+}
+
+/* Botones de estado */
+.status-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.status-btn {
+  padding: 6px 14px;
+  border: 2px solid var(--gray-300);
+  background: white;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.status-btn:hover {
+  border-color: var(--gray-400);
+  transform: translateY(-1px);
+}
+
+.status-btn.active.present {
+  background: var(--success-500);
+  border-color: var(--success-600);
+  color: white;
+}
+
+.status-btn.active.absent {
+  background: var(--danger-500);
+  border-color: var(--danger-600);
+  color: white;
+}
+
+.status-btn.active.late {
+  background: var(--warning-500);
+  border-color: var(--warning-600);
+  color: white;
+}
+
+.status-btn.active.excused {
+  background: var(--gray-500);
+  border-color: var(--gray-600);
+  color: white;
+}
+
+/* Notas */
+.notes-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  resize: none;
+}
+
+.notes-input:focus {
+  outline: none;
+  border-color: var(--primary-500);
+}
+
+/* Barra de acciones */
+.attendance-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.attendance-actions .btn {
+  flex: 1;
+  min-width: 150px;
+}
+
+/* Estados vacíos */
+.empty-state {
+  padding: var(--spacing-2xl);
+  text-align: center;
+  color: var(--gray-500);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
+}
+
+.error-message {
+  background: var(--danger-50);
+  color: var(--danger-700);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--danger-500);
+  margin-bottom: var(--spacing-lg);
+}
+
+.info-box {
+  background: var(--primary-50);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--primary-500);
+  margin-bottom: var(--spacing-lg);
+  font-size: 0.875rem;
+  color: var(--gray-700);
+}
+
+/* Resumen de asistencia */
+.attendance-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-item {
+  text-align: center;
+}
+
+.summary-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.summary-number.present { color: var(--success-600); }
+.summary-number.absent { color: var(--danger-600); }
+.summary-number.late { color: var(--warning-600); }
+.summary-number.excused { color: var(--gray-600); }
+
+.summary-label {
+  font-size: 0.75rem;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .attendance-main {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+  
+  .attendance-table {
+    font-size: 0.875rem;
+  }
+  
+  .attendance-table th,
+  .attendance-table td {
+    padding: 8px 10px;
+  }
+  
+  .player-number {
+    width: 32px;
+    height: 32px;
+    font-size: 0.75rem;
+  }
+  
+  .status-buttons {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .status-btn {
+    padding: 8px;
+    text-align: center;
+  }
+  
+  .attendance-actions {
+    flex-direction: column;
+  }
+  
+  .attendance-actions .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  /* En móvil, mostrar cada fila como una card */
+  .attendance-table thead {
+    display: none;
+  }
+  
+  .attendance-table tbody tr {
+    display: block;
+    margin-bottom: var(--spacing-md);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+  }
+  
+  .attendance-table td {
+    display: block;
+    padding: 6px 0;
+    border: none;
+  }
+  
+  .attendance-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--gray-600);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+  }
+  
+  .status-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+}

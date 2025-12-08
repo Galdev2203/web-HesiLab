@@ -289,9 +289,7 @@ async function checkTodayTraining(trainingsData) {
     // Configurar botón de asistencia
     const attendanceBtn = document.getElementById('takeAttendanceBtn');
     attendanceBtn.onclick = () => {
-      // Aquí puedes implementar la lógica para pasar asistencia
-      // Por ahora redirigimos a la página de jugadores
-      window.location.href = `/pages/players.html?team_id=${training.team_id}`;
+      window.location.href = `/pages/attendance.html?team_id=${training.team_id}`;
     };
   } else {
     todaySection.style.display = 'none';

@@ -6,6 +6,7 @@ import {
   getUserRole,
   getRoleLabel 
 } from '../js/permissionsHelper.js';
+import { initHeader } from '../js/headerComponent.js';
 
 // Validar sesión
 const { data: sessionData } = await supabase.auth.getSession();
@@ -13,6 +14,9 @@ if (!sessionData.session) {
   window.location.href = '/pages/index.html';
   throw new Error('No session');
 }
+
+// Inicializar header
+initHeader('📋 Asistencia', true);
 
 // Inicializar permisos
 await initPermissions();
@@ -170,116 +174,163 @@ function renderAttendanceList() {
   const container = document.getElementById('attendanceList');
   container.innerHTML = '';
 
-  const attendanceGrid = document.createElement('div');
-  attendanceGrid.className = 'attendance-grid';
-
   // Combinar registros con datos de jugadores
   const recordsWithPlayers = attendanceRecords.map(record => {
     const playerData = record._playerData || activePlayers.find(p => p.id === record.player_id);
     return { ...record, _playerData: playerData };
   });
 
+  // Crear tabla
+  const table = document.createElement('table');
+  table.className = 'attendance-table';
+  
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Jugador</th>
+        <th>Estado</th>
+        <th>Notas</th>
+      </tr>
+    </thead>
+    <tbody id="attendanceTableBody"></tbody>
+  `;
+
+  const tbody = table.querySelector('#attendanceTableBody');
+
   recordsWithPlayers.forEach(record => {
-    const card = createAttendanceCard(record);
-    attendanceGrid.appendChild(card);
+    const row = createAttendanceRow(record);
+    tbody.appendChild(row);
   });
 
-  container.appendChild(attendanceGrid);
+  container.appendChild(table);
 
   // Mostrar barra de acciones
   document.getElementById('actionsBar').style.display = 'flex';
+  
+  // Mostrar resumen
+  updateSummary();
 }
 
 /**
- * Crear card de asistencia
+ * Crear fila de asistencia
  */
-function createAttendanceCard(record) {
+function createAttendanceRow(record) {
   const player = record._playerData;
-  if (!player) return document.createElement('div');
+  if (!player) return document.createElement('tr');
 
-  const card = document.createElement('div');
-  card.className = 'attendance-card fade-in';
+  const row = document.createElement('tr');
 
   // Aplicar cambios pendientes si existen
   const pending = pendingChanges.get(player.id);
   const displayStatus = pending?.status || record.status;
   const displayNotes = pending?.notes !== undefined ? pending.notes : record.notes;
 
-  let statusClass = 'status-present';
-  let statusIcon = '✅';
-  let statusText = 'Presente';
-
-  if (displayStatus === 'PRESENT') {
-    statusClass = 'status-present';
-    statusIcon = '✅';
-    statusText = 'Presente';
-  } else if (displayStatus === 'ABSENT') {
-    statusClass = 'status-absent';
-    statusIcon = '❌';
-    statusText = 'Ausente';
-  } else if (displayStatus === 'LATE') {
-    statusClass = 'status-late';
-    statusIcon = '⏰';
-    statusText = 'Retrasado';
-  } else if (displayStatus === 'EXCUSED') {
-    statusClass = 'status-excused';
-    statusIcon = '📝';
-    statusText = 'Justificado';
-  } else if (displayStatus === 'INJURED') {
-    statusClass = 'status-injured';
-    statusIcon = '🤕';
-    statusText = 'Lesionado';
-  }
-
-  card.innerHTML = `
-    <div class="attendance-player-info">
-      <div class="attendance-dorsal">#${player.number || '?'}</div>
-      <div class="attendance-player-name">
-        <div class="player-full-name">${escapeHtml(player.name)} ${escapeHtml(player.surname)}</div>
-        ${player.position ? `<div class="player-position-tag">${escapeHtml(player.position)}</div>` : ''}
+  row.innerHTML = `
+    <td data-label="Jugador">
+      <div class="player-info">
+        <div class="player-number">${player.number || '?'}</div>
+        <div class="player-name">${escapeHtml(player.name)} ${escapeHtml(player.surname)}</div>
       </div>
-    </div>
-    
-    <div class="attendance-status-section">
-      <div class="attendance-status-badge ${statusClass}">
-        ${statusIcon} ${statusText}
+    </td>
+    <td data-label="Estado">
+      <div class="status-buttons">
+        <button class="status-btn ${displayStatus === 'PRESENT' ? 'active present' : ''}" 
+                data-player-id="${player.id}" data-status="PRESENT">
+          ✅ Presente
+        </button>
+        <button class="status-btn ${displayStatus === 'ABSENT' ? 'active absent' : ''}" 
+                data-player-id="${player.id}" data-status="ABSENT">
+          ❌ Ausente
+        </button>
+        <button class="status-btn ${displayStatus === 'LATE' ? 'active late' : ''}" 
+                data-player-id="${player.id}" data-status="LATE">
+          ⏰ Tarde
+        </button>
+        <button class="status-btn ${displayStatus === 'EXCUSED' ? 'active excused' : ''}" 
+                data-player-id="${player.id}" data-status="EXCUSED">
+          📝 Justif.
+        </button>
       </div>
-      
-      <div class="attendance-status-buttons" id="buttons-${player.id}">
-        <button class="status-btn status-present-btn" data-status="PRESENT" title="Presente">✅</button>
-        <button class="status-btn status-absent-btn" data-status="ABSENT" title="Ausente">❌</button>
-        <button class="status-btn status-late-btn" data-status="LATE" title="Retrasado">⏰</button>
-        <button class="status-btn status-excused-btn" data-status="EXCUSED" title="Justificado">📝</button>
-        <button class="status-btn status-injured-btn" data-status="INJURED" title="Lesionado">🤕</button>
-      </div>
-      
-      <div class="attendance-notes-section">
-        <textarea 
-          class="attendance-notes-input" 
-          id="notes-${player.id}"
-          placeholder="Observaciones (opcional)"
-          rows="2"
-        >${escapeHtml(displayNotes || '')}</textarea>
-      </div>
-    </div>
+    </td>
+    <td data-label="Notas">
+      <input type="text" class="notes-input" 
+             data-player-id="${player.id}"
+             placeholder="Añadir nota..."
+             value="${escapeHtml(displayNotes || '')}">
+    </td>
   `;
 
-  // Event listeners para botones de estado
-  const buttonsContainer = card.querySelector(`#buttons-${player.id}`);
-  buttonsContainer.querySelectorAll('.status-btn').forEach(btn => {
+  // Eventos
+  row.querySelectorAll('.status-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const newStatus = btn.dataset.status;
-      updateAttendanceStatus(player.id, newStatus);
+      const playerId = btn.dataset.playerId;
+      const status = btn.dataset.status;
+      handleStatusChange(playerId, status);
     });
   });
 
-  // Event listener para notas
-  const notesInput = card.querySelector(`#notes-${player.id}`);
-  notesInput.addEventListener('change', () => {
-    updateAttendanceNotes(player.id, notesInput.value.trim() || null);
+  row.querySelector('.notes-input').addEventListener('input', (e) => {
+    const playerId = e.target.dataset.playerId;
+    const notes = e.target.value;
+    handleNotesChange(playerId, notes);
   });
 
-  return card;
+  return row;
+}
+
+/**
+ * Manejar cambio de estado
+ */
+function handleStatusChange(playerId, status) {
+  const existing = pendingChanges.get(playerId) || {};
+  pendingChanges.set(playerId, { ...existing, status });
+  renderAttendanceList();
+}
+
+/**
+ * Manejar cambio de notas
+ */
+function handleNotesChange(playerId, notes) {
+  const existing = pendingChanges.get(playerId) || {};
+  pendingChanges.set(playerId, { ...existing, notes: notes.trim() || null });
+}
+
+/**
+ * Actualizar resumen de asistencia
+ */
+function updateSummary() {
+  const summary = { PRESENT: 0, ABSENT: 0, LATE: 0, EXCUSED: 0 };
+  
+  attendanceRecords.forEach(record => {
+    const pending = pendingChanges.get(record.player_id);
+    const status = pending?.status || record.status;
+    if (summary[status] !== undefined) {
+      summary[status]++;
+    }
+  });
+
+  const summaryContainer = document.getElementById('attendanceSummary');
+  summaryContainer.innerHTML = `
+    <div class="attendance-summary">
+      <div class="summary-item">
+        <span class="summary-number present">${summary.PRESENT}</span>
+        <span class="summary-label">Presentes</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-number absent">${summary.ABSENT}</span>
+        <span class="summary-label">Ausentes</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-number late">${summary.LATE}</span>
+        <span class="summary-label">Tarde</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-number excused">${summary.EXCUSED}</span>
+        <span class="summary-label">Justificados</span>
+      </div>
+    </div>
+  `;
+  summaryContainer.style.display = 'block';
 }
 
 /**

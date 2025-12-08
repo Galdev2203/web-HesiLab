@@ -7,36 +7,27 @@
   
   <!-- CSS -->
   <link rel="stylesheet" href="../css/global.css">
-  <link rel="stylesheet" href="../css/players.css">
+  <link rel="stylesheet" href="../css/unified-header.css">
+  <link rel="stylesheet" href="../css/attendance.css">
   
   <!-- Analytics -->
   <script src="../js/analytics.js"></script>
 </head>
-<body>
+<body class="has-unified-header">
 
-<!-- Header -->
-<header class="page-header">
-  <div class="container">
-    <h2>📋 Control de asistencia</h2>
-    <a href="#" class="back-link" onclick="history.back(); return false;">Volver</a>
-  </div>
-</header>
+<!-- El header y sidebar se generan dinámicamente con headerComponent.js -->
 
 <!-- Main Content -->
-<main class="players-main">
+<main class="attendance-main">
   <div class="container">
     <p id="errorMsg" class="error-message" style="display:none;"></p>
-
-    <div class="info-box">
-      <p>✅ Gestiona la asistencia de jugadores a entrenamientos y eventos. Selecciona una fecha para cargar o generar el pase de lista.</p>
-    </div>
 
     <!-- Selector de fecha -->
     <div class="attendance-selector">
       <div class="date-selector-box">
-        <label for="selectedDate">Fecha:</label>
+        <label for="selectedDate">📅 Fecha:</label>
         <input type="date" id="selectedDate" />
-        <button id="loadBtn" class="btn btn-primary">📅 Cargar asistencia</button>
+        <button id="loadBtn" class="btn btn-primary">Cargar</button>
       </div>
 
       <div id="sessionInfo" class="session-info" style="display:none;">
@@ -45,19 +36,22 @@
       </div>
     </div>
 
+    <!-- Resumen -->
+    <div id="attendanceSummary" style="display:none;"></div>
+
     <!-- Lista de asistencia -->
     <div id="attendanceList" class="attendance-list-container">
       <div class="empty-state">
-        <div class="empty-icon">📅</div>
+        <div class="empty-icon">📋</div>
         <p>Selecciona una fecha para ver o generar el pase de lista</p>
       </div>
     </div>
 
     <!-- Acciones -->
     <div id="actionsBar" class="attendance-actions" style="display:none;">
-      <button id="saveAllBtn" class="btn btn-primary">💾 Guardar todos los cambios</button>
-      <button id="markAllPresentBtn" class="btn btn-outline">✅ Marcar todos presentes</button>
-      <button id="markAllAbsentBtn" class="btn btn-outline">❌ Marcar todos ausentes</button>
+      <button id="saveAllBtn" class="btn btn-primary">💾 Guardar cambios</button>
+      <button id="markAllPresentBtn" class="btn btn-outline">✅ Todos presentes</button>
+      <button id="markAllAbsentBtn" class="btn btn-outline">❌ Todos ausentes</button>
     </div>
   </div>
 </main>
