@@ -35,28 +35,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Cargar datos del equipo
 async function loadData() {
   try {
-    // Cargar jugadores
+    console.log('Cargando datos para team_id:', currentTeamId);
+    
+    // Cargar jugadores - usando el mismo formato que players.js
     const { data: players, error: playersError } = await supabase
       .from('players')
-      .select('id, name, surname, number, position')
+      .select('*')
       .eq('team_id', currentTeamId)
       .eq('active', true);
 
-    if (playersError) throw playersError;
-    allPlayers = (players || []).sort((a, b) => (a.number || 999) - (b.number || 999));
+    if (playersError) {
+      console.error('Error en query de jugadores:', playersError);
+      throw playersError;
+    }
     
-    console.log('Jugadores cargados:', allPlayers.length);
+    allPlayers = (players || []).sort((a, b) => (a.number || 999) - (b.number || 999));
+    console.log('Jugadores cargados:', allPlayers.length, allPlayers);
 
     // Cargar toda la asistencia del equipo
     const { data: attendance, error: attendanceError } = await supabase
       .from('attendance')
-      .select('id, player_id, date, status')
-      .eq('team_id', currentTeamId)
-      .order('date', { ascending: false });
+      .select('*')
+      .eq('team_id', currentTeamId);
 
-    if (attendanceError) throw attendanceError;
-    allAttendance = attendance || [];
+    if (attendanceError) {
+      console.error('Error en query de asistencia:', attendanceError);
+      throw attendanceError;
+    }
     
+    allAttendance = attendance || [];
     console.log('Registros de asistencia cargados:', allAttendance.length);
 
   } catch (error) {
