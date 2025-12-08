@@ -12,6 +12,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/unified-header.css">
+  <link rel="stylesheet" href="../css/cards-layout.css">
   <link rel="stylesheet" href="../css/players.css">
   
   <!-- Analytics -->
@@ -29,59 +30,62 @@
     <!-- Search Bar -->
     <div class="search-bar">
       <input id="searchInput" placeholder="🔍 Buscar por nombre o dorsal" />
-      <button id="refreshBtn" class="btn">Refrescar</button>
+      <button id="refreshBtn" class="btn">🔄 Refrescar</button>
     </div>
 
     <!-- Players List -->
-    <div id="playersList">Cargando jugadores...</div>
-
-    <!-- Form Box -->
-    <div id="formBox" class="add-player-section">
-      <h3 id="formTitle">Añadir jugador</h3>
-
-      <div class="form-grid">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="playerName">Nombre <span class="required">*</span></label>
-            <input id="playerName" placeholder="Nombre completo" />
-          </div>
-
-          <div class="form-group" style="max-width:160px;">
-            <label for="playerNumber">Dorsal <span class="required">*</span></label>
-            <input id="playerNumber" placeholder="#" inputmode="numeric" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="playerPosition">Posición</label>
-            <input id="playerPosition" placeholder="Ej: Alero, Base, Pívot..." />
-          </div>
-
-          <div class="form-group">
-            <label for="playerBirthdate">Fecha de nacimiento</label>
-            <input id="playerBirthdate" type="date" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="playerNotes">Notas</label>
-            <textarea id="playerNotes" placeholder="Observaciones" rows="3"></textarea>
-          </div>
-        </div>
-
-        <div class="form-actions">
-          <button id="savePlayerBtn" class="btn btn-primary">Guardar jugador</button>
-          <button id="cancelEditBtn" class="btn btn-outline">Cancelar</button>
-          <small class="form-hint">Campos con <span class="required">*</span> obligatorios</small>
-        </div>
-      </div>
+    <div id="playersList" class="items-grid">
+      Cargando jugadores...
     </div>
+    
+    <!-- Botón flotante -->
+    <button class="fab" id="fabBtn" title="Añadir jugador">
+      <span class="fab-icon">+</span>
+    </button>
   </div>
 </main>
 
+<!-- Modal para crear/editar jugador -->
+<div id="playerModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">Añadir jugador</h3>
+      <button class="close-modal" id="closeModalBtn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="playerName">Nombre <span class="required">*</span></label>
+        <input id="playerName" placeholder="Nombre completo" required />
+      </div>
+
+      <div class="form-group">
+        <label for="playerNumber">Dorsal</label>
+        <input id="playerNumber" type="number" placeholder="#" min="0" />
+      </div>
+
+      <div class="form-group">
+        <label for="playerPosition">Posición</label>
+        <input id="playerPosition" placeholder="Ej: Alero, Base, Pívot..." />
+      </div>
+
+      <div class="form-group">
+        <label for="playerBirthdate">Fecha de nacimiento</label>
+        <input id="playerBirthdate" type="date" />
+      </div>
+
+      <div class="form-group">
+        <label for="playerNotes">Notas</label>
+        <textarea id="playerNotes" placeholder="Observaciones" rows="3"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="secondary-btn" id="cancelModalBtn">Cancelar</button>
+      <button id="saveBtn" class="primary-btn">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- JS -->
-<script type="module" src="../js/players.js"></script>
+<script type="module" src="../js/players.refactored.js"></script>
 </body>
 </html>

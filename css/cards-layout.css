@@ -356,3 +356,18 @@
     font-size: 1.75rem;
   }
 }
+
+/* Player Badge - Número de jugador */
+.player-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-600);
+  color: white;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md);
+  margin-right: 0.5rem;
+  min-width: 2rem;
+}
