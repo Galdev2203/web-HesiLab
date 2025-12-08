@@ -22,6 +22,17 @@ async function loadProfile() {
     document.getElementById('userEmail').textContent = user.email;
     document.getElementById('securityEmail').textContent = user.email;
     
+    // Detectar si el usuario usa OAuth (Google, etc.)
+    const isOAuthUser = user.app_metadata?.provider !== 'email';
+    
+    // Ocultar sección de contraseña si usa OAuth
+    if (isOAuthUser) {
+      const passwordSection = document.querySelector('.security-section .security-item:first-child');
+      if (passwordSection) {
+        passwordSection.style.display = 'none';
+      }
+    }
+    
     // Fecha de registro
     const createdDate = new Date(user.created_at);
     document.getElementById('memberSince').textContent = createdDate.toLocaleDateString('es-ES', {
@@ -113,7 +124,38 @@ document.getElementById('avatarInput').onchange = async (e) => {
   }
 
   try {
-    // Subir imagen a Supabase Storage
+    // 1. Obtener la URL del avatar actual para eliminar el archivo antiguo
+    const { data: currentProfile } = await supabase
+      .from('profiles')
+      .select('avatar_url')
+      .eq('id', user.id)
+      .single();
+
+    // 2. Si existe un avatar anterior, extraer el path y eliminarlo
+    if (currentProfile?.avatar_url) {
+      try {
+        // Extraer el path del archivo desde la URL
+        const urlParts = currentProfile.avatar_url.split('/');
+        const storageIndex = urlParts.indexOf('profile-images');
+        if (storageIndex !== -1) {
+          const oldFilePath = urlParts.slice(storageIndex + 1).join('/');
+          
+          // Eliminar el archivo antiguo
+          const { error: deleteError } = await supabase.storage
+            .from('profile-images')
+            .remove([oldFilePath]);
+          
+          if (deleteError) {
+            console.warn('No se pudo eliminar la imagen anterior:', deleteError);
+          }
+        }
+      } catch (deleteErr) {
+        console.warn('Error al intentar eliminar imagen anterior:', deleteErr);
+        // Continuamos aunque falle la eliminación
+      }
+    }
+
+    // 3. Subir la nueva imagen
     const fileExt = file.name.split('.').pop();
     const fileName = `${user.id}-${Date.now()}.${fileExt}`;
     const filePath = `avatars/${fileName}`;
@@ -122,17 +164,17 @@ document.getElementById('avatarInput').onchange = async (e) => {
       .from('profile-images')
       .upload(filePath, file, {
         cacheControl: '3600',
-        upsert: true
+        upsert: false
       });
 
     if (uploadError) throw uploadError;
 
-    // Obtener URL pública
+    // 4. Obtener URL pública
     const { data: urlData } = supabase.storage
       .from('profile-images')
       .getPublicUrl(filePath);
 
-    // Actualizar en la base de datos
+    // 5. Actualizar en la base de datos
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ avatar_url: urlData.publicUrl })
@@ -140,7 +182,7 @@ document.getElementById('avatarInput').onchange = async (e) => {
 
     if (updateError) throw updateError;
 
-    // Actualizar imagen en la página
+    // 6. Actualizar imagen en la página
     document.getElementById('avatarImg').src = urlData.publicUrl;
     alert('✅ Foto de perfil actualizada correctamente');
 

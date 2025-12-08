@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Asistencia</title>
+  <title>Dashboard - HesiLab</title>
 
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8303721499770704"
@@ -18,37 +18,141 @@
 </head>
 
 <body>
-  <!-- Header -->
-  <header class="dashboard-header">
-    <div class="container">
-      <div class="dashboard-title">
-        <h2>HesiLab</h2>
+  <!-- Header Profesional -->
+  <header class="modern-header">
+    <div class="header-content">
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <div class="header-brand">
+        <h1>HesiLab</h1>
       </div>
-      <div class="flex items-center">
-        <p id="userinfo">Cargando datos del usuario...</p>
-        <a href="/pages/profile.html" class="profile-btn" title="Mi perfil">👤</a>
-        <button class="logout-btn" id="logoutBtn">Cerrar sesión</button>
+
+      <div class="header-actions">
+        <button class="icon-btn" id="notificationsBtn" title="Notificaciones">
+          <span class="icon">🔔</span>
+          <span class="badge">3</span>
+        </button>
+        <div class="user-menu">
+          <button class="user-avatar" id="userMenuBtn">
+            <img id="headerAvatar" src="" alt="Avatar">
+          </button>
+        </div>
       </div>
     </div>
   </header>
+
+  <!-- Sidebar Navegación -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="user-profile">
+        <img id="sidebarAvatar" src="" alt="Avatar" class="sidebar-avatar">
+        <div class="user-info">
+          <h4 id="sidebarUserName">Usuario</h4>
+          <p id="sidebarUserEmail">email@ejemplo.com</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="/pages/dashboard.html" class="nav-item active">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">Inicio</span>
+      </a>
+      <a href="/pages/teams.html" class="nav-item">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Mis Equipos</span>
+      </a>
+      <a href="/pages/profile.html" class="nav-item">
+        <span class="nav-icon">👤</span>
+        <span class="nav-text">Mi Perfil</span>
+      </a>
+      
+      <div class="nav-divider"></div>
+      
+      <a href="#" class="nav-item" id="settingsBtn">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-text">Configuración</span>
+      </a>
+      <a href="#" class="nav-item" id="helpBtn">
+        <span class="nav-icon">❓</span>
+        <span class="nav-text">Ayuda</span>
+      </a>
+      <a href="#" class="nav-item logout-item" id="sidebarLogoutBtn">
+        <span class="nav-icon">🚪</span>
+        <span class="nav-text">Cerrar Sesión</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <p class="version">HesiLab v1.0</p>
+    </div>
+  </aside>
+
+  <!-- Overlay para cerrar sidebar en móvil -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- Main Content -->
   <main class="dashboard-main">
     <div class="container">
       <!-- Welcome Section -->
       <div class="welcome-section fade-in">
-        <h3>¡Bienvenido de nuevo! 👋</h3>
-        <p>Gestiona tus equipos, jugadores y asistencias desde un solo lugar</p>
+        <div class="welcome-text">
+          <h2>¡Bienvenido de nuevo! 👋</h2>
+          <p>Gestiona tus equipos, jugadores y asistencias desde un solo lugar</p>
+        </div>
+        <div class="welcome-date">
+          <span id="currentDate"></span>
+        </div>
       </div>
 
-      <!-- Cards Grid -->
-      <div id="cardsContainer">
-        <div class="card fade-in" id="teamsCard">
-          <div class="card-icon">👥</div>
-          <h3>Mis equipos</h3>
-          <p>Gestiona equipos, entrenadores y jugadores de forma eficiente.</p>
-          <div class="card-arrow">Ir a equipos</div>
+      <!-- Stats Grid -->
+      <div class="stats-grid fade-in">
+        <div class="stat-card">
+          <div class="stat-icon primary">👥</div>
+          <div class="stat-content">
+            <h3 id="totalTeams">0</h3>
+            <p>Equipos</p>
+          </div>
         </div>
+        <div class="stat-card">
+          <div class="stat-icon success">⚽</div>
+          <div class="stat-content">
+            <h3 id="totalPlayers">0</h3>
+            <p>Jugadores</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon warning">📅</div>
+          <div class="stat-content">
+            <h3 id="totalEvents">0</h3>
+            <p>Eventos</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon info">✅</div>
+          <div class="stat-content">
+            <h3 id="attendanceRate">0%</h3>
+            <p>Asistencia</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="section-header">
+        <h3>Accesos Rápidos</h3>
+      </div>
+      
+      <div class="cards-grid fade-in" id="cardsContainer">
+        <a href="/pages/teams.html" class="action-card">
+          <div class="card-icon primary">👥</div>
+          <h4>Mis Equipos</h4>
+          <p>Gestiona equipos y jugadores</p>
+          <span class="card-arrow">→</span>
+        </a>
       </div>
     </div>
   </main>
