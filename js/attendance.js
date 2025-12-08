@@ -15,21 +15,21 @@ if (!sessionData.session) {
   throw new Error('No session');
 }
 
-// Inicializar header
-initHeader('📋 Asistencia', true);
-
-// Inicializar permisos
-await initPermissions();
-
 // Obtener team_id
 const params = new URLSearchParams(window.location.search);
 const teamId = params.get('team_id');
 
 if (!teamId) {
-  document.getElementById('errorMsg').style.display = 'block';
-  document.getElementById('errorMsg').innerText = 'Error: falta team_id';
+  alert('Error: falta team_id');
+  window.location.href = '/pages/dashboard.html';
   throw new Error('Missing team_id');
 }
+
+// Inicializar header
+initHeader('📋 Asistencia', true);
+
+// Inicializar permisos
+await initPermissions();
 
 // Verificar permisos
 const canManage = await hasPermission(teamId, 'MANAGE_ATTENDANCE');
@@ -106,12 +106,16 @@ async function loadAttendanceForDate() {
       .eq('active', true)
       .order('number');
 
+    console.log('Jugadores cargados:', players);
+    console.log('Error jugadores:', playersError);
+
     if (playersError) throw playersError;
 
     activePlayers = players || [];
 
     if (activePlayers.length === 0) {
       container.innerHTML = '<div class="empty-state"><p>No hay jugadores activos en el equipo</p></div>';
+      document.getElementById('actionsBar').style.display = 'none';
       return;
     }
 

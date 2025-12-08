@@ -970,52 +970,67 @@ body {
     font-size: 1.25rem;
   }
   
+  /* Cambiar calendario a lista vertical en móvil */
   .weekly-calendar {
-    gap: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
   
   .day-column {
-    min-height: 100px;
-    padding: 4px;
+    min-height: auto;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 12px;
+    align-items: start;
   }
   
   .day-header {
-    padding-bottom: 4px;
-    margin-bottom: 4px;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: none;
+    text-align: left;
   }
   
   .day-name {
-    font-size: 0.5rem;
-    margin-bottom: 1px;
+    font-size: 0.7rem;
+    margin-bottom: 2px;
   }
   
   .day-number {
-    font-size: 0.95rem;
+    font-size: 1.5rem;
+  }
+  
+  .day-events {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
   
   .event-item {
-    padding: 3px 4px;
-    margin-bottom: 3px;
+    padding: 8px;
+    margin-bottom: 0;
   }
   
   .event-time {
-    font-size: 0.55rem;
-    margin-bottom: 1px;
+    font-size: 0.7rem;
+    margin-bottom: 2px;
   }
   
   .event-title {
-    font-size: 0.6rem;
-    line-height: 1.1;
-    margin-bottom: 1px;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    margin-bottom: 2px;
   }
   
   .event-team {
-    font-size: 0.55rem;
+    font-size: 0.7rem;
   }
   
   .no-events {
-    font-size: 0.55rem;
-    padding: 6px 0;
+    font-size: 0.75rem;
+    padding: 8px 0;
   }
   
   #weekRange {
