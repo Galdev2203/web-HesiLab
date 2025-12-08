@@ -172,7 +172,7 @@ async function loadWeeklyCalendar() {
 
   // Cargar todos los entrenamientos de la semana
   const { data: trainingsData, error: trainingsError } = await supabase
-    .from('team_trainings')
+    .from('team_training_sessions')
     .select('id, team_id, date, start_time, end_time, weekday, teams(name)')
     .in('team_id', teamIds);
 
@@ -182,7 +182,7 @@ async function loadWeeklyCalendar() {
   // Cargar todos los eventos de la semana
   const { data: eventsData, error: eventsError } = await supabase
     .from('team_events')
-    .select('id, team_id, title, description, date, time, teams(name)')
+    .select('id, team_id, title, date, time, teams(name)')
     .in('team_id', teamIds);
 
   console.log('Eventos cargados:', eventsData);
