@@ -157,7 +157,17 @@ async function loadWeeklyCalendar() {
   console.log('Equipos del usuario:', teamsData);
 
   if (!teamsData || teamsData.length === 0) {
-    weeklyCalendar.innerHTML = '<p class="no-events">No tienes equipos asignados</p>';
+    weeklyCalendar.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 3rem; text-align: center;">
+        <div class="empty-icon" style="font-size: 4rem; margin-bottom: 1rem;">\uD83D\uDCC5</div>
+        <h3 style="margin: 0 0 0.5rem 0; color: var(--gray-700);">No tienes equipos asignados</h3>
+        <p style="color: var(--gray-500); margin: 0;">Crea un equipo o espera a que te a\u00f1adan a uno para ver entrenamientos y eventos</p>
+        <a href="/pages/teams.html" class="btn btn-primary" style="margin-top: 1.5rem; display: inline-block; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 0.5rem;">\u279C Ir a Mis Equipos</a>
+      </div>
+    `;
+    
+    // También actualizar sección HOY
+    await checkTodayTraining([]);
     return;
   }
 
@@ -278,6 +288,21 @@ async function checkTodayTraining(trainingsData) {
 
   const todaySection = document.getElementById('todayTrainingSection');
   const todayContainer = document.getElementById('todayTrainingsContainer');
+  const noTrainingsMsg = document.getElementById('noTrainingsToday');
+  
+  // Si no hay entrenamientos data (porque no hay equipos)
+  if (!trainingsData || trainingsData.length === 0) {
+    todaySection.style.display = 'none';
+    if (noTrainingsMsg) {
+      noTrainingsMsg.innerHTML = `
+        <div class="empty-icon">📅</div>
+        <p>No tienes equipos asignados</p>
+        <a href="/pages/teams.html" class="btn btn-primary" style="margin-top: 1rem; display: inline-block; padding: 0.5rem 1rem; text-decoration: none;">Ir a Mis Equipos</a>
+      `;
+      noTrainingsMsg.style.display = 'block';
+    }
+    return;
+  }
   
   if (todayTrainings.length > 0) {
     todayContainer.innerHTML = '';
@@ -301,10 +326,16 @@ async function checkTodayTraining(trainingsData) {
     });
     
     todaySection.style.display = 'block';
-    document.getElementById('noTrainingsToday').style.display = 'none';
+    if (noTrainingsMsg) noTrainingsMsg.style.display = 'none';
   } else {
     todaySection.style.display = 'none';
-    document.getElementById('noTrainingsToday').style.display = 'block';
+    if (noTrainingsMsg) {
+      noTrainingsMsg.innerHTML = `
+        <div class="empty-icon">✅</div>
+        <p>No hay entrenamientos programados para hoy</p>
+      `;
+      noTrainingsMsg.style.display = 'block';
+    }
   }
 }
 
