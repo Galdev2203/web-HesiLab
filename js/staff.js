@@ -28,7 +28,11 @@ if (!teamId) {
 }
 
 // Inicializar header
-await initHeader('👨‍🏫 Cuerpo Técnico', true);
+await initHeader({
+  title: '👨‍🏫 Cuerpo Técnico',
+  backUrl: true,
+  activeNav: null
+});
 
 // Inicializar permisos
 await initPermissions();

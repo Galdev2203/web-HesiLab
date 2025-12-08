@@ -26,7 +26,11 @@ if (!teamId) {
 }
 
 // Inicializar header
-await initHeader('🏃 Entrenamientos', true);
+await initHeader({
+  title: '🏃 Entrenamientos',
+  backUrl: true,
+  activeNav: null
+});
 
 // Inicializar permisos
 await initPermissions();

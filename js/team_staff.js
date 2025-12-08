@@ -262,15 +262,21 @@ async function loadStaff() {
       loadStaff();
     };
   });
+  
+  // Mostrar/ocultar formulario de añadir según permisos (después de cargar el rol)
+  const addBox = document.getElementById('addBox');
+  if (addBox) {
+    if (canManageStaff) {
+      addBox.style.display = 'block';
+      console.log('Formulario de añadir entrenadores: VISIBLE');
+    } else {
+      addBox.style.display = 'none';
+      console.log('Formulario de añadir entrenadores: OCULTO');
+    }
+  }
 }
 
 loadStaff();
-
-// Mostrar/ocultar formulario de añadir según permisos
-if (!canManageStaff) {
-  const addBox = document.getElementById('addBox');
-  if (addBox) addBox.style.display = 'none';
-}
 
 // Añadir entrenador
 document.getElementById("addBtn").onclick = async () => {

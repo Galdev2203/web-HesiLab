@@ -25,8 +25,12 @@ if (!teamId) {
   throw new Error('Missing team_id');
 }
 
-// Inicializar header
-initHeader('📋 Asistencia', true);
+// Inicializar header después de validar teamId
+await initHeader({
+  title: '📋 Asistencia',
+  backUrl: true,
+  activeNav: null
+});
 
 // Inicializar permisos
 await initPermissions();
