@@ -45,7 +45,7 @@ class PlayerCardRenderer extends CardRenderer {
       <div class="item-card-header">
         <div class="item-info">
           <div class="item-title">
-            ${player.number ? `<span class="player-badge">#${player.number}</span>` : ''}
+            ${player.number !== null && player.number !== undefined ? `<span class="player-badge">${player.number}</span>` : ''}
             ${escapeHtml(player.name)}
           </div>
           <div class="item-subtitle">${escapeHtml(player.position) || 'Sin posición'}</div>
@@ -160,9 +160,13 @@ async function savePlayer() {
   
   let number = null;
   if (numberStr) {
-    number = parseInt(numberStr, 10);
-    if (isNaN(number) || number < 0) {
-      validator.addError('El dorsal debe ser un número válido mayor o igual a 0');
+    // Permitir números como 0, 00, 1, etc.
+    const parsedNumber = parseInt(numberStr, 10);
+    if (isNaN(parsedNumber) || parsedNumber < 0) {
+      validator.addError('El dorsal debe ser un número válido (se permite 0 y 00)');
+    } else {
+      // Guardar como string para preservar '00'
+      number = numberStr;
     }
   }
 
