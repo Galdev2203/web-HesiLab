@@ -233,7 +233,7 @@ function createAttendanceRow(record) {
     <td data-label="Jugador">
       <div class="player-info">
         <div class="player-number">${player.number || '?'}</div>
-        <div class="player-name">${escapeHtml(player.name)} ${escapeHtml(player.surname)}</div>
+        <div class="player-name">${escapeHtml(player.name)}</div>
       </div>
     </td>
     <td data-label="Estado">

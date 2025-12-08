@@ -40,7 +40,7 @@ async function loadData() {
     // Cargar jugadores - usando el mismo formato que players.js
     const { data: players, error: playersError } = await supabase
       .from('players')
-      .select('*')
+      .select('id, name, number, position')
       .eq('team_id', currentTeamId)
       .eq('active', true);
 
@@ -317,7 +317,7 @@ function renderPlayerStatsTable(playerStats) {
         <span class="player-number">${stats.player.number || '-'}</span>
       </td>
       <td>
-        <span class="player-name">${stats.player.name} ${stats.player.surname}</span>
+        <span class="player-name">${stats.player.name}</span>
       </td>
       <td class="text-center">${stats.present}</td>
       <td class="text-center">${stats.absent}</td>
