@@ -1,5 +1,6 @@
 // team_detail.js - Lógica para detalles del equipo
 import { supabase } from "../js/supabaseClient.js";
+import { initHeader } from "../js/headerComponent.js";
 import { 
   initPermissions, 
   getUserStaffData, 
@@ -53,6 +54,13 @@ if (teamError || !teamData) {
   console.error(teamError);
   throw new Error("Team not found");
 }
+
+// Inicializar header con el nombre del equipo
+await initHeader({
+  title: teamData.name,
+  backUrl: '/pages/teams.html',
+  activeNav: null
+});
 
 // Mostrar información del equipo
 document.getElementById("teamTitle").innerText = teamData.name;

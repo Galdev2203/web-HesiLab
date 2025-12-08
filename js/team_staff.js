@@ -1,5 +1,6 @@
 // team_staff.js - Lógica para gestión de entrenadores
 import { supabase } from "../js/supabaseClient.js";
+import { initHeader } from "../js/headerComponent.js";
 
 // Validar sesión
 const { data: sessionData } = await supabase.auth.getSession();
@@ -41,6 +42,22 @@ async function loadMyRole() {
 // Cargar staff
 async function loadStaff() {
   await loadMyRole();
+  
+  // Inicializar header
+  await initHeader({
+    title: 'Entrenadores',
+    backUrl: null, // Se usa history.back
+    activeNav: null
+  });
+  
+  // Usar history.back() para el botón de volver
+  const backBtn = document.querySelector('.back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      history.back();
+    });
+  }
 
   const container = document.getElementById("staffList");
   container.innerHTML = "Cargando...";

@@ -1,7 +1,15 @@
 // teams.js - Lógica para gestión de equipos
 import { supabase } from "../js/supabaseClient.js";
+import { initHeader } from "../js/headerComponent.js";
 
-// Comprobar sesión
+// Inicializar header unificado
+await initHeader({
+  title: 'Mis equipos',
+  backUrl: '/pages/dashboard.html',
+  activeNav: 'teams'
+});
+
+// Obtener sesión después de initHeader
 const { data: sessionData } = await supabase.auth.getSession();
 const session = sessionData.session;
 if (!session) {
@@ -9,6 +17,10 @@ if (!session) {
   throw new Error("No session");
 }
 const user = session.user;
+
+// ============================================
+// GESTIÓN DE EQUIPOS
+// ============================================
 
 // Cargar equipos donde el usuario es staff
 async function loadTeams() {

@@ -1,5 +1,13 @@
 // profile.js - Gestión del perfil de usuario
 import { supabase } from "../js/supabaseClient.js";
+import { initHeader } from "../js/headerComponent.js";
+
+// Inicializar header unificado
+await initHeader({
+  title: 'Mi Perfil',
+  backUrl: '/pages/dashboard.html',
+  activeNav: 'profile'
+});
 
 // Comprobar sesión
 const { data: sessionData } = await supabase.auth.getSession();

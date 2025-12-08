@@ -1,11 +1,28 @@
 // players.js - Gestión de jugadores con sistema de permisos
 import { supabase } from '../js/supabaseClient.js';
+import { initHeader } from '../js/headerComponent.js';
 import { 
   initPermissions, 
   hasPermission, 
   getUserRole,
   getRoleLabel 
 } from '../js/permissionsHelper.js';
+
+// Inicializar header unificado
+await initHeader({
+  title: 'Jugadores',
+  backUrl: null, // Se usa history.back en el botón
+  activeNav: null
+});
+
+// Usar history.back() para el botón de volver
+const backBtn = document.querySelector('.back-btn');
+if (backBtn) {
+  backBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    history.back();
+  });
+}
 
 // Validar sesión
 const { data: sessionData } = await supabase.auth.getSession();
@@ -14,6 +31,10 @@ if (!sessionData.session) {
   throw new Error('No session');
 }
 const user = sessionData.session.user;
+
+// ============================================
+// GESTIÓN DE JUGADORES
+// ============================================
 
 // Inicializar permisos
 await initPermissions();
