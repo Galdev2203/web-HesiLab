@@ -527,6 +527,14 @@ document.getElementById('saveAllBtn')?.addEventListener('click', saveAllChanges)
 document.getElementById('markAllPresentBtn')?.addEventListener('click', markAllPresent);
 document.getElementById('markAllAbsentBtn')?.addEventListener('click', markAllAbsent);
 
+// Recargar cuando la página vuelve a estar visible (para detectar nuevos jugadores)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && currentDate) {
+    console.log('Página visible de nuevo, recargando jugadores...');
+    loadAttendanceForDate();
+  }
+});
+
 // Establecer fecha de hoy por defecto
 const today = new Date().toISOString().split('T')[0];
 document.getElementById('selectedDate').value = today;
