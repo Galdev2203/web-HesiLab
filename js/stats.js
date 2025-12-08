@@ -153,9 +153,18 @@ function filterAttendanceByPeriod(attendance, period, customStart, customEnd) {
 
     switch (period) {
       case 'week': {
-        const weekAgo = new Date(today);
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        return recordDate >= weekAgo && recordDate <= today;
+        const now = new Date();
+        const dayOfWeek = now.getDay();
+        const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Ajustar para que lunes sea inicio
+        const monday = new Date(now);
+        monday.setDate(now.getDate() + diff);
+        monday.setHours(0, 0, 0, 0);
+        
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        sunday.setHours(23, 59, 59, 999);
+        
+        return recordDate >= monday && recordDate <= sunday;
       }
       
       case 'month': {
