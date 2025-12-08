@@ -173,12 +173,8 @@ async function loadWeeklyCalendar() {
   // Cargar todos los entrenamientos de la semana
   const { data: trainingsData, error: trainingsError } = await supabase
     .from('team_trainings')
-    .select('*, teams(name)')
-    .in('team_id', teamIds)
-    .gte('date', weekStart.toISOString().split('T')[0])
-    .lt('date', weekEnd.toISOString().split('T')[0])
-    .order('date', { ascending: true })
-    .order('start_time', { ascending: true });
+    .select('id, team_id, date, start_time, end_time, weekday, teams(name)')
+    .in('team_id', teamIds);
 
   console.log('Entrenamientos cargados:', trainingsData);
   console.log('Error en entrenamientos:', trainingsError);
@@ -186,12 +182,8 @@ async function loadWeeklyCalendar() {
   // Cargar todos los eventos de la semana
   const { data: eventsData, error: eventsError } = await supabase
     .from('team_events')
-    .select('*, teams(name)')
-    .in('team_id', teamIds)
-    .gte('date', weekStart.toISOString().split('T')[0])
-    .lt('date', weekEnd.toISOString().split('T')[0])
-    .order('date', { ascending: true })
-    .order('time', { ascending: true });
+    .select('id, team_id, title, description, date, time, teams(name)')
+    .in('team_id', teamIds);
 
   console.log('Eventos cargados:', eventsData);
   console.log('Error en eventos:', eventsError);
@@ -223,11 +215,25 @@ async function loadWeeklyCalendar() {
 
     const eventsContainer = document.getElementById(`events-${dateStr}`);
 
-    if (dayTrainings.length === 0 && dayEvents.length === 0) {
+    // Filtrar entrenamientos por fecha o por día de la semana
+    const dayOfWeek = currentDate.getDay(); // 0 = Domingo, 1 = Lunes, etc.
+    const dayTrainingsFiltered = trainingsData?.filter(t => {
+      // Si tiene fecha específica, usar esa
+      if (t.date) {
+        return t.date === dateStr;
+      }
+      // Si solo tiene weekday (entrenamientos recurrentes), usar ese
+      if (t.weekday !== null && t.weekday !== undefined) {
+        return t.weekday === dayOfWeek;
+      }
+      return false;
+    }) || [];
+
+    if (dayTrainingsFiltered.length === 0 && dayEvents.length === 0) {
       eventsContainer.innerHTML = '<span class="no-events">Sin eventos</span>';
     } else {
       // Agregar entrenamientos
-      dayTrainings.forEach(training => {
+      dayTrainingsFiltered.forEach(training => {
         const eventDiv = document.createElement('div');
         eventDiv.className = 'event-item training';
         eventDiv.innerHTML = `

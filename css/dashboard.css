@@ -876,7 +876,7 @@ body {
 /* Responsive del calendario */
 @media (max-width: 1200px) {
   .weekly-calendar {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(7, minmax(140px, 1fr));
   }
 }
 
@@ -888,7 +888,14 @@ body {
   }
   
   .weekly-calendar {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(7, minmax(110px, 120px));
+    gap: 8px;
+  }
+  
+  .day-column {
+    min-width: 110px;
+    min-height: 140px;
+    padding: 8px;
   }
   
   .today-training-card {
@@ -908,7 +915,45 @@ body {
 
 @media (max-width: 480px) {
   .weekly-calendar {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(7, minmax(100px, 110px));
+    gap: 6px;
+    padding-bottom: 8px;
+  }
+  
+  .day-column {
+    min-width: 100px;
+    min-height: 120px;
+    padding: 6px;
+  }
+  
+  .day-header {
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+  }
+  
+  .day-name {
+    font-size: 0.65rem;
+  }
+  
+  .day-number {
+    font-size: 1rem;
+  }
+  
+  .event-item {
+    padding: 6px;
+    margin-bottom: 4px;
+  }
+  
+  .event-time {
+    font-size: 0.65rem;
+  }
+  
+  .event-title {
+    font-size: 0.75rem;
+  }
+  
+  .event-team {
+    font-size: 0.65rem;
   }
   
   #weekRange {
