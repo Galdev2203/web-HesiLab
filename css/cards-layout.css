@@ -1,5 +1,73 @@
 /* cards-layout.css - Estilos compartidos para cards, FAB y modales */
 
+/* Botones */
+.primary-btn,
+.secondary-btn,
+.danger-btn {
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.primary-btn {
+  background: var(--primary-600);
+  color: white;
+}
+
+.primary-btn:hover {
+  background: var(--primary-700);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.primary-btn:disabled {
+  background: var(--gray-400);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.secondary-btn {
+  background: transparent;
+  color: var(--primary-600);
+  border: 1px solid var(--primary-600);
+}
+
+.secondary-btn:hover {
+  background: var(--primary-50);
+  transform: translateY(-1px);
+}
+
+.secondary-btn:disabled {
+  color: var(--gray-400);
+  border-color: var(--gray-400);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.danger-btn {
+  background: var(--red-600);
+  color: white;
+}
+
+.danger-btn:hover {
+  background: var(--red-700);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.danger-btn:disabled {
+  background: var(--gray-400);
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Grid de items */
 .items-grid {
   display: grid;
