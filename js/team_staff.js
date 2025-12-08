@@ -194,11 +194,17 @@ async function openEditModal(staffId) {
     return;
   }
 
+  console.log('Editando staff ID:', staffId);
+  console.log('All staff:', allStaff);
+  
   const staff = allStaff.find(s => s.id === staffId);
   if (!staff) {
+    console.error('Staff no encontrado. ID buscado:', staffId, 'IDs disponibles:', allStaff.map(s => s.id));
     alert('Entrenador no encontrado');
     return;
   }
+
+  console.log('Staff encontrado:', staff);
 
   modal.open('edit', 'Editar entrenador');
   modal.currentEditId = staffId;
