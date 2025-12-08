@@ -154,18 +154,24 @@ async function loadWeeklyCalendar() {
     .eq('user_id', user.id)
     .eq('active', true);
 
+  console.log('Equipos del usuario:', teamsData);
+
   if (!teamsData || teamsData.length === 0) {
     weeklyCalendar.innerHTML = '<p class="no-events">No tienes equipos asignados</p>';
     return;
   }
 
   const teamIds = teamsData.map(t => t.team_id);
+  console.log('IDs de equipos:', teamIds);
+  
   const weekStart = new Date(currentWeekStart);
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 7);
 
+  console.log('Semana:', weekStart.toISOString().split('T')[0], 'a', weekEnd.toISOString().split('T')[0]);
+
   // Cargar todos los entrenamientos de la semana
-  const { data: trainingsData } = await supabase
+  const { data: trainingsData, error: trainingsError } = await supabase
     .from('team_trainings')
     .select('*, teams(name)')
     .in('team_id', teamIds)
@@ -174,8 +180,11 @@ async function loadWeeklyCalendar() {
     .order('date', { ascending: true })
     .order('start_time', { ascending: true });
 
+  console.log('Entrenamientos cargados:', trainingsData);
+  console.log('Error en entrenamientos:', trainingsError);
+
   // Cargar todos los eventos de la semana
-  const { data: eventsData } = await supabase
+  const { data: eventsData, error: eventsError } = await supabase
     .from('team_events')
     .select('*, teams(name)')
     .in('team_id', teamIds)
@@ -183,6 +192,9 @@ async function loadWeeklyCalendar() {
     .lt('date', weekEnd.toISOString().split('T')[0])
     .order('date', { ascending: true })
     .order('time', { ascending: true });
+
+  console.log('Eventos cargados:', eventsData);
+  console.log('Error en eventos:', eventsError);
 
   // Generar los 7 días de la semana
   for (let i = 0; i < 7; i++) {
