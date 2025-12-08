@@ -534,6 +534,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Crear controlador
     const controller = new AttendanceController(teamId);
 
+    // Establecer fecha de hoy por defecto
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('selectedDate');
+    if (dateInput) {
+      dateInput.value = today;
+    }
+
     // Event listeners
     document.getElementById('loadBtn')?.addEventListener('click', () => {
       const dateInput = document.getElementById('selectedDate');
@@ -557,10 +564,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         controller.loadForDate(controller.currentDate);
       }
     });
-
-    // Establecer fecha de hoy por defecto
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('selectedDate').value = today;
 
   } catch (error) {
     console.error('Error en inicialización:', error);
