@@ -124,18 +124,16 @@
       <div class="collapsible-section">
         <div class="section-header-collapsible" id="weekHeader">
           <h2>📆 Mi Semana</h2>
-          <div class="header-actions-row">
-            <div class="week-navigation">
-              <button id="prevWeek" class="week-btn">←</button>
-              <span id="weekRange">Cargando...</span>
-              <button id="nextWeek" class="week-btn">→</button>
-            </div>
-            <button class="collapse-btn" aria-label="Colapsar sección">
-              <span class="collapse-icon">▼</span>
-            </button>
-          </div>
+          <button class="collapse-btn" aria-label="Colapsar sección">
+            <span class="collapse-icon">▼</span>
+          </button>
         </div>
         <div class="section-content" id="weekContent">
+          <div class="week-navigation">
+            <button id="prevWeek" class="week-btn">←</button>
+            <span id="weekRange">Cargando...</span>
+            <button id="nextWeek" class="week-btn">→</button>
+          </div>
           <div class="weekly-calendar" id="weeklyCalendar">
             <!-- Se genera dinámicamente con JavaScript -->
           </div>

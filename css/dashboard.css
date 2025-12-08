@@ -805,18 +805,19 @@ body {
 .week-navigation {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-md);
-  background: white;
-  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--gray-50);
+  padding: var(--spacing-md);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-lg);
 }
 
 .week-btn {
   width: 36px;
   height: 36px;
   border: none;
-  background: var(--gray-100);
+  background: white;
   color: var(--gray-700);
   border-radius: 50%;
   cursor: pointer;
@@ -825,6 +826,7 @@ body {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
 }
 
 .week-btn:hover {

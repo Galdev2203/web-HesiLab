@@ -329,18 +329,16 @@ function initCollapsibleSections() {
   
   collapsibleHeaders.forEach(header => {
     header.addEventListener('click', (e) => {
-      // No colapsar si se hizo click en los botones de navegación
-      if (e.target.closest('.week-navigation') || e.target.closest('.week-btn')) {
-        return;
+      // No colapsar si se hizo click en el botón de colapsar específicamente
+      if (e.target.closest('.collapse-btn')) {
+        const section = header.closest('.collapsible-section');
+        section.classList.toggle('collapsed');
+        
+        // Guardar estado en localStorage
+        const sectionId = header.id;
+        const isCollapsed = section.classList.contains('collapsed');
+        localStorage.setItem(`section_${sectionId}_collapsed`, isCollapsed);
       }
-      
-      const section = header.closest('.collapsible-section');
-      section.classList.toggle('collapsed');
-      
-      // Guardar estado en localStorage
-      const sectionId = header.id;
-      const isCollapsed = section.classList.contains('collapsed');
-      localStorage.setItem(`section_${sectionId}_collapsed`, isCollapsed);
     });
   });
   
