@@ -98,62 +98,46 @@
   <!-- Main Content -->
   <main class="dashboard-main">
     <div class="container">
-      <!-- Welcome Section -->
-      <div class="welcome-section fade-in">
-        <div class="welcome-text">
-          <h2>¡Bienvenido de nuevo! 👋</h2>
-          <p>Gestiona tus equipos, jugadores y asistencias desde un solo lugar</p>
-        </div>
-        <div class="welcome-date">
-          <span id="currentDate"></span>
-        </div>
-      </div>
-
-      <!-- Stats Grid -->
-      <div class="stats-grid fade-in">
-        <div class="stat-card">
-          <div class="stat-icon primary">👥</div>
-          <div class="stat-content">
-            <h3 id="totalTeams">0</h3>
-            <p>Equipos</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon success">⚽</div>
-          <div class="stat-content">
-            <h3 id="totalPlayers">0</h3>
-            <p>Jugadores</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon warning">📅</div>
-          <div class="stat-content">
-            <h3 id="totalEvents">0</h3>
-            <p>Eventos</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon info">✅</div>
-          <div class="stat-content">
-            <h3 id="attendanceRate">0%</h3>
-            <p>Asistencia</p>
-          </div>
+      
+      <!-- Calendario Semanal -->
+      <div class="section-header">
+        <h2>Mi Semana</h2>
+        <div class="week-navigation">
+          <button id="prevWeek" class="week-btn">←</button>
+          <span id="weekRange">Cargando...</span>
+          <button id="nextWeek" class="week-btn">→</button>
         </div>
       </div>
 
-      <!-- Quick Actions -->
+      <div class="weekly-calendar" id="weeklyCalendar">
+        <!-- Se genera dinámicamente con JavaScript -->
+      </div>
+
+      <!-- Botón de Asistencia (solo visible si hay entrenamiento hoy) -->
+      <div id="todayTrainingSection" style="display: none;">
+        <div class="today-training-card">
+          <div class="training-info">
+            <h3>🏃‍♂️ Entrenamiento de hoy</h3>
+            <p id="todayTrainingDetails"></p>
+          </div>
+          <button id="takeAttendanceBtn" class="primary-btn-large">
+            Pasar Asistencia
+          </button>
+        </div>
+      </div>
+
+      <!-- Accesos Rápidos (minimalista) -->
       <div class="section-header">
         <h3>Accesos Rápidos</h3>
       </div>
       
-      <div class="cards-grid fade-in" id="cardsContainer">
-        <a href="/pages/teams.html" class="action-card">
-          <div class="card-icon primary">👥</div>
-          <h4>Mis Equipos</h4>
-          <p>Gestiona equipos y jugadores</p>
-          <span class="card-arrow">→</span>
+      <div class="quick-actions" id="quickActions">
+        <a href="/pages/teams.html" class="quick-action-btn">
+          <span class="icon">👥</span>
+          <span class="text">Mis Equipos</span>
         </a>
       </div>
+
     </div>
   </main>
 
