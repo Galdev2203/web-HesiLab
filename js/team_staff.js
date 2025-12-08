@@ -1,6 +1,7 @@
 // team_staff.js - Lógica para gestión de entrenadores
 import { supabase } from "../js/supabaseClient.js";
 import { initHeader } from "../js/headerComponent.js";
+import { initPermissions, hasPermission } from "../js/permissionsHelper.js";
 
 // Validar sesión
 const { data: sessionData } = await supabase.auth.getSession();
@@ -21,6 +22,10 @@ if (!teamId) {
 
 // Mi rol actual
 let myRole = null;
+let canManageStaff = false;
+
+// Inicializar permisos
+await initPermissions();
 
 async function loadMyRole() {
   const { data, error } = await supabase
@@ -37,6 +42,10 @@ async function loadMyRole() {
   }
 
   myRole = data.role;
+  
+  // Verificar permiso para gestionar staff
+  canManageStaff = await hasPermission(teamId, 'MANAGE_STAFF') || myRole === 'principal';
+  console.log('Puede gestionar staff:', canManageStaff, 'Rol:', myRole);
 }
 
 // Inicializar header
@@ -128,17 +137,17 @@ async function loadStaff() {
     card.appendChild(staffInfo);
     card.appendChild(staffActions);
 
-    // Permisos
-    if (myRole !== "principal") {
+    // Permisos - usar sistema de permisos
+    if (!canManageStaff) {
       deleteBtn.style.display = "none";
-      roleSelect.style.display = "none";
+      roleSelect.disabled = true;
       saveRoleBtn.style.display = "none";
     }
 
     // No puedo editarme a mí mismo
     if (staff.user_id === user.id) {
       deleteBtn.style.display = "none";
-      roleSelect.style.display = "none";
+      roleSelect.disabled = true;
       saveRoleBtn.style.display = "none";
     }
 
@@ -244,6 +253,12 @@ async function loadStaff() {
 
 loadStaff();
 
+// Mostrar/ocultar formulario de añadir según permisos
+if (!canManageStaff) {
+  const addBox = document.getElementById('addBox');
+  if (addBox) addBox.style.display = 'none';
+}
+
 // Añadir entrenador
 document.getElementById("addBtn").onclick = async () => {
   const email = document.getElementById("emailInput").value.trim();
@@ -289,7 +304,7 @@ document.getElementById("addBtn").onclick = async () => {
   // Insertar permisos seleccionados
   if (selectedPermissions.length > 0) {
     const permissionsToInsert = selectedPermissions.map(perm => ({
-      staff_id: staffData.id,
+      team_staff_id: staffData.id,
       permission: perm,
       value: true
     }));
