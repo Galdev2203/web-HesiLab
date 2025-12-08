@@ -37,6 +37,7 @@ async function loadTeams() {
   
   data.forEach(row => {
     const team = row.teams;
+    const isHeadCoach = row.role === 'HEAD_COACH';
     const div = document.createElement('div');
     div.className = 'team-card fade-in';
     div.innerHTML = `
@@ -46,8 +47,9 @@ async function loadTeams() {
       </div>
       <div class="team-actions">
         <button class="primary-btn" data-teamid="${team.id}">➜ Entrar</button>
-        ${row.role === 'principal' 
-          ? `<button class="danger-btn" data-teamid="${team.id}" data-action="delete">🗑️ Eliminar</button>` 
+        ${isHeadCoach 
+          ? `<button class="secondary-btn" data-teamid="${team.id}" data-action="edit" data-name="${team.name}" data-category="${team.category || ''}">✏️ Editar</button>
+             <button class="danger-btn" data-teamid="${team.id}" data-action="delete">🗑️ Eliminar</button>` 
           : ``}
       </div>
     `;
@@ -62,14 +64,24 @@ async function loadTeams() {
     }
   });
 
+  document.querySelectorAll('button.secondary-btn[data-action="edit"]').forEach(b => {
+    b.onclick = () => {
+      const teamId = b.getAttribute('data-teamid');
+      const teamName = b.getAttribute('data-name');
+      const teamCategory = b.getAttribute('data-category');
+      openEditModal(teamId, teamName, teamCategory);
+    }
+  });
+
   document.querySelectorAll('button.danger-btn[data-action="delete"]').forEach(b => {
     b.onclick = async () => {
-      if (!confirm('¿Eliminar equipo? Esta acción eliminará relaciones; confirmar.')) return;
+      if (!confirm('¿Eliminar equipo? Esta acción eliminará todos los datos relacionados (jugadores, entrenamientos, eventos, etc.). ¿Estás seguro?')) return;
       const teamId = b.getAttribute('data-teamid');
       
-      // Borrar equipo (también se eliminarán filas relacionadas por FK)
+      // Borrar equipo (también se eliminarán filas relacionadas por FK con CASCADE)
       const { error } = await supabase.from('teams').delete().eq('id', teamId);
       if (error) return alert('Error al eliminar: ' + error.message);
+      alert('Equipo eliminado correctamente');
       loadTeams();
     }
   });
@@ -102,6 +114,51 @@ document.getElementById('createBtn').onclick = async () => {
   document.getElementById('teamName').value = '';
   document.getElementById('teamCategory').value = '';
   loadTeams();
+};
+
+// Variables para edición
+let currentEditTeamId = null;
+
+// Abrir modal de edición
+function openEditModal(teamId, name, category) {
+  currentEditTeamId = teamId;
+  document.getElementById('editTeamName').value = name;
+  document.getElementById('editTeamCategory').value = category || '';
+  document.getElementById('editModal').style.display = 'flex';
+}
+
+// Guardar edición
+document.getElementById('saveEditBtn').onclick = async () => {
+  if (!currentEditTeamId) return;
+  
+  const name = document.getElementById('editTeamName').value.trim();
+  const category = document.getElementById('editTeamCategory').value.trim();
+  
+  if (!name) return alert('El nombre del equipo es obligatorio');
+  
+  const { error } = await supabase
+    .from('teams')
+    .update({ 
+      name: name, 
+      category: category || null 
+    })
+    .eq('id', currentEditTeamId);
+  
+  if (error) {
+    console.error('Error actualizando equipo:', error);
+    return alert('Error al actualizar: ' + error.message);
+  }
+  
+  document.getElementById('editModal').style.display = 'none';
+  currentEditTeamId = null;
+  loadTeams();
+};
+
+// Cerrar modal al hacer clic fuera
+document.getElementById('editModal').onclick = (e) => {
+  if (e.target.id === 'editModal') {
+    document.getElementById('editModal').style.display = 'none';
+  }
 };
 
 // Cargar inicial
