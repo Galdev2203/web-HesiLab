@@ -3,13 +3,9 @@ import { supabase } from './supabaseClient.js';
 import { requireSession } from './utils/supabaseHelpers.js';
 import { formatDate as formatDateUtil, formatTime } from './utils/domHelpers.js';
 
-// Verificar sesión
-await requireSession();
-const { data: { session } } = await supabase.auth.getSession();
-const user = session.user;
-
 // Estado del calendario
 let currentWeekStart = getWeekStart(new Date());
+let user = null;
 
 // ============================================
 // SIDEBAR Y MENÚ
@@ -275,7 +271,7 @@ class CalendarManager {
     });
   }
 
-  showEmptyState() {
+  async showEmptyState() {
     this.calendar.innerHTML = `
       <div class="empty-state" style="grid-column: 1 / -1; padding: 3rem; text-align: center;">
         <div class="empty-icon" style="font-size: 4rem; margin-bottom: 1rem;">📅</div>
@@ -442,6 +438,11 @@ class CollapsibleSectionsManager {
 // INICIALIZACIÓN
 // ============================================
 document.addEventListener('DOMContentLoaded', async () => {
+  // Verificar sesión
+  await requireSession();
+  const { data: { session } } = await supabase.auth.getSession();
+  user = session.user;
+
   // Inicializar componentes
   const sidebar = new SidebarManager();
   const profile = new ProfileManager(user);
