@@ -534,11 +534,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Crear controlador
     const controller = new AttendanceController(teamId);
 
-    // Establecer fecha de hoy por defecto
-    const today = new Date().toISOString().split('T')[0];
+    // Establecer fecha de hoy por defecto (zona horaria local)
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayString = `${year}-${month}-${day}`;
+    
     const dateInput = document.getElementById('selectedDate');
     if (dateInput) {
-      dateInput.value = today;
+      dateInput.value = todayString;
     }
 
     // Event listeners
