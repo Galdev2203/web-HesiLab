@@ -47,9 +47,23 @@ async function loadTeams() {
 
   container.innerHTML = '';
   
-  data.forEach(row => {
+  // Cargar stats para todos los equipos
+  for (const row of data) {
     const team = row.teams;
     const isHeadCoach = row.role === 'HEAD_COACH' || row.role === 'principal';
+    
+    // Obtener conteo de jugadores activos
+    const { count: playersCount } = await supabase
+      .from('players')
+      .select('*', { count: 'exact', head: true })
+      .eq('team_id', team.id)
+      .eq('active', true);
+    
+    // Obtener conteo de entrenamientos
+    const { count: trainingsCount } = await supabase
+      .from('trainings')
+      .select('*', { count: 'exact', head: true })
+      .eq('team_id', team.id);
     
     const div = document.createElement('div');
     div.className = 'team-card fade-in';
@@ -72,13 +86,13 @@ async function loadTeams() {
           : ``}
       </div>
       <div class="team-stats">
-        <div class="stat-item"><strong>0</strong> jugadores</div>
-        <div class="stat-item"><strong>0</strong> entrenamientos</div>
+        <div class="stat-item"><strong>${playersCount || 0}</strong> ${playersCount === 1 ? 'jugador' : 'jugadores'}</div>
+        <div class="stat-item"><strong>${trainingsCount || 0}</strong> ${trainingsCount === 1 ? 'entrenamiento' : 'entrenamientos'}</div>
       </div>
     `;
     
     container.appendChild(div);
-  });
+  }
 
   // Hacer cards clickeables (excepto el menú)
   document.querySelectorAll('.team-card').forEach(card => {
@@ -243,26 +257,37 @@ async function createTeam(name, category) {
 
     console.log('Equipo creado:', newTeam);
 
-    // 2. El trigger automáticamente añade al creador como staff con rol 'principal'
-    // Esperar un momento para que el trigger se ejecute
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // 2. El trigger automáticamente añade al creador como staff
+    // Esperar y hacer múltiples intentos para obtener el registro de staff
+    let staffData = null;
+    let attempts = 0;
+    const maxAttempts = 5;
+    
+    while (!staffData && attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const { data, error } = await supabase
+        .from('team_staff')
+        .select('id, role')
+        .eq('team_id', newTeam.id)
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-    // 3. Obtener el registro de staff creado por el trigger
-    const { data: staffData, error: staffError } = await supabase
-      .from('team_staff')
-      .select('id')
-      .eq('team_id', newTeam.id)
-      .eq('user_id', user.id)
-      .single();
-
-    if (staffError) {
-      console.error('Error obteniendo staff:', staffError);
-      throw new Error('No se pudo obtener el staff del equipo');
+      if (data) {
+        staffData = data;
+        console.log('Staff encontrado:', staffData);
+        break;
+      }
+      
+      attempts++;
+      console.log(`Intento ${attempts}/${maxAttempts} - Esperando a que el trigger cree el staff...`);
     }
 
-    console.log('Staff creado:', staffData);
+    if (!staffData) {
+      throw new Error('No se pudo obtener el registro de staff después de ' + maxAttempts + ' intentos');
+    }
 
-    // 4. Crear todos los permisos para el principal
+    // 3. Crear todos los permisos para el principal
     const allPermissions = [
       'MANAGE_TEAM',
       'MANAGE_STAFF',
@@ -279,18 +304,44 @@ async function createTeam(name, category) {
       value: true
     }));
 
-    const { error: permError } = await supabase
+    console.log('Insertando permisos:', permissionsToInsert);
+
+    const { data: insertedPerms, error: permError } = await supabase
       .from('team_staff_permissions')
-      .insert(permissionsToInsert);
+      .insert(permissionsToInsert)
+      .select();
 
     if (permError) {
-      console.error('Error creando permisos:', permError);
-      alert('Equipo creado, pero hubo un problema al asignar permisos. Contacta con soporte.');
+      console.error('Error creando permisos - Detalles:', permError);
+      console.error('team_staff_id:', staffData.id);
+      console.error('Permisos a insertar:', permissionsToInsert);
+      
+      // Intentar insertar permisos uno por uno para identificar cuál falla
+      console.log('Intentando inserción individual de permisos...');
+      let successCount = 0;
+      for (const perm of permissionsToInsert) {
+        const { error: singleError } = await supabase
+          .from('team_staff_permissions')
+          .insert(perm);
+        
+        if (singleError) {
+          console.error(`Error insertando permiso ${perm.permission}:`, singleError);
+        } else {
+          successCount++;
+        }
+      }
+      
+      if (successCount > 0) {
+        console.log(`Se insertaron ${successCount}/${allPermissions.length} permisos`);
+        alert(`¡Equipo creado! (${successCount}/${allPermissions.length} permisos asignados)`);
+      } else {
+        alert('Equipo creado, pero hubo un problema al asignar permisos. Por favor, verifica los permisos manualmente.');
+      }
     } else {
-      console.log('Permisos asignados correctamente');
+      console.log('Permisos asignados correctamente:', insertedPerms);
+      alert('¡Equipo creado con éxito!');
     }
 
-    alert('¡Equipo creado con éxito!');
     closeModal();
     loadTeams();
 
@@ -322,3 +373,12 @@ async function updateTeam(teamId, name, category) {
 
 // Cargar inicial
 loadTeams();
+
+// Recargar equipos cuando la página se vuelve visible
+// (útil cuando vuelves de añadir jugadores o entrenamientos)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    console.log('Página visible - recargando equipos...');
+    loadTeams();
+  }
+});
