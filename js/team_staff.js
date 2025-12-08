@@ -30,22 +30,35 @@ await initPermissions();
 async function loadMyRole() {
   const { data, error } = await supabase
     .from("team_staff")
-    .select("role")
+    .select("role, id")
     .eq("team_id", teamId)
     .eq("user_id", user.id)
     .eq("active", true)
     .single();
 
   if (error || !data) {
+    console.error("Error cargando rol:", error);
     document.getElementById("errorMsg").innerText = "No tienes permiso para ver este equipo.";
+    document.getElementById("errorMsg").style.display = "block";
     throw new Error("No permission");
   }
 
   myRole = data.role;
+  console.log('Mi rol:', myRole, 'Staff ID:', data.id);
   
   // Verificar permiso para gestionar staff
-  canManageStaff = await hasPermission(teamId, 'MANAGE_STAFF') || myRole === 'principal';
-  console.log('Puede gestionar staff:', canManageStaff, 'Rol:', myRole);
+  // Aceptar tanto 'principal' (español) como 'HEAD_COACH' (inglés)
+  const isPrincipal = myRole === 'principal' || myRole === 'HEAD_COACH';
+  const hasManageStaffPerm = await hasPermission(teamId, 'MANAGE_STAFF');
+  
+  canManageStaff = hasManageStaffPerm || isPrincipal;
+  
+  console.log('=== DEBUG PERMISOS ===');
+  console.log('Rol:', myRole);
+  console.log('Es principal:', isPrincipal);
+  console.log('Tiene MANAGE_STAFF:', hasManageStaffPerm);
+  console.log('Puede gestionar staff:', canManageStaff);
+  console.log('=====================');
 }
 
 // Inicializar header

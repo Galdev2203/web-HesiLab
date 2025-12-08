@@ -159,17 +159,25 @@ async function loadWeeklyCalendar() {
   if (!teamsData || teamsData.length === 0) {
     weeklyCalendar.innerHTML = `
       <div class="empty-state" style="grid-column: 1 / -1; padding: 3rem; text-align: center;">
-        <div class="empty-icon" style="font-size: 4rem; margin-bottom: 1rem;">\uD83D\uDCC5</div>
+        <div class="empty-icon" style="font-size: 4rem; margin-bottom: 1rem;">📅</div>
         <h3 style="margin: 0 0 0.5rem 0; color: var(--gray-700);">No tienes equipos asignados</h3>
-        <p style="color: var(--gray-500); margin: 0;">Crea un equipo o espera a que te a\u00f1adan a uno para ver entrenamientos y eventos</p>
-        <a href="/pages/teams.html" class="btn btn-primary" style="margin-top: 1.5rem; display: inline-block; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 0.5rem;">\u279C Ir a Mis Equipos</a>
+        <p style="color: var(--gray-500); margin: 0;">Crea un equipo o espera a que te añadan a uno para ver entrenamientos y eventos</p>
+        <a href="/pages/teams.html" class="btn btn-primary" style="margin-top: 1.5rem; display: inline-block; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 0.5rem;">➜ Ir a Mis Equipos</a>
       </div>
     `;
+    
+    // Ocultar el selector de semana
+    const weekNavigation = document.querySelector('.week-navigation');
+    if (weekNavigation) weekNavigation.style.display = 'none';
     
     // También actualizar sección HOY
     await checkTodayTraining([]);
     return;
   }
+
+  // Mostrar el selector de semana si hay equipos
+  const weekNavigation = document.querySelector('.week-navigation');
+  if (weekNavigation) weekNavigation.style.display = 'flex';
 
   const teamIds = teamsData.map(t => t.team_id);
   console.log('IDs de equipos:', teamIds);
