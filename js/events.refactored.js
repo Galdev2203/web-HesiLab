@@ -164,23 +164,27 @@ class EventCardRenderer extends CardRenderer {
 
   attachEventHandlers() {
     // Edit buttons
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        const id = parseInt(btn.dataset.id);
-        const event = this.items.find(ev => ev.id === id);
-        if (event && this.editCallback) this.editCallback(event);
-      };
-    });
+    if (this.editCallback) {
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const id = parseInt(btn.dataset.id);
+          const event = this.items.find(ev => ev.id === id);
+          if (event) this.editCallback(event);
+        };
+      });
+    }
 
     // Delete buttons
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        const id = parseInt(btn.dataset.id);
-        if (this.deleteCallback) this.deleteCallback(id);
-      };
-    });
+    if (this.deleteCallback) {
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const id = parseInt(btn.dataset.id);
+          this.deleteCallback(id);
+        };
+      });
+    }
   }
 }
 

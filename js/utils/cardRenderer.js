@@ -4,9 +4,15 @@
  */
 export class CardRenderer {
   constructor(containerId) {
-    this.container = document.getElementById(containerId);
+    this.containerId = containerId;
     this.items = [];
     this.canManage = false;
+    this.editCallback = null;
+    this.deleteCallback = null;
+  }
+  
+  getContainer() {
+    return document.getElementById(this.containerId);
   }
   
   setItems(items) {
@@ -18,10 +24,15 @@ export class CardRenderer {
   }
   
   render(emptyMessage = 'No hay elementos') {
-    if (!this.container) return;
+    const container = this.getContainer();
+    
+    if (!container) {
+      console.error('Container not found:', this.containerId);
+      return;
+    }
     
     if (this.items.length === 0) {
-      this.container.innerHTML = `
+      container.innerHTML = `
         <div class="empty-state">
           <p>${emptyMessage}</p>
         </div>
@@ -29,14 +40,15 @@ export class CardRenderer {
       return;
     }
     
-    this.container.innerHTML = '';
+    container.innerHTML = '';
     
     this.items.forEach(item => {
       const card = this.createCard(item);
-      this.container.appendChild(card);
+      container.appendChild(card);
     });
     
     this.attachMenuHandlers();
+    this.attachCallbacks();
   }
   
   createCard(item) {
@@ -88,25 +100,37 @@ export class CardRenderer {
   }
   
   onEdit(callback) {
-    document.querySelectorAll('.edit-item').forEach(btn => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        const itemId = btn.dataset.id;
-        const item = this.items.find(i => i.id === itemId);
-        if (item) callback(item);
-        btn.closest('.menu-dropdown').classList.remove('show');
-      };
-    });
+    this.editCallback = callback;
   }
   
   onDelete(callback) {
-    document.querySelectorAll('.delete-item').forEach(btn => {
-      btn.onclick = async (e) => {
-        e.stopPropagation();
-        const itemId = btn.dataset.id;
-        await callback(itemId);
-        btn.closest('.menu-dropdown').classList.remove('show');
-      };
-    });
+    this.deleteCallback = callback;
+  }
+  
+  attachCallbacks() {
+    // Edit buttons
+    if (this.editCallback) {
+      document.querySelectorAll('.edit-item').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const itemId = btn.dataset.id;
+          const item = this.items.find(i => i.id == itemId);
+          if (item) this.editCallback(item);
+          btn.closest('.menu-dropdown')?.classList.remove('show');
+        };
+      });
+    }
+    
+    // Delete buttons  
+    if (this.deleteCallback) {
+      document.querySelectorAll('.delete-item').forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          const itemId = btn.dataset.id;
+          await this.deleteCallback(itemId);
+          btn.closest('.menu-dropdown')?.classList.remove('show');
+        };
+      });
+    }
   }
 }

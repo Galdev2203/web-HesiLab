@@ -78,6 +78,11 @@ class TeamCardRenderer extends CardRenderer {
   async render(emptyMessage = 'No tienes equipos todavía. ¡Crea tu primer equipo!') {
     const container = document.getElementById(this.containerId);
 
+    if (!container) {
+      console.error('Container not found:', this.containerId);
+      return;
+    }
+
     if (this.items.length === 0) {
       container.innerHTML = `<div class="empty-state"><p>${emptyMessage}</p></div>`;
       return;
@@ -120,28 +125,32 @@ class TeamCardRenderer extends CardRenderer {
     });
 
     // Edit buttons
-    document.querySelectorAll('.edit-item').forEach(btn => {
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        const team = {
-          id: btn.getAttribute('data-teamid'),
-          name: btn.getAttribute('data-name'),
-          category: btn.getAttribute('data-category')
+    if (this.editCallback) {
+      document.querySelectorAll('.edit-item').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const team = {
+            id: btn.getAttribute('data-teamid'),
+            name: btn.getAttribute('data-name'),
+            category: btn.getAttribute('data-category')
+          };
+          this.editCallback(team);
+          btn.closest('.menu-dropdown').classList.remove('show');
         };
-        if (this.editCallback) this.editCallback(team);
-        btn.closest('.menu-dropdown').classList.remove('show');
-      };
-    });
+      });
+    }
 
     // Delete buttons
-    document.querySelectorAll('.delete-item').forEach(btn => {
-      btn.onclick = async (e) => {
-        e.stopPropagation();
-        const teamId = btn.getAttribute('data-teamid');
-        if (this.deleteCallback) this.deleteCallback(teamId);
-        btn.closest('.menu-dropdown').classList.remove('show');
-      };
-    });
+    if (this.deleteCallback) {
+      document.querySelectorAll('.delete-item').forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          const teamId = btn.getAttribute('data-teamid');
+          this.deleteCallback(teamId);
+          btn.closest('.menu-dropdown').classList.remove('show');
+        };
+      });
+    }
 
     // Cerrar dropdowns al hacer clic fuera
     document.addEventListener('click', (e) => {
