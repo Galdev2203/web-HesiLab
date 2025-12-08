@@ -1,424 +1,231 @@
 // attendance.js - Sistema de asistencia con generación lazy
-import { supabase } from '../js/supabaseClient.js';
+import { supabase } from './supabaseClient.js';
 import { 
   initPermissions, 
   hasPermission, 
   getUserRole,
   getRoleLabel 
-} from '../js/permissionsHelper.js';
-import { initHeader } from '../js/headerComponent.js';
+} from './permissionsHelper.js';
+import { initHeader } from './headerComponent.js';
+import { requireSession, requireTeamId } from './utils/supabaseHelpers.js';
+import { escapeHtml, showError } from './utils/domHelpers.js';
 
-// Validar sesión
-const { data: sessionData } = await supabase.auth.getSession();
-if (!sessionData.session) {
-  window.location.href = '/pages/index.html';
-  throw new Error('No session');
-}
-
-// Obtener team_id
-const params = new URLSearchParams(window.location.search);
-const teamId = params.get('team_id');
-
-if (!teamId) {
-  alert('Error: falta team_id');
-  window.location.href = '/pages/dashboard.html';
-  throw new Error('Missing team_id');
-}
-
-// Inicializar header después de validar teamId
-await initHeader({
-  title: '📋 Asistencia',
-  backUrl: true,
-  activeNav: null
-});
-
-// Inicializar permisos
-await initPermissions();
-
-// Verificar permisos
-const canManage = await hasPermission(teamId, 'MANAGE_ATTENDANCE');
-const userRole = await getUserRole(teamId);
-
-if (!canManage) {
-  document.getElementById('errorMsg').style.display = 'block';
-  document.getElementById('errorMsg').innerText = `No tienes permiso para gestionar asistencia. Tu rol: ${getRoleLabel(userRole)}`;
-}
-
-// Estado
-let currentDate = null;
-let currentSession = null;
-let currentEvent = null;
-let attendanceRecords = [];
+// Variables globales
+let teamId = null;
+let canManage = false;
 let activePlayers = [];
-let pendingChanges = new Map(); // player_id -> { status, notes }
 
-/**
- * Cargar asistencia para una fecha
- */
-async function loadAttendanceForDate() {
-  const dateInput = document.getElementById('selectedDate');
-  const selectedDate = dateInput.value;
-
-  if (!selectedDate) {
-    alert('Selecciona una fecha');
-    return;
+// ============================================
+// GESTOR DE SESIONES Y EVENTOS
+// ============================================
+class SessionEventManager {
+  constructor(teamId) {
+    this.teamId = teamId;
+    this.currentSession = null;
+    this.currentEvent = null;
   }
 
-  currentDate = selectedDate;
-  const dayOfWeek = new Date(selectedDate).getDay();
+  async loadForDate(date) {
+    const dayOfWeek = new Date(date).getDay();
 
-  const container = document.getElementById('attendanceList');
-  container.innerHTML = '<div class="loading">Cargando...</div>';
-
-  try {
-    // 1. Buscar sesión de entrenamiento para ese día de la semana
+    // Buscar sesión de entrenamiento
     const { data: sessions, error: sessionsError } = await supabase
       .from('team_training_sessions')
       .select('*')
-      .eq('team_id', teamId)
+      .eq('team_id', this.teamId)
       .eq('weekday', dayOfWeek);
 
     if (sessionsError) throw sessionsError;
+    this.currentSession = sessions && sessions.length > 0 ? sessions[0] : null;
 
-    currentSession = sessions && sessions.length > 0 ? sessions[0] : null;
-
-    // 2. Buscar evento específico para esa fecha
+    // Buscar evento específico
     const { data: events, error: eventsError } = await supabase
       .from('team_events')
       .select('*')
-      .eq('team_id', teamId)
-      .eq('event_date', selectedDate);
+      .eq('team_id', this.teamId)
+      .eq('event_date', date);
 
     if (eventsError) throw eventsError;
+    this.currentEvent = events && events.length > 0 ? events[0] : null;
 
-    currentEvent = events && events.length > 0 ? events[0] : null;
+    return { session: this.currentSession, event: this.currentEvent };
+  }
 
-    // 3. Si no hay sesión ni evento, mostrar mensaje
-    if (!currentSession && !currentEvent) {
-      showNoSessionMessage();
-      return;
+  hasActivity() {
+    return this.currentSession || this.currentEvent;
+  }
+
+  displayInfo() {
+    const infoBox = document.getElementById('sessionInfo');
+    const badge = document.getElementById('sessionTypeBadge');
+    const details = document.getElementById('sessionDetails');
+
+    if (this.currentEvent) {
+      this.displayEventInfo(badge, details);
+    } else if (this.currentSession) {
+      this.displaySessionInfo(badge, details);
     }
 
-    // 4. Mostrar info de la sesión/evento
-    displaySessionInfo();
+    infoBox.style.display = 'flex';
+  }
 
-    // 5. Cargar jugadores activos
-    const { data: players, error: playersError } = await supabase
-      .from('players')
-      .select('*')
-      .eq('team_id', teamId)
-      .eq('active', true)
-      .order('number');
-
-    console.log('Jugadores cargados:', players);
-    console.log('Error jugadores:', playersError);
-
-    if (playersError) throw playersError;
-
-    activePlayers = players || [];
-
-    if (activePlayers.length === 0) {
-      container.innerHTML = '<div class="empty-state"><p>No hay jugadores activos en el equipo</p></div>';
-      document.getElementById('actionsBar').style.display = 'none';
-      return;
+  displayEventInfo(badge, details) {
+    const eventTypes = {
+      'MATCH': '⚽ Partido oficial',
+      'FRIENDLY': '🤝 Amistoso',
+      'TOURNAMENT': '🏆 Torneo',
+      'TRAINING': '⚽ Entrenamiento',
+      'MEETING': '👥 Reunión',
+      'OTHER': '📌 Otro'
+    };
+    
+    badge.textContent = eventTypes[this.currentEvent.type] || this.currentEvent.type;
+    badge.className = 'session-type-badge event-badge';
+    
+    let detailsHtml = '';
+    if (this.currentEvent.title) detailsHtml += `<strong>${escapeHtml(this.currentEvent.title)}</strong><br>`;
+    if (this.currentEvent.start_time) {
+      const end = this.currentEvent.end_time ? ` - ${this.currentEvent.end_time.substring(0, 5)}` : '';
+      detailsHtml += `🕐 ${this.currentEvent.start_time.substring(0, 5)}${end}<br>`;
     }
+    if (this.currentEvent.location) detailsHtml += `📍 ${escapeHtml(this.currentEvent.location)}`;
+    
+    details.innerHTML = detailsHtml;
+  }
 
-    // 6. Cargar registros de asistencia existentes (primero verificar estructura)
-    const { data: existingAttendance, error: attendanceError } = await supabase
+  displaySessionInfo(badge, details) {
+    const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    badge.textContent = `⚽ Entrenamiento - ${weekdays[this.currentSession.weekday]}`;
+    badge.className = 'session-type-badge training-badge';
+    
+    let detailsHtml = '';
+    if (this.currentSession.start_time) {
+      const end = this.currentSession.end_time ? ` - ${this.currentSession.end_time.substring(0, 5)}` : '';
+      detailsHtml += `🕐 ${this.currentSession.start_time.substring(0, 5)}${end}<br>`;
+    }
+    if (this.currentSession.location) detailsHtml += `📍 ${escapeHtml(this.currentSession.location)}`;
+    
+    details.innerHTML = detailsHtml;
+  }
+}
+
+// ============================================
+// GESTOR DE REGISTROS DE ASISTENCIA
+// ============================================
+class AttendanceRecordsManager {
+  constructor(teamId) {
+    this.teamId = teamId;
+    this.records = [];
+    this.pendingChanges = new Map();
+  }
+
+  async loadForDate(date, sessionEventManager) {
+    // Cargar registros existentes
+    const { data: existingAttendance, error } = await supabase
       .from('attendance')
       .select('*')
-      .eq('team_id', teamId)
-      .eq('date', selectedDate)
-      .limit(1);
+      .eq('team_id', this.teamId)
+      .eq('date', date);
 
-    if (attendanceError) throw attendanceError;
+    if (error) throw error;
 
-    // Si hay registros, cargar todos
     if (existingAttendance && existingAttendance.length > 0) {
-      const { data: allAttendance, error: allError } = await supabase
-        .from('attendance')
-        .select('*')
-        .eq('team_id', teamId)
-        .eq('date', selectedDate);
-
-      if (allError) throw allError;
+      // Combinar con datos de jugadores
+      const attendanceMap = new Map(existingAttendance.map(a => [a.player_id, a]));
       
-      // Combinar registros de asistencia con datos de jugadores
-      const attendanceMap = new Map(allAttendance.map(a => [a.player_id, a]));
-      
-      attendanceRecords = activePlayers.map(player => {
+      this.records = activePlayers.map(player => {
         const existingRecord = attendanceMap.get(player.id);
         if (existingRecord) {
-          // Jugador con registro existente
-          return {
-            ...existingRecord,
-            _playerData: player
-          };
+          return { ...existingRecord, _playerData: player };
         } else {
-          // Jugador nuevo sin registro todavía
-          return {
-            id: null,
-            team_id: teamId,
-            player_id: player.id,
-            date: currentDate,
-            session_id: currentSession?.id || null,
-            event_id: currentEvent?.id || null,
-            status: 'PRESENT',
-            notes: null,
-            _isNew: true,
-            _playerData: player
-          };
+          return this.createNewRecord(player, date, sessionEventManager);
         }
       });
-      
-      renderAttendanceList();
     } else {
-      // 7. Si no hay registros, generar lazy
-      generateLazyAttendance();
+      // Generar registros lazy
+      this.generateLazy(date, sessionEventManager);
     }
 
-  } catch (error) {
-    console.error('Error loading attendance:', error);
-    container.innerHTML = `<div class="error-state">Error: ${error.message}</div>`;
+    return this.records;
   }
-}
 
-/**
- * Generar pase de lista lazy (sin insertar en BD hasta guardar)
- */
-function generateLazyAttendance() {
-  attendanceRecords = activePlayers.map(player => ({
-    id: null, // No existe en BD todavía
-    team_id: teamId,
-    player_id: player.id,
-    date: currentDate,
-    session_id: currentSession?.id || null,
-    event_id: currentEvent?.id || null,
-    status: 'PRESENT',
-    notes: null,
-    _isNew: true,
-    _playerData: player
-  }));
+  generateLazy(date, sessionEventManager) {
+    this.records = activePlayers.map(player => 
+      this.createNewRecord(player, date, sessionEventManager)
+    );
+  }
 
-  renderAttendanceList();
-}
+  createNewRecord(player, date, sessionEventManager) {
+    return {
+      id: null,
+      team_id: this.teamId,
+      player_id: player.id,
+      date: date,
+      session_id: sessionEventManager.currentSession?.id || null,
+      event_id: sessionEventManager.currentEvent?.id || null,
+      status: 'PRESENT',
+      notes: null,
+      _isNew: true,
+      _playerData: player
+    };
+  }
 
-/**
- * Renderizar lista de asistencia
- */
-function renderAttendanceList() {
-  const container = document.getElementById('attendanceList');
-  container.innerHTML = '';
+  updateStatus(playerId, status) {
+    const existing = this.pendingChanges.get(playerId) || {};
+    this.pendingChanges.set(playerId, { ...existing, status });
+  }
 
-  // Combinar registros con datos de jugadores
-  const recordsWithPlayers = attendanceRecords.map(record => {
-    const playerData = record._playerData || activePlayers.find(p => p.id === record.player_id);
-    return { ...record, _playerData: playerData };
-  });
+  updateNotes(playerId, notes) {
+    const existing = this.pendingChanges.get(playerId) || {};
+    this.pendingChanges.set(playerId, { ...existing, notes: notes.trim() || null });
+  }
 
-  // Crear tabla
-  const table = document.createElement('table');
-  table.className = 'attendance-table';
-  
-  table.innerHTML = `
-    <thead>
-      <tr>
-        <th>Jugador</th>
-        <th>Estado</th>
-        <th>Notas</th>
-      </tr>
-    </thead>
-    <tbody id="attendanceTableBody"></tbody>
-  `;
-
-  const tbody = table.querySelector('#attendanceTableBody');
-
-  recordsWithPlayers.forEach(record => {
-    const row = createAttendanceRow(record);
-    tbody.appendChild(row);
-  });
-
-  container.appendChild(table);
-
-  // Mostrar barra de acciones
-  document.getElementById('actionsBar').style.display = 'flex';
-  
-  // Mostrar resumen
-  updateSummary();
-}
-
-/**
- * Crear fila de asistencia
- */
-function createAttendanceRow(record) {
-  const player = record._playerData;
-  if (!player) return document.createElement('tr');
-
-  const row = document.createElement('tr');
-
-  // Aplicar cambios pendientes si existen
-  const pending = pendingChanges.get(player.id);
-  const displayStatus = pending?.status || record.status;
-  const displayNotes = pending?.notes !== undefined ? pending.notes : record.notes;
-
-  row.innerHTML = `
-    <td data-label="Jugador">
-      <div class="player-info">
-        <div class="player-number">${player.number || '?'}</div>
-        <div class="player-name">${escapeHtml(player.name)}</div>
-      </div>
-    </td>
-    <td data-label="Estado">
-      <div class="status-buttons">
-        <button class="status-btn ${displayStatus === 'PRESENT' ? 'active present' : ''}" 
-                data-player-id="${player.id}" data-status="PRESENT">
-          ✅ Presente
-        </button>
-        <button class="status-btn ${displayStatus === 'ABSENT' ? 'active absent' : ''}" 
-                data-player-id="${player.id}" data-status="ABSENT">
-          ❌ Ausente
-        </button>
-        <button class="status-btn ${displayStatus === 'LATE' ? 'active late' : ''}" 
-                data-player-id="${player.id}" data-status="LATE">
-          ⏰ Tarde
-        </button>
-        <button class="status-btn ${displayStatus === 'EXCUSED' ? 'active excused' : ''}" 
-                data-player-id="${player.id}" data-status="EXCUSED">
-          📝 Justif.
-        </button>
-      </div>
-    </td>
-    <td data-label="Notas">
-      <input type="text" class="notes-input" 
-             data-player-id="${player.id}"
-             placeholder="Añadir nota..."
-             value="${escapeHtml(displayNotes || '')}">
-    </td>
-  `;
-
-  // Eventos
-  row.querySelectorAll('.status-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const playerId = btn.dataset.playerId;
-      const status = btn.dataset.status;
-      handleStatusChange(playerId, status);
+  markAll(status) {
+    activePlayers.forEach(player => {
+      const existing = this.pendingChanges.get(player.id) || {};
+      this.pendingChanges.set(player.id, { ...existing, status });
     });
-  });
-
-  row.querySelector('.notes-input').addEventListener('input', (e) => {
-    const playerId = e.target.dataset.playerId;
-    const notes = e.target.value;
-    handleNotesChange(playerId, notes);
-  });
-
-  return row;
-}
-
-/**
- * Manejar cambio de estado
- */
-function handleStatusChange(playerId, status) {
-  const existing = pendingChanges.get(playerId) || {};
-  pendingChanges.set(playerId, { ...existing, status });
-  renderAttendanceList();
-}
-
-/**
- * Manejar cambio de notas
- */
-function handleNotesChange(playerId, notes) {
-  const existing = pendingChanges.get(playerId) || {};
-  pendingChanges.set(playerId, { ...existing, notes: notes.trim() || null });
-}
-
-/**
- * Actualizar resumen de asistencia
- */
-function updateSummary() {
-  const summary = { PRESENT: 0, ABSENT: 0, LATE: 0, EXCUSED: 0 };
-  
-  attendanceRecords.forEach(record => {
-    const pending = pendingChanges.get(record.player_id);
-    const status = pending?.status || record.status;
-    if (summary[status] !== undefined) {
-      summary[status]++;
-    }
-  });
-
-  const summaryContainer = document.getElementById('attendanceSummary');
-  summaryContainer.innerHTML = `
-    <div class="attendance-summary">
-      <div class="summary-item">
-        <span class="summary-number present">${summary.PRESENT}</span>
-        <span class="summary-label">Presentes</span>
-      </div>
-      <div class="summary-item">
-        <span class="summary-number absent">${summary.ABSENT}</span>
-        <span class="summary-label">Ausentes</span>
-      </div>
-      <div class="summary-item">
-        <span class="summary-number late">${summary.LATE}</span>
-        <span class="summary-label">Tarde</span>
-      </div>
-      <div class="summary-item">
-        <span class="summary-number excused">${summary.EXCUSED}</span>
-        <span class="summary-label">Justificados</span>
-      </div>
-    </div>
-  `;
-  summaryContainer.style.display = 'block';
-}
-
-/**
- * Actualizar estado de asistencia (en memoria)
- */
-function updateAttendanceStatus(playerId, status) {
-  const existing = pendingChanges.get(playerId) || {};
-  pendingChanges.set(playerId, { ...existing, status });
-  renderAttendanceList();
-}
-
-/**
- * Actualizar notas de asistencia (en memoria)
- */
-function updateAttendanceNotes(playerId, notes) {
-  const existing = pendingChanges.get(playerId) || {};
-  pendingChanges.set(playerId, { ...existing, notes });
-}
-
-/**
- * Guardar todos los cambios
- */
-async function saveAllChanges() {
-  if (!canManage) {
-    alert('No tienes permiso para gestionar asistencia');
-    return;
   }
 
-  if (attendanceRecords.length === 0) {
-    alert('No hay registros para guardar');
-    return;
+  getStatus(playerId) {
+    const record = this.records.find(r => r.player_id === playerId);
+    const pending = this.pendingChanges.get(playerId);
+    return pending?.status || record?.status || 'PRESENT';
   }
 
-  const saveBtn = document.getElementById('saveAllBtn');
-  saveBtn.disabled = true;
-  saveBtn.textContent = '💾 Guardando...';
+  getNotes(playerId) {
+    const record = this.records.find(r => r.player_id === playerId);
+    const pending = this.pendingChanges.get(playerId);
+    return pending?.notes !== undefined ? pending.notes : record?.notes;
+  }
 
-  try {
-    const recordsToUpsert = attendanceRecords.map(record => {
-      const pending = pendingChanges.get(record.player_id);
+  getSummary() {
+    const summary = { PRESENT: 0, ABSENT: 0, LATE: 0, EXCUSED: 0 };
+    
+    this.records.forEach(record => {
+      const status = this.getStatus(record.player_id);
+      if (summary[status] !== undefined) {
+        summary[status]++;
+      }
+    });
+
+    return summary;
+  }
+
+  async save(date, sessionEventManager) {
+    const recordsToUpsert = this.records.map(record => {
+      const pending = this.pendingChanges.get(record.player_id);
       
       const baseRecord = {
-        team_id: teamId,
+        team_id: this.teamId,
         player_id: record.player_id,
-        date: currentDate,
-        session_id: currentSession?.id || null,
-        event_id: currentEvent?.id || null,
+        date: date,
+        session_id: sessionEventManager.currentSession?.id || null,
+        event_id: sessionEventManager.currentEvent?.id || null,
         status: pending?.status || record.status,
         notes: pending?.notes !== undefined ? pending.notes : record.notes
       };
       
-      // Solo incluir id si existe (para updates)
       if (record.id) {
         baseRecord.id = record.id;
       }
@@ -437,136 +244,335 @@ async function saveAllChanges() {
     if (error) throw error;
 
     // Actualizar registros con IDs generados
-    attendanceRecords = data.map(record => ({
+    this.records = data.map(record => ({
       ...record,
       _isNew: false,
       _playerData: activePlayers.find(p => p.id === record.player_id)
     }));
 
-    pendingChanges.clear();
-    renderAttendanceList();
+    this.pendingChanges.clear();
+    return this.records;
+  }
+}
 
-    alert('✅ Asistencia guardada correctamente');
+// ============================================
+// RENDERIZADOR DE ASISTENCIA
+// ============================================
+class AttendanceRenderer {
+  constructor(recordsManager) {
+    this.recordsManager = recordsManager;
+    this.container = document.getElementById('attendanceList');
+    this.summaryContainer = document.getElementById('attendanceSummary');
+    this.actionsBar = document.getElementById('actionsBar');
+  }
+
+  render() {
+    this.container.innerHTML = '';
+
+    const table = document.createElement('table');
+    table.className = 'attendance-table';
+    
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Jugador</th>
+          <th>Estado</th>
+          <th>Notas</th>
+        </tr>
+      </thead>
+      <tbody id="attendanceTableBody"></tbody>
+    `;
+
+    const tbody = table.querySelector('#attendanceTableBody');
+
+    this.recordsManager.records.forEach(record => {
+      const row = this.createRow(record);
+      tbody.appendChild(row);
+    });
+
+    this.container.appendChild(table);
+    this.actionsBar.style.display = 'flex';
+    this.renderSummary();
+  }
+
+  createRow(record) {
+    const player = record._playerData;
+    if (!player) return document.createElement('tr');
+
+    const row = document.createElement('tr');
+    const displayStatus = this.recordsManager.getStatus(player.id);
+    const displayNotes = this.recordsManager.getNotes(player.id);
+
+    row.innerHTML = `
+      <td data-label="Jugador">
+        <div class="player-info">
+          <div class="player-number">${player.number || '?'}</div>
+          <div class="player-name">${escapeHtml(player.name)}</div>
+        </div>
+      </td>
+      <td data-label="Estado">
+        <div class="status-buttons">
+          <button class="status-btn ${displayStatus === 'PRESENT' ? 'active present' : ''}" 
+                  data-player-id="${player.id}" data-status="PRESENT">
+            ✅ Presente
+          </button>
+          <button class="status-btn ${displayStatus === 'ABSENT' ? 'active absent' : ''}" 
+                  data-player-id="${player.id}" data-status="ABSENT">
+            ❌ Ausente
+          </button>
+          <button class="status-btn ${displayStatus === 'LATE' ? 'active late' : ''}" 
+                  data-player-id="${player.id}" data-status="LATE">
+            ⏰ Tarde
+          </button>
+          <button class="status-btn ${displayStatus === 'EXCUSED' ? 'active excused' : ''}" 
+                  data-player-id="${player.id}" data-status="EXCUSED">
+            📝 Justif.
+          </button>
+        </div>
+      </td>
+      <td data-label="Notas">
+        <input type="text" class="notes-input" 
+               data-player-id="${player.id}"
+               placeholder="Añadir nota..."
+               value="${escapeHtml(displayNotes || '')}">
+      </td>
+    `;
+
+    // Eventos
+    row.querySelectorAll('.status-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.recordsManager.updateStatus(btn.dataset.playerId, btn.dataset.status);
+        this.render();
+      });
+    });
+
+    row.querySelector('.notes-input').addEventListener('input', (e) => {
+      this.recordsManager.updateNotes(e.target.dataset.playerId, e.target.value);
+    });
+
+    return row;
+  }
+
+  renderSummary() {
+    const summary = this.recordsManager.getSummary();
+
+    this.summaryContainer.innerHTML = `
+      <div class="attendance-summary">
+        <div class="summary-item">
+          <span class="summary-number present">${summary.PRESENT}</span>
+          <span class="summary-label">Presentes</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-number absent">${summary.ABSENT}</span>
+          <span class="summary-label">Ausentes</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-number late">${summary.LATE}</span>
+          <span class="summary-label">Tarde</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-number excused">${summary.EXCUSED}</span>
+          <span class="summary-label">Justificados</span>
+        </div>
+      </div>
+    `;
+    this.summaryContainer.style.display = 'block';
+  }
+
+  showNoSession() {
+    this.container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <p>No hay entrenamiento ni evento programado para esta fecha</p>
+        <p class="empty-hint">Configura entrenamientos semanales o crea eventos específicos primero</p>
+      </div>
+    `;
+    
+    document.getElementById('sessionInfo').style.display = 'none';
+    this.actionsBar.style.display = 'none';
+  }
+
+  showNoPlayers() {
+    this.container.innerHTML = '<div class="empty-state"><p>No hay jugadores activos en el equipo</p></div>';
+    this.actionsBar.style.display = 'none';
+  }
+
+  showLoading() {
+    this.container.innerHTML = '<div class="loading">Cargando...</div>';
+  }
+
+  showError(message) {
+    this.container.innerHTML = `<div class="error-state">Error: ${message}</div>`;
+  }
+}
+
+// ============================================
+// CONTROLADOR PRINCIPAL
+// ============================================
+class AttendanceController {
+  constructor(teamId) {
+    this.teamId = teamId;
+    this.currentDate = null;
+    this.sessionEventManager = new SessionEventManager(teamId);
+    this.recordsManager = new AttendanceRecordsManager(teamId);
+    this.renderer = new AttendanceRenderer(this.recordsManager);
+  }
+
+  async loadForDate(date) {
+    this.currentDate = date;
+    this.renderer.showLoading();
+
+    try {
+      // Cargar sesión/evento
+      await this.sessionEventManager.loadForDate(date);
+
+      if (!this.sessionEventManager.hasActivity()) {
+        this.renderer.showNoSession();
+        return;
+      }
+
+      this.sessionEventManager.displayInfo();
+
+      // Cargar jugadores activos
+      const { data: players, error: playersError } = await supabase
+        .from('players')
+        .select('*')
+        .eq('team_id', this.teamId)
+        .eq('active', true)
+        .order('number');
+
+      if (playersError) throw playersError;
+      activePlayers = players || [];
+
+      if (activePlayers.length === 0) {
+        this.renderer.showNoPlayers();
+        return;
+      }
+
+      // Cargar/generar registros
+      await this.recordsManager.loadForDate(date, this.sessionEventManager);
+      this.renderer.render();
+
+    } catch (error) {
+      console.error('Error loading attendance:', error);
+      this.renderer.showError(error.message);
+    }
+  }
+
+  async save() {
+    if (!canManage) {
+      alert('No tienes permiso para gestionar asistencia');
+      return;
+    }
+
+    if (this.recordsManager.records.length === 0) {
+      alert('No hay registros para guardar');
+      return;
+    }
+
+    const saveBtn = document.getElementById('saveAllBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = '💾 Guardando...';
+
+    try {
+      await this.recordsManager.save(this.currentDate, this.sessionEventManager);
+      this.renderer.render();
+      alert('✅ Asistencia guardada correctamente');
+    } catch (error) {
+      console.error('Error saving attendance:', error);
+      alert(`Error al guardar: ${error.message}`);
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = '💾 Guardar todos los cambios';
+    }
+  }
+
+  markAllPresent() {
+    this.recordsManager.markAll('PRESENT');
+    this.renderer.render();
+  }
+
+  markAllAbsent() {
+    this.recordsManager.markAll('ABSENT');
+    this.renderer.render();
+  }
+}
+
+// ============================================
+// INICIALIZACIÓN
+// ============================================
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    // Verificar sesión
+    await requireSession();
+    
+    // Obtener team_id
+    const params = new URLSearchParams(window.location.search);
+    teamId = params.get('team_id');
+
+    if (!teamId) {
+      throw new Error('Falta team_id');
+    }
+
+    // Inicializar header
+    await initHeader({
+      title: '📋 Asistencia',
+      backUrl: true,
+      activeNav: null
+    });
+
+    // Inicializar permisos
+    await initPermissions();
+    canManage = await hasPermission(teamId, 'MANAGE_ATTENDANCE');
+    const userRole = await getUserRole(teamId);
+
+    if (!canManage) {
+      document.getElementById('errorMsg').style.display = 'block';
+      document.getElementById('errorMsg').innerText = `No tienes permiso para gestionar asistencia. Tu rol: ${getRoleLabel(userRole)}`;
+    }
+
+    // Crear controlador
+    const controller = new AttendanceController(teamId);
+
+    // Establecer fecha de hoy por defecto (zona horaria local)
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayString = `${year}-${month}-${day}`;
+    
+    const dateInput = document.getElementById('selectedDate');
+    if (dateInput) {
+      dateInput.value = todayString;
+    }
+
+    // Event listeners
+    document.getElementById('loadBtn')?.addEventListener('click', () => {
+      const dateInput = document.getElementById('selectedDate');
+      const selectedDate = dateInput.value;
+      
+      if (!selectedDate) {
+        alert('Selecciona una fecha');
+        return;
+      }
+      
+      controller.loadForDate(selectedDate);
+    });
+
+    document.getElementById('saveAllBtn')?.addEventListener('click', () => controller.save());
+    document.getElementById('markAllPresentBtn')?.addEventListener('click', () => controller.markAllPresent());
+    document.getElementById('markAllAbsentBtn')?.addEventListener('click', () => controller.markAllAbsent());
+
+    // Recargar cuando la página vuelve a estar visible
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && controller.currentDate) {
+        controller.loadForDate(controller.currentDate);
+      }
+    });
 
   } catch (error) {
-    console.error('Error saving attendance:', error);
-    alert(`Error al guardar: ${error.message}`);
-  } finally {
-    saveBtn.disabled = false;
-    saveBtn.textContent = '💾 Guardar todos los cambios';
-  }
-}
-
-/**
- * Marcar todos como presentes
- */
-function markAllPresent() {
-  activePlayers.forEach(player => {
-    const existing = pendingChanges.get(player.id) || {};
-    pendingChanges.set(player.id, { ...existing, status: 'PRESENT' });
-  });
-  renderAttendanceList();
-}
-
-/**
- * Marcar todos como ausentes
- */
-function markAllAbsent() {
-  activePlayers.forEach(player => {
-    const existing = pendingChanges.get(player.id) || {};
-    pendingChanges.set(player.id, { ...existing, status: 'ABSENT' });
-  });
-  renderAttendanceList();
-}
-
-/**
- * Mostrar info de sesión/evento
- */
-function displaySessionInfo() {
-  const infoBox = document.getElementById('sessionInfo');
-  const badge = document.getElementById('sessionTypeBadge');
-  const details = document.getElementById('sessionDetails');
-
-  if (currentEvent) {
-    const eventTypes = {
-      'MATCH': '⚽ Partido oficial',
-      'FRIENDLY': '🤝 Amistoso',
-      'TOURNAMENT': '🏆 Torneo',
-      'TRAINING': '⚽ Entrenamiento',
-      'MEETING': '👥 Reunión',
-      'OTHER': '📌 Otro'
-    };
-    badge.textContent = eventTypes[currentEvent.type] || currentEvent.type;
-    badge.className = 'session-type-badge event-badge';
-    
-    let detailsHtml = '';
-    if (currentEvent.title) detailsHtml += `<strong>${escapeHtml(currentEvent.title)}</strong><br>`;
-    if (currentEvent.start_time) {
-      const end = currentEvent.end_time ? ` - ${currentEvent.end_time.substring(0, 5)}` : '';
-      detailsHtml += `🕐 ${currentEvent.start_time.substring(0, 5)}${end}<br>`;
-    }
-    if (currentEvent.location) detailsHtml += `📍 ${escapeHtml(currentEvent.location)}`;
-    
-    details.innerHTML = detailsHtml;
-  } else if (currentSession) {
-    const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    badge.textContent = `⚽ Entrenamiento - ${weekdays[currentSession.weekday]}`;
-    badge.className = 'session-type-badge training-badge';
-    
-    let detailsHtml = '';
-    if (currentSession.start_time) {
-      const end = currentSession.end_time ? ` - ${currentSession.end_time.substring(0, 5)}` : '';
-      detailsHtml += `🕐 ${currentSession.start_time.substring(0, 5)}${end}<br>`;
-    }
-    if (currentSession.location) detailsHtml += `📍 ${escapeHtml(currentSession.location)}`;
-    
-    details.innerHTML = detailsHtml;
-  }
-
-  infoBox.style.display = 'flex';
-}
-
-/**
- * Mostrar mensaje cuando no hay sesión ni evento
- */
-function showNoSessionMessage() {
-  const container = document.getElementById('attendanceList');
-  container.innerHTML = `
-    <div class="empty-state">
-      <div class="empty-icon">📅</div>
-      <p>No hay entrenamiento ni evento programado para esta fecha</p>
-      <p class="empty-hint">Configura entrenamientos semanales o crea eventos específicos primero</p>
-    </div>
-  `;
-  
-  document.getElementById('sessionInfo').style.display = 'none';
-  document.getElementById('actionsBar').style.display = 'none';
-}
-
-/**
- * Helpers
- */
-function escapeHtml(text) {
-  if (!text) return '';
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-// Event listeners
-document.getElementById('loadBtn')?.addEventListener('click', loadAttendanceForDate);
-document.getElementById('saveAllBtn')?.addEventListener('click', saveAllChanges);
-document.getElementById('markAllPresentBtn')?.addEventListener('click', markAllPresent);
-document.getElementById('markAllAbsentBtn')?.addEventListener('click', markAllAbsent);
-
-// Recargar cuando la página vuelve a estar visible (para detectar nuevos jugadores)
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && currentDate) {
-    console.log('Página visible de nuevo, recargando jugadores...');
-    loadAttendanceForDate();
+    console.error('Error en inicialización:', error);
+    alert(error.message);
+    window.location.href = '/pages/dashboard.html';
   }
 });
-
-// Establecer fecha de hoy por defecto
-const today = new Date().toISOString().split('T')[0];
-document.getElementById('selectedDate').value = today;

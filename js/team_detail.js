@@ -1,6 +1,6 @@
 // team_detail.js - Lógica para detalles del equipo
-import { supabase } from "../js/supabaseClient.js";
-import { initHeader } from "../js/headerComponent.js";
+import { supabase } from './supabaseClient.js';
+import { initHeader } from './headerComponent.js';
 import { 
   initPermissions, 
   getUserStaffData, 
@@ -9,177 +9,176 @@ import {
   getRoleLabel,
   getPermissionLabel,
   toggleElementByPermission 
-} from "../js/permissionsHelper.js";
+} from './permissionsHelper.js';
+import { requireSession, requireTeamId } from './utils/supabaseHelpers.js';
+import { showError } from './utils/domHelpers.js';
 
-// Función principal
-async function init() {
-  try {
-    console.log("Iniciando carga del equipo...");
-    
-    // Validar sesión
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
-      window.location.href = "/pages/index.html";
-      throw new Error("No session");
+// ============================================
+// GESTOR DE NAVEGACIÓN Y PERMISOS
+// ============================================
+class TeamNavigationManager {
+  constructor(teamId, userPermissions) {
+    this.teamId = teamId;
+    this.userPermissions = userPermissions;
+    this.navigationButtons = {
+      players: { id: 'playersBtn', permission: 'MANAGE_PLAYERS' },
+      team_staff: { id: 'staffBtn', permission: ['MANAGE_STAFF', 'MANAGE_STAFF_PERMISSIONS'] },
+      trainings: { id: 'trainingsBtn', permission: 'MANAGE_TRAININGS' },
+      events: { id: 'eventsBtn', permission: 'MANAGE_EVENTS' },
+      attendance: { id: 'attendanceBtn', permission: 'MANAGE_ATTENDANCE' },
+      stats: { id: 'statsBtn', permission: null } // Siempre visible
+    };
+  }
+
+  setupNavigation() {
+    Object.entries(this.navigationButtons).forEach(([key, config]) => {
+      const btn = document.getElementById(config.id);
+      if (!btn) return;
+
+      // Configurar URL
+      btn.href = `/pages/${key}.html?team_id=${this.teamId}`;
+
+      // Configurar visibilidad según permisos
+      if (config.permission === null) {
+        // Siempre visible (como stats)
+        btn.style.display = 'flex';
+      } else if (Array.isArray(config.permission)) {
+        // Múltiples permisos (OR)
+        const hasPermission = config.permission.some(p => this.userPermissions[p]);
+        toggleElementByPermission(btn, hasPermission);
+      } else {
+        // Permiso único
+        toggleElementByPermission(btn, this.userPermissions[config.permission]);
+      }
+    });
+
+    // Mostrar sección de acciones
+    const actions = document.getElementById('actions');
+    if (actions) actions.style.display = 'grid';
+  }
+}
+
+// ============================================
+// GESTOR DE PERMISOS DEL USUARIO
+// ============================================
+class UserPermissionsDisplay {
+  constructor(teamId) {
+    this.teamId = teamId;
+    this.roleElement = document.getElementById('userRole');
+    this.permissionsList = document.getElementById('permissionsList');
+  }
+
+  async load() {
+    const userRole = await getUserRole(this.teamId);
+    const userPermissions = await getAllUserPermissions(this.teamId);
+
+    this.displayRole(userRole);
+    this.displayPermissions(userPermissions);
+
+    return userPermissions;
+  }
+
+  displayRole(role) {
+    if (this.roleElement) {
+      this.roleElement.innerText = getRoleLabel(role);
     }
-    const user = sessionData.session.user;
-    console.log("Usuario autenticado:", user.email);
+  }
 
-    // Inicializar sistema de permisos
-    await initPermissions();
-    console.log("Permisos inicializados");
+  displayPermissions(permissions) {
+    if (!this.permissionsList) return;
 
-    // Obtener team_id de la URL
-    const params = new URLSearchParams(window.location.search);
-    const teamId = params.get("team_id");
-    console.log("Team ID:", teamId);
+    const activePermissions = Object.entries(permissions)
+      .filter(([_, value]) => value === true)
+      .map(([key, _]) => getPermissionLabel(key));
 
-    if (!teamId) {
-      alert("Error: no se ha proporcionado team_id.");
-      window.location.href = "/pages/teams.html";
-      return;
+    if (activePermissions.length > 0) {
+      this.permissionsList.innerHTML = activePermissions
+        .map(p => `<li>${p}</li>`)
+        .join('');
+    } else {
+      this.permissionsList.innerHTML = '<li>Sin permisos asignados</li>';
     }
+  }
+}
 
-    // Obtener datos del staff del usuario (incluye rol y permisos)
-    console.log("Obteniendo datos del staff...");
-    const staffData = await getUserStaffData(teamId);
-    console.log("Staff data:", staffData);
+// ============================================
+// GESTOR DE EQUIPO
+// ============================================
+class TeamDetailManager {
+  constructor(teamId, user) {
+    this.teamId = teamId;
+    this.user = user;
+  }
 
+  async init() {
+    // Verificar acceso del usuario al equipo
+    const staffData = await getUserStaffData(this.teamId);
     if (!staffData) {
-      alert("No tienes permisos para acceder a este equipo.");
-      window.location.href = "/pages/teams.html";
-      return;
+      throw new Error('No tienes permisos para acceder a este equipo');
     }
 
     // Cargar datos del equipo
-    console.log("Cargando datos del equipo...");
-    const { data: teamData, error: teamError } = await supabase
-      .from("teams")
-      .select("*")
-      .eq("id", teamId)
-      .single();
-
-    if (teamError || !teamData) {
-      console.error("Error al cargar equipo:", teamError);
-      alert("No se pudo cargar el equipo.");
-      window.location.href = "/pages/teams.html";
-      return;
-    }
-
-    console.log("Equipo cargado:", teamData);
-
-    // Inicializar header con el nombre del equipo
-    console.log("Inicializando header...");
+    const teamData = await this.loadTeamData();
+    
+    // Inicializar header
     await initHeader({
       title: teamData.name,
       backUrl: '/pages/teams.html',
       activeNav: null
     });
-    console.log("Header inicializado");
 
-    // Continuar con el resto de la carga
-    await loadTeamDetails(teamId, user, teamData);
-    console.log("Detalles del equipo cargados correctamente");
-  } catch (error) {
-    console.error("Error en init():", error);
-    alert("Error al cargar el equipo: " + error.message);
-    window.location.href = "/pages/teams.html";
+    // Cargar permisos y configurar navegación
+    const permissionsDisplay = new UserPermissionsDisplay(this.teamId);
+    const userPermissions = await permissionsDisplay.load();
+
+    // Configurar navegación
+    const navigation = new TeamNavigationManager(this.teamId, userPermissions);
+    navigation.setupNavigation();
+  }
+
+  async loadTeamData() {
+    const { data: teamData, error: teamError } = await supabase
+      .from('teams')
+      .select('*')
+      .eq('id', this.teamId)
+      .single();
+
+    if (teamError || !teamData) {
+      throw new Error('No se pudo cargar el equipo');
+    }
+
+    return teamData;
   }
 }
 
-// Cargar detalles del equipo
-async function loadTeamDetails(teamId, user, teamData) {
-  console.log("Cargando detalles del equipo...");
-  
+// ============================================
+// INICIALIZACIÓN
+// ============================================
+document.addEventListener('DOMContentLoaded', async () => {
   try {
-    // Mostrar rol y permisos del usuario
-    const userRole = await getUserRole(teamId);
-    const userPermissions = await getAllUserPermissions(teamId);
-    
-    console.log("Rol del usuario:", userRole);
-    console.log("Permisos del usuario:", userPermissions);
+    // Verificar sesión
+    await requireSession();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session.user;
 
-    // Actualizar rol
-    const userRoleElement = document.getElementById("userRole");
-    if (userRoleElement) {
-      userRoleElement.innerText = getRoleLabel(userRole);
+    // Inicializar sistema de permisos
+    await initPermissions();
+
+    // Obtener team_id de la URL
+    const params = new URLSearchParams(window.location.search);
+    const teamId = params.get('team_id');
+
+    if (!teamId) {
+      throw new Error('No se ha proporcionado team_id');
     }
 
-    // Mostrar permisos
-    const permissionsList = document.getElementById("permissionsList");
-    if (permissionsList) {
-      const activePermissions = Object.entries(userPermissions)
-        .filter(([_, value]) => value === true)
-        .map(([key, _]) => getPermissionLabel(key));
+    // Inicializar gestor del equipo
+    const teamDetail = new TeamDetailManager(teamId, user);
+    await teamDetail.init();
 
-      if (activePermissions.length > 0) {
-        permissionsList.innerHTML = activePermissions
-          .map(p => `<li>${p}</li>`)
-          .join('');
-      } else {
-        permissionsList.innerHTML = '<li>Sin permisos asignados</li>';
-      }
-    }
-
-    // Configurar navegación con permisos
-    const playersBtn = document.getElementById("playersBtn");
-    const staffBtn = document.getElementById("staffBtn");
-    const trainingsBtn = document.getElementById("trainingsBtn");
-    const eventsBtn = document.getElementById("eventsBtn");
-    const attendanceBtn = document.getElementById("attendanceBtn");
-    const statsBtn = document.getElementById("statsBtn");
-
-    if (playersBtn) playersBtn.href = `/pages/players.html?team_id=${teamId}`;
-    if (staffBtn) staffBtn.href = `/pages/team_staff.html?team_id=${teamId}`;
-    if (trainingsBtn) trainingsBtn.href = `/pages/trainings.html?team_id=${teamId}`;
-    if (eventsBtn) eventsBtn.href = `/pages/events.html?team_id=${teamId}`;
-    if (attendanceBtn) attendanceBtn.href = `/pages/attendance.html?team_id=${teamId}`;
-    if (statsBtn) statsBtn.href = `/pages/stats.html?team_id=${teamId}`;
-
-    // Mostrar/ocultar botones según permisos
-    if (playersBtn) {
-      toggleElementByPermission(playersBtn, userPermissions['MANAGE_PLAYERS']);
-    }
-
-    if (staffBtn) {
-      toggleElementByPermission(
-        staffBtn, 
-        userPermissions['MANAGE_STAFF'] || userPermissions['MANAGE_STAFF_PERMISSIONS']
-      );
-    }
-
-    if (trainingsBtn) {
-      toggleElementByPermission(trainingsBtn, userPermissions['MANAGE_TRAININGS']);
-    }
-
-    if (eventsBtn) {
-      toggleElementByPermission(eventsBtn, userPermissions['MANAGE_EVENTS']);
-    }
-
-    if (attendanceBtn) {
-      toggleElementByPermission(attendanceBtn, userPermissions['MANAGE_ATTENDANCE']);
-    }
-
-    // Estadísticas siempre visible (lectura para todos)
-    if (statsBtn) {
-      statsBtn.style.display = 'flex';
-    }
-
-    // Mostrar secciones
-    const actions = document.getElementById("actions");
-    
-    if (actions) actions.style.display = "grid";
-    
-    console.log("Detalles cargados, secciones visibles");
   } catch (error) {
-    console.error("Error al cargar detalles:", error);
-    throw error;
+    console.error('Error al cargar el equipo:', error);
+    alert(error.message || 'Error al cargar el equipo. Redirigiendo...');
+    window.location.href = '/pages/teams.html';
   }
-}
-
-// Iniciar la aplicación
-init().catch(error => {
-  console.error("Error al cargar el equipo:", error);
-  alert("Error al cargar el equipo. Redirigiendo...");
-  window.location.href = "/pages/teams.html";
 });

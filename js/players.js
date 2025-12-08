@@ -1,222 +1,178 @@
-// players.js - Gestión de jugadores con sistema de permisos
-import { supabase } from '../js/supabaseClient.js';
-import { initHeader } from '../js/headerComponent.js';
-import { 
-  initPermissions, 
-  hasPermission, 
-  getUserRole,
-  getRoleLabel 
-} from '../js/permissionsHelper.js';
+// players.js - Gestión de jugadores
+import { supabase } from './supabaseClient.js';
+import { initHeader } from './headerComponent.js';
+import { initPermissions, hasPermission, getUserRole, getRoleLabel } from './permissionsHelper.js';
+import { ModalManager } from './utils/modalManager.js';
+import { CardRenderer } from './utils/cardRenderer.js';
+import { FormValidator, getFormValue, setFormValue, clearForm } from './utils/formValidator.js';
+import { requireSession, requireTeamId, loadData, insertData, updateData } from './utils/supabaseHelpers.js';
+import { escapeHtml, showError, formatDate } from './utils/domHelpers.js';
 
-// Inicializar header unificado
+// Validar sesión y obtener team_id
+await requireSession();
+const teamId = requireTeamId();
+
+// Inicializar header
 await initHeader({
   title: 'Jugadores',
-  backUrl: true, // Usa history.back()
+  backUrl: true,
   activeNav: null
 });
 
-// Validar sesión
-const { data: sessionData } = await supabase.auth.getSession();
-if (!sessionData.session) {
-  window.location.href = '/pages/index.html';
-  throw new Error('No session');
-}
-const user = sessionData.session.user;
-
-// ============================================
-// GESTIÓN DE JUGADORES
-// ============================================
-
 // Inicializar permisos
 await initPermissions();
-
-// Obtener team_id de la URL
-const params = new URLSearchParams(window.location.search);
-const teamId = params.get('team_id');
-
-if (!teamId) {
-  document.getElementById('errorMsg').style.display = 'block';
-  document.getElementById('errorMsg').innerText = 'Error: falta team_id en la URL.';
-  throw new Error('Missing team_id');
-}
-
-// Verificar permisos
 const canManage = await hasPermission(teamId, 'MANAGE_PLAYERS');
 const userRole = await getUserRole(teamId);
 
 if (!canManage) {
-  document.getElementById('errorMsg').style.display = 'block';
-  document.getElementById('errorMsg').innerText = `No tienes permiso para gestionar jugadores. Tu rol: ${getRoleLabel(userRole)}`;
-  const formBox = document.getElementById('formBox');
-  if (formBox) formBox.style.display = 'none';
+  showError(`No tienes permiso para gestionar jugadores. Tu rol: ${getRoleLabel(userRole)}`);
 }
 
 // Estado
-let editingId = null;
 let allPlayers = [];
 
-/**
- * Cargar jugadores del equipo
- */
-async function loadPlayers() {
-  const container = document.getElementById('playersList');
-  container.innerHTML = '<div class="loading">Cargando jugadores...</div>';
+// Modal manager
+const modal = new ModalManager('playerModal');
+const validator = new FormValidator();
 
-  try {
-    const { data, error } = await supabase
-      .from('players')
-      .select('*')
-      .eq('team_id', teamId)
-      .eq('active', true)
-      .order('number', { ascending: true });
+// Card renderer para jugadores
+class PlayerCardRenderer extends CardRenderer {
+  createCard(player) {
+    const card = document.createElement('div');
+    card.className = 'item-card fade-in';
 
-    if (error) throw error;
-
-    allPlayers = data || [];
-    renderPlayers();
-  } catch (error) {
-    container.innerHTML = `<div class="error-state">Error: ${error.message}</div>`;
-    console.error('Error loading players:', error);
-  }
-}
-
-/**
- * Renderizar lista de jugadores
- */
-function renderPlayers() {
-  const container = document.getElementById('playersList');
-  const searchTerm = document.getElementById('searchInput')?.value.trim().toLowerCase() || '';
-
-  let filteredPlayers = allPlayers;
-  if (searchTerm) {
-    filteredPlayers = allPlayers.filter(p =>
-      p.name.toLowerCase().includes(searchTerm) ||
-      (p.number && String(p.number).includes(searchTerm)) ||
-      (p.position && p.position.toLowerCase().includes(searchTerm))
-    );
-  }
-
-  if (filteredPlayers.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <p>${searchTerm ? 'No se encontraron jugadores' : 'Aún no hay jugadores'}</p>
+    card.innerHTML = `
+      <div class="item-card-header">
+        <div class="item-info">
+          <div class="item-title">
+            ${player.number !== null && player.number !== undefined ? `<span class="player-badge">${player.number}</span>` : ''}
+            ${escapeHtml(player.name)}
+          </div>
+          <div class="item-subtitle">${escapeHtml(player.position) || 'Sin posición'}</div>
+        </div>
+        ${this.createMenuButton(player.id)}
       </div>
+      ${player.birthdate || player.notes ? `
+        <div class="item-meta">
+          ${player.birthdate ? `<div class="item-meta-row">📅 ${formatDate(player.birthdate)}</div>` : ''}
+          ${player.notes ? `<div class="item-meta-row">${escapeHtml(player.notes)}</div>` : ''}
+        </div>
+      ` : ''}
     `;
-    return;
+
+    return card;
   }
 
-  container.innerHTML = '';
-  filteredPlayers.forEach(player => {
-    const card = createPlayerCard(player);
-    container.appendChild(card);
-  });
-}
-
-/**
- * Crear card de jugador
- */
-function createPlayerCard(player) {
-  const card = document.createElement('div');
-  card.className = 'player-card fade-in';
-
-  card.innerHTML = `
-    <div class="player-info">
-      <div class="player-number">${player.number || '-'}</div>
-      <div class="player-details">
-        <div class="player-name">${escapeHtml(player.name)}</div>
-        <div class="player-position">${escapeHtml(player.position) || 'Sin posición'}</div>
-        ${player.birthdate ? `<div class="player-meta">📅 ${formatDate(player.birthdate)}</div>` : ''}
-        ${player.notes ? `<div class="player-notes">${escapeHtml(player.notes)}</div>` : ''}
-      </div>
-    </div>
-    <div class="player-actions" id="actions-${player.id}"></div>
-  `;
-
-  if (canManage) {
-    const actionsContainer = card.querySelector(`#actions-${player.id}`);
+  render(emptyMessage = 'Aún no hay jugadores') {
+    const container = this.getContainer();
     
-    const editBtn = document.createElement('button');
-    editBtn.className = 'btn btn-outline btn-sm';
-    editBtn.textContent = '✏️ Editar';
-    editBtn.onclick = () => openEditForm(player);
-    actionsContainer.appendChild(editBtn);
+    if (!container) {
+      console.error('Container not found:', this.containerId);
+      return;
+    }
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'btn btn-danger btn-sm';
-    deleteBtn.textContent = '🗑️';
-    deleteBtn.onclick = () => deletePlayer(player.id, player.name);
-    actionsContainer.appendChild(deleteBtn);
+    const searchInput = document.getElementById('searchInput');
+    const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    
+    let filteredPlayers = this.items;
+    if (searchTerm) {
+      filteredPlayers = this.items.filter(p =>
+        p.name.toLowerCase().includes(searchTerm) ||
+        (p.number && String(p.number).includes(searchTerm)) ||
+        (p.position && p.position.toLowerCase().includes(searchTerm))
+      );
+    }
+
+    if (filteredPlayers.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <p>${searchTerm ? 'No se encontraron jugadores' : emptyMessage}</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = '';
+    filteredPlayers.forEach(player => {
+      const card = this.createCard(player);
+      container.appendChild(card);
+    });
+
+    this.attachMenuHandlers();
+    this.attachCallbacks();
   }
-
-  return card;
 }
 
-/**
- * Abrir formulario para editar
- */
-function openEditForm(player) {
-  editingId = player.id;
-  document.getElementById('formTitle').textContent = 'Editar jugador';
-  document.getElementById('playerName').value = player.name || '';
-  document.getElementById('playerNumber').value = player.number ?? '';
-  document.getElementById('playerPosition').value = player.position || '';
-  const birthdateInput = document.getElementById('playerBirthdate');
-  if (birthdateInput) birthdateInput.value = player.birthdate || '';
-  document.getElementById('playerNotes').value = player.notes || '';
-  
-  document.getElementById('cancelEditBtn').style.display = 'inline-block';
-  document.getElementById('savePlayerBtn').textContent = '💾 Guardar';
-  
-  const formBox = document.getElementById('formBox');
-  if (formBox) formBox.scrollIntoView({ behavior: 'smooth' });
+const cardRenderer = new PlayerCardRenderer('playersList');
+cardRenderer.setCanManage(canManage);
+
+// Cargar jugadores
+async function loadPlayers() {
+  const query = supabase
+    .from('players')
+    .select('*')
+    .eq('team_id', teamId)
+    .eq('active', true)
+    .order('number', { ascending: true });
+
+  const players = await loadData(query, 'Error al cargar jugadores');
+  if (players) {
+    allPlayers = players;
+    cardRenderer.setItems(players);
+    cardRenderer.render();
+  }
 }
 
-/**
- * Resetear formulario
- */
-function resetForm() {
-  editingId = null;
-  document.getElementById('formTitle').textContent = 'Añadir jugador';
-  document.getElementById('playerName').value = '';
-  document.getElementById('playerNumber').value = '';
-  document.getElementById('playerPosition').value = '';
-  const birthdateInput = document.getElementById('playerBirthdate');
-  if (birthdateInput) birthdateInput.value = '';
-  document.getElementById('playerNotes').value = '';
-  document.getElementById('cancelEditBtn').style.display = 'none';
-  document.getElementById('savePlayerBtn').textContent = '➕ Añadir';
+// Abrir modal para crear
+function openCreateModal() {
+  modal.open('create', 'Añadir jugador');
+  modal.currentEditId = null;
+  clearForm(['playerName', 'playerNumber', 'playerPosition', 'playerBirthdate', 'playerNotes']);
 }
 
-/**
- * Guardar jugador
- */
-async function savePlayer(e) {
-  e.preventDefault();
+// Abrir modal para editar
+function openEditModal(player) {
+  modal.open('edit', 'Editar jugador');
+  modal.currentEditId = player.id;
+  setFormValue('playerName', player.name);
+  setFormValue('playerNumber', player.number ?? '');
+  setFormValue('playerPosition', player.position || '');
+  setFormValue('playerBirthdate', player.birthdate || '');
+  setFormValue('playerNotes', player.notes || '');
+}
 
+// Guardar jugador
+async function savePlayer() {
   if (!canManage) {
     alert('No tienes permiso para gestionar jugadores');
     return;
   }
 
-  const name = document.getElementById('playerName').value.trim();
-  const numberStr = document.getElementById('playerNumber').value.trim();
-  const position = document.getElementById('playerPosition').value.trim();
-  const birthdateInput = document.getElementById('playerBirthdate');
-  const birthdate = birthdateInput ? birthdateInput.value || null : null;
-  const notes = document.getElementById('playerNotes').value.trim();
+  const name = getFormValue('playerName', 'trim');
+  const numberStr = getFormValue('playerNumber', 'trim');
+  const position = getFormValue('playerPosition', 'trim');
+  const birthdate = getFormValue('playerBirthdate') || null;
+  const notes = getFormValue('playerNotes', 'trim');
 
-  if (!name) {
-    alert('El nombre es obligatorio');
-    return;
-  }
-
+  // Validar
+  validator.reset();
+  validator.required(name, 'Nombre del jugador');
+  
   let number = null;
   if (numberStr) {
-    number = parseInt(numberStr, 10);
-    if (isNaN(number) || number < 0) {
-      alert('El dorsal debe ser un número válido');
-      return;
+    // Permitir números como 0, 00, 1, etc.
+    const parsedNumber = parseInt(numberStr, 10);
+    if (isNaN(parsedNumber) || parsedNumber < 0) {
+      validator.addError('El dorsal debe ser un número válido (se permite 0 y 00)');
+    } else {
+      // Guardar como string para preservar '00'
+      number = numberStr;
     }
+  }
+
+  if (!validator.isValid()) {
+    validator.showErrors();
+    return;
   }
 
   const playerData = {
@@ -229,88 +185,70 @@ async function savePlayer(e) {
     active: true
   };
 
-  try {
-    if (editingId) {
-      const { error } = await supabase
-        .from('players')
-        .update(playerData)
-        .eq('id', editingId);
-      if (error) throw error;
-    } else {
-      const { error } = await supabase
-        .from('players')
-        .insert(playerData);
-      if (error) throw error;
-    }
+  let result;
+  if (modal.mode === 'edit') {
+    result = await updateData('players', modal.currentEditId, playerData, 'Jugador actualizado');
+  } else {
+    result = await insertData('players', playerData, 'Jugador creado');
+  }
 
-    resetForm();
+  if (result.success) {
+    modal.close();
     await loadPlayers();
-  } catch (error) {
-    console.error('Error saving player:', error);
-    
-    // Manejar errores específicos
-    if (error.code === '23505') {
-      if (error.message.includes('uniq_player_number_per_team')) {
-        alert(`El dorsal ${number} ya está siendo usado por otro jugador en este equipo`);
-      } else {
-        alert('Ya existe un jugador con esos datos en este equipo');
-      }
+  } else if (result.error?.code === '23505') {
+    if (result.error.message.includes('uniq_player_number_per_team')) {
+      alert(`El dorsal ${number} ya está siendo usado por otro jugador en este equipo`);
     } else {
-      alert(`Error guardando jugador: ${error.message}`);
+      alert('Ya existe un jugador con esos datos en este equipo');
     }
   }
 }
 
-/**
- * Eliminar jugador
- */
-async function deletePlayer(playerId, playerName) {
-  if (!confirm(`¿Eliminar a ${playerName}?`)) return;
+// Eliminar jugador (soft delete)
+async function deletePlayer(playerId) {
+  const player = allPlayers.find(p => p.id == playerId);
+  if (!confirm(`¿Eliminar a ${player?.name || 'este jugador'}?`)) return;
 
-  try {
-    const { error } = await supabase
-      .from('players')
-      .update({ active: false })
-      .eq('id', playerId);
-
-    if (error) throw error;
+  const result = await updateData('players', playerId, { active: false }, 'Jugador eliminado');
+  if (result.success) {
     await loadPlayers();
-  } catch (error) {
-    console.error('Error deleting player:', error);
-    alert(`Error: ${error.message}`);
   }
 }
 
-/**
- * Helpers
- */
-function escapeHtml(text) {
-  if (!text) return '';
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
+// Inicializar cuando el DOM esté listo
+async function init() {
+  const fabBtn = document.getElementById('fabBtn');
+  const searchInput = document.getElementById('searchInput');
+  const refreshBtn = document.getElementById('refreshBtn');
+
+  if (fabBtn) {
+    fabBtn.onclick = openCreateModal;
+    fabBtn.style.display = canManage ? 'flex' : 'none';
+  }
+
+  if (searchInput) {
+    let searchTimeout;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => cardRenderer.render(), 300);
+    });
+  }
+
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', loadPlayers);
+  }
+
+  // Configurar modal callbacks
+  modal.onSave = savePlayer;
+  cardRenderer.onEdit(openEditModal);
+  cardRenderer.onDelete(deletePlayer);
+
+  // Cargar inicial
+  await loadPlayers();
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
 }
-
-// Event listeners
-document.getElementById('savePlayerBtn')?.addEventListener('click', savePlayer);
-document.getElementById('cancelEditBtn')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  resetForm();
-});
-
-let searchTimeout;
-document.getElementById('searchInput')?.addEventListener('input', () => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => renderPlayers(), 300);
-});
-
-document.getElementById('refreshBtn')?.addEventListener('click', () => loadPlayers());
-
-// Cargar inicial
-loadPlayers();
