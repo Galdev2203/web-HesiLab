@@ -12,6 +12,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/unified-header.css">
+  <link rel="stylesheet" href="../css/cards-layout.css">
   <link rel="stylesheet" href="../css/team_staff.css">
   
   <!-- Analytics -->
@@ -27,54 +28,67 @@
     <div id="errorMsg" class="error-message" style="display:none; background: #fee; color: #c00; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;"></div>
 
     <!-- Staff List -->
-    <div id="staffList">Cargando staff...</div>
+    <div id="staffList" class="items-grid">Cargando staff...</div>
+    
+    <!-- Botón flotante -->
+    <button class="fab" id="fabBtn" title="Añadir entrenador">
+      <span class="fab-icon">+</span>
+    </button>
+  </div>
+</main>
 
-    <!-- Add Box -->
-    <div id="addBox">
+<!-- Modal para añadir entrenador -->
+<div id="staffModal" class="modal">
+  <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-header">
       <h3>Añadir entrenador</h3>
-      <div class="add-form">
-        <div class="form-group">
-          <label for="emailInput">Email del entrenador</label>
-          <input id="emailInput" type="email" placeholder="email@ejemplo.com" />
-        </div>
-        <div class="form-group">
-          <label for="roleInput">Rol</label>
-          <select id="roleInput">
-            <option value="segundo">Segundo Entrenador</option>
-            <option value="ayudante" selected>Ayudante</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Permisos:</label>
-          <div class="permissions-grid">
-            <label class="permission-item">
-              <input type="checkbox" id="perm_MANAGE_PLAYERS" value="MANAGE_PLAYERS" checked>
-              <span>Gestionar jugadores</span>
-            </label>
-            <label class="permission-item">
-              <input type="checkbox" id="perm_MANAGE_TRAININGS" value="MANAGE_TRAININGS" checked>
-              <span>Gestionar entrenamientos</span>
-            </label>
-            <label class="permission-item">
-              <input type="checkbox" id="perm_MANAGE_EVENTS" value="MANAGE_EVENTS" checked>
-              <span>Gestionar eventos</span>
-            </label>
-            <label class="permission-item">
-              <input type="checkbox" id="perm_MANAGE_ATTENDANCE" value="MANAGE_ATTENDANCE" checked>
-              <span>Gestionar asistencia</span>
-            </label>
-            <label class="permission-item">
-              <input type="checkbox" id="perm_MANAGE_STAFF" value="MANAGE_STAFF">
-              <span>Gestionar entrenadores</span>
-            </label>
-            <label class="permission-item">
-              <input type="checkbox" id="perm_MANAGE_TEAM" value="MANAGE_TEAM">
-              <span>Gestionar equipo</span>
-            </label>
-          </div>
-        </div>
-        <button id="addBtn" class="btn btn-primary">Añadir Entrenador</button>
+      <button class="close-modal" id="closeModalBtn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="emailInput">Email del entrenador</label>
+        <input id="emailInput" type="email" placeholder="email@ejemplo.com" />
       </div>
+      <div class="form-group">
+        <label for="roleInput">Rol</label>
+        <select id="roleInput">
+          <option value="segundo">Segundo Entrenador</option>
+          <option value="ayudante" selected>Ayudante</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Permisos:</label>
+        <div class="permissions-grid">
+          <label class="permission-item">
+            <input type="checkbox" id="perm_MANAGE_PLAYERS" value="MANAGE_PLAYERS" checked>
+            <span>Gestionar jugadores</span>
+          </label>
+          <label class="permission-item">
+            <input type="checkbox" id="perm_MANAGE_TRAININGS" value="MANAGE_TRAININGS" checked>
+            <span>Gestionar entrenamientos</span>
+          </label>
+          <label class="permission-item">
+            <input type="checkbox" id="perm_MANAGE_EVENTS" value="MANAGE_EVENTS" checked>
+            <span>Gestionar eventos</span>
+          </label>
+          <label class="permission-item">
+            <input type="checkbox" id="perm_MANAGE_ATTENDANCE" value="MANAGE_ATTENDANCE" checked>
+            <span>Gestionar asistencia</span>
+          </label>
+          <label class="permission-item">
+            <input type="checkbox" id="perm_MANAGE_STAFF" value="MANAGE_STAFF">
+            <span>Gestionar entrenadores</span>
+          </label>
+          <label class="permission-item">
+            <input type="checkbox" id="perm_MANAGE_TEAM" value="MANAGE_TEAM">
+            <span>Gestionar equipo</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="secondary-btn" id="cancelModalBtn">Cancelar</button>
+      <button id="addBtn" class="primary-btn">Añadir Entrenador</button>
     </div>
   </div>
 </main>

@@ -71,6 +71,12 @@ await initHeader({
 // Cargar staff
 async function loadStaff() {
   await loadMyRole();
+  
+  // Mostrar/ocultar FAB según permisos
+  const fab = document.getElementById('fabBtn');
+  if (fab) {
+    fab.style.display = canManageStaff ? 'flex' : 'none';
+  }
 
   const container = document.getElementById("staffList");
   container.innerHTML = "Cargando...";
@@ -96,75 +102,63 @@ async function loadStaff() {
 
   data.forEach(staff => {
     const card = document.createElement("div");
-    card.className = "staff-card";
+    card.className = "item-card";
 
-    const staffInfo = document.createElement("div");
-    staffInfo.className = "staff-info";
+    const isMe = staff.user_id === user.id;
+    const roleLabel = staff.role === 'principal' || staff.role === 'HEAD_COACH' ? '👔 Principal' : 
+                     staff.role === 'segundo' ? '🎽 Segundo' : '🏃 Ayudante';
 
-    const staffAvatar = document.createElement("div");
-    staffAvatar.className = "staff-avatar";
-    staffAvatar.textContent = staff.role === 'principal' ? '👔' : staff.role === 'segundo' ? '🎽' : '🏃';
-
-    const staffDetails = document.createElement("div");
-    staffDetails.className = "staff-details";
-
-    const staffEmail = document.createElement("div");
-    staffEmail.className = "staff-email";
-    staffEmail.textContent = staff.profiles?.email || "(sin email)";
-
-    const staffRoleDisplay = document.createElement("div");
-    staffRoleDisplay.className = "staff-role-display";
-
-    const roleSelect = document.createElement("select");
-    roleSelect.className = "roleSelect";
-    roleSelect.setAttribute("data-id", staff.id);
-    roleSelect.innerHTML = `
-      <option value="principal" ${staff.role === "principal" ? "selected" : ""}>👔 Principal</option>
-      <option value="segundo" ${staff.role === "segundo" ? "selected" : ""}>🎽 Segundo</option>
-      <option value="ayudante" ${staff.role === "ayudante" ? "selected" : ""}>🏃 Ayudante</option>
+    card.innerHTML = `
+      <div class="item-card-header">
+        <div class="item-info">
+          <div class="item-title">${staff.profiles?.email || "(sin email)"}</div>
+          <div class="item-subtitle">${roleLabel}</div>
+        </div>
+        ${canManageStaff && !isMe ? `
+          <div class="item-menu">
+            <button class="menu-btn" data-id="${staff.id}">⋮</button>
+            <div class="menu-dropdown">
+              <button class="menu-item delete delete-item" data-id="${staff.id}" data-user="${staff.user_id}">🗑️ Eliminar</button>
+            </div>
+          </div>
+        ` : ''}
+      </div>
     `;
 
-    staffRoleDisplay.appendChild(roleSelect);
-    staffDetails.appendChild(staffEmail);
-    staffDetails.appendChild(staffRoleDisplay);
-    staffInfo.appendChild(staffAvatar);
-    staffInfo.appendChild(staffDetails);
-
-    const staffActions = document.createElement("div");
-    staffActions.className = "staff-actions";
-
-    const saveRoleBtn = document.createElement("button");
-    saveRoleBtn.className = "btn btn-primary saveRoleBtn";
-    saveRoleBtn.setAttribute("data-id", staff.id);
-    saveRoleBtn.textContent = "💾 Guardar rol";
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.className = "btn btn-danger deleteBtn";
-    deleteBtn.setAttribute("data-id", staff.id);
-    deleteBtn.setAttribute("data-user", staff.user_id);
-    deleteBtn.textContent = "🗑️ Eliminar";
-
-    staffActions.appendChild(saveRoleBtn);
-    staffActions.appendChild(deleteBtn);
-
-    card.appendChild(staffInfo);
-    card.appendChild(staffActions);
-
-    // Permisos - usar sistema de permisos
-    if (!canManageStaff) {
-      deleteBtn.style.display = "none";
-      roleSelect.disabled = true;
-      saveRoleBtn.style.display = "none";
-    }
-
-    // No puedo editarme a mí mismo
-    if (staff.user_id === user.id) {
-      deleteBtn.style.display = "none";
-      roleSelect.disabled = true;
-      saveRoleBtn.style.display = "none";
-    }
-
     container.appendChild(card);
+  });
+
+  // Agregar manejadores para menú de 3 puntos
+  document.querySelectorAll('.menu-btn').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const dropdown = btn.nextElementSibling;
+      document.querySelectorAll('.menu-dropdown.show').forEach(menu => {
+        if (menu !== dropdown) menu.classList.remove('show');
+      });
+      dropdown.classList.toggle('show');
+    };
+  });
+
+  document.querySelectorAll('.delete-item').forEach(btn => {
+    btn.onclick = async (e) => {
+      e.stopPropagation();
+      const staffId = btn.dataset.id;
+      const userId = btn.dataset.user;
+      if (confirm('¿Eliminar este entrenador del equipo?')) {
+        await deleteStaff(staffId, userId);
+      }
+      btn.closest('.menu-dropdown').classList.remove('show');
+    };
+  });
+
+  // Cerrar menús al hacer clic fuera
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.item-menu')) {
+      document.querySelectorAll('.menu-dropdown.show').forEach(menu => {
+        menu.classList.remove('show');
+      });
+    }
   });
 
   // Guardar cambios de rol (usando RPC)
@@ -345,5 +339,51 @@ document.getElementById("addBtn").onclick = async () => {
   });
   
   alert("Entrenador añadido correctamente.");
+  closeModal();
   loadStaff();
 };
+
+// Elementos del modal
+const modal = document.getElementById('staffModal');
+const fabBtn = document.getElementById('fabBtn');
+const closeBtn = document.getElementById('closeModalBtn');
+const cancelBtn = document.getElementById('cancelModalBtn');
+
+/**
+ * Abrir modal
+ */
+function openModal() {
+  if (!canManageStaff) {
+    alert('No tienes permiso para añadir entrenadores');
+    return;
+  }
+  modal.classList.add('show');
+  modal.style.display = 'flex';
+}
+
+/**
+ * Cerrar modal
+ */
+function closeModal() {
+  modal.classList.remove('show');
+  setTimeout(() => {
+    modal.style.display = 'none';
+  }, 200);
+}
+
+// Event listeners para modal
+fabBtn.onclick = openModal;
+closeBtn.onclick = closeModal;
+cancelBtn.onclick = closeModal;
+
+// Cerrar modal al hacer clic fuera
+modal.onclick = (e) => {
+  if (e.target === modal) closeModal();
+};
+
+// Cerrar con ESC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modal.style.display === 'flex') {
+    closeModal();
+  }
+});

@@ -8,6 +8,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/unified-header.css">
+  <link rel="stylesheet" href="../css/cards-layout.css">
   <link rel="stylesheet" href="../css/players.css">
   
   <!-- Analytics -->
@@ -41,76 +42,74 @@
     </div>
 
     <!-- Lista de eventos -->
-    <div id="eventsList">
+    <div id="eventsList" class="items-grid">
       Cargando eventos...
     </div>
-
-    <!-- Formulario -->
-    <div id="formBox" class="add-player-section">
-      <h3 id="formTitle">Añadir evento</h3>
-
-      <div class="form-grid">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="eventType">Tipo <span class="required">*</span></label>
-            <select id="eventType" required>
-              <option value="">Selecciona tipo</option>
-              <option value="MATCH">⚽ Partido oficial</option>
-              <option value="FRIENDLY">🤝 Amistoso</option>
-              <option value="TOURNAMENT">🏆 Torneo</option>
-              <option value="TRAINING">⚽ Entrenamiento especial</option>
-              <option value="MEETING">👥 Reunión</option>
-              <option value="OTHER">📌 Otro</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="eventDate">Fecha <span class="required">*</span></label>
-            <input id="eventDate" type="date" required />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="startTime">Hora inicio</label>
-            <input id="startTime" type="time" />
-          </div>
-
-          <div class="form-group">
-            <label for="endTime">Hora fin</label>
-            <input id="endTime" type="time" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="title">Título</label>
-            <input id="title" placeholder="Ej: vs Equipo Rival" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="location">Ubicación</label>
-            <input id="location" placeholder="Ej: Pabellón Municipal" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="notes">Notas</label>
-            <textarea id="notes" placeholder="Observaciones adicionales" rows="3"></textarea>
-          </div>
-        </div>
-
-        <div class="form-actions">
-          <button id="saveBtn" class="btn btn-primary">➕ Añadir evento</button>
-          <button id="cancelBtn" class="btn btn-outline" style="display:none;">Cancelar</button>
-        </div>
-      </div>
-    </div>
+    
+    <!-- Botón flotante -->
+    <button class="fab" id="fabBtn" title="Añadir evento">
+      <span class="fab-icon">+</span>
+    </button>
   </div>
 </main>
+
+<!-- Modal para crear/editar evento -->
+<div id="eventModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">Añadir evento</h3>
+      <button class="close-modal" id="closeModalBtn">&times;</button>
+    </div>
+    <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+      <div class="form-group">
+        <label for="eventType">Tipo <span class="required">*</span></label>
+        <select id="eventType" required>
+          <option value="">Selecciona tipo</option>
+          <option value="MATCH">⚽ Partido oficial</option>
+          <option value="FRIENDLY">🤝 Amistoso</option>
+          <option value="TOURNAMENT">🏆 Torneo</option>
+          <option value="TRAINING">⚽ Entrenamiento especial</option>
+          <option value="MEETING">👥 Reunión</option>
+          <option value="OTHER">📌 Otro</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="eventDate">Fecha <span class="required">*</span></label>
+        <input id="eventDate" type="date" required />
+      </div>
+
+      <div class="form-group">
+        <label for="startTime">Hora inicio</label>
+        <input id="startTime" type="time" />
+      </div>
+
+      <div class="form-group">
+        <label for="endTime">Hora fin</label>
+        <input id="endTime" type="time" />
+      </div>
+
+      <div class="form-group">
+        <label for="title">Título</label>
+        <input id="title" placeholder="Ej: vs Equipo Rival" />
+      </div>
+
+      <div class="form-group">
+        <label for="location">Ubicación</label>
+        <input id="location" placeholder="Ej: Pabellón Municipal" />
+      </div>
+
+      <div class="form-group">
+        <label for="notes">Notas</label>
+        <textarea id="notes" placeholder="Observaciones adicionales" rows="3"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="secondary-btn" id="cancelModalBtn">Cancelar</button>
+      <button id="saveBtn" class="primary-btn">Guardar</button>
+    </div>
+  </div>
+</div>
 
 <!-- JS -->
 <script type="module" src="../js/events.js"></script>

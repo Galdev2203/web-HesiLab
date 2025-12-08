@@ -48,6 +48,7 @@ if (!canManage) {
 
 // Estado
 let editingId = null;
+let currentMode = 'create';
 let allEvents = [];
 
 const EVENT_TYPES = {
@@ -58,6 +59,14 @@ const EVENT_TYPES = {
   'MEETING': '👥 Reunión',
   'OTHER': '📌 Otro'
 };
+
+// Elementos del modal
+const modal = document.getElementById('eventModal');
+const modalTitle = document.getElementById('modalTitle');
+const fabBtn = document.getElementById('fabBtn');
+const closeBtn = document.getElementById('closeModalBtn');
+const cancelBtn = document.getElementById('cancelModalBtn');
+const saveBtn = document.getElementById('saveBtn');
 
 /**
  * Cargar eventos
@@ -340,11 +349,64 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+/**
+ * Abrir modal
+ */
+function openModal(mode = 'create', event = null) {
+  currentMode = mode;
+  editingId = event ? event.id : null;
+  
+  if (mode === 'create') {
+    modalTitle.textContent = 'Añadir evento';
+    document.getElementById('eventType').value = '';
+    document.getElementById('eventDate').value = '';
+    document.getElementById('startTime').value = '';
+    document.getElementById('endTime').value = '';
+    document.getElementById('title').value = '';
+    document.getElementById('location').value = '';
+    document.getElementById('notes').value = '';
+  } else {
+    modalTitle.textContent = 'Editar evento';
+    document.getElementById('eventType').value = event.type;
+    document.getElementById('eventDate').value = event.event_date;
+    document.getElementById('startTime').value = event.start_time || '';
+    document.getElementById('endTime').value = event.end_time || '';
+    document.getElementById('title').value = event.title || '';
+    document.getElementById('location').value = event.location || '';
+    document.getElementById('notes').value = event.notes || '';
+  }
+  
+  modal.classList.add('show');
+  modal.style.display = 'flex';
+}
+
+/**
+ * Cerrar modal
+ */
+function closeModal() {
+  modal.classList.remove('show');
+  setTimeout(() => {
+    modal.style.display = 'none';
+  }, 200);
+  editingId = null;
+}
+
 // Event listeners
-document.getElementById('saveBtn')?.addEventListener('click', saveEvent);
-document.getElementById('cancelBtn')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  resetForm();
+fabBtn.onclick = () => openModal('create');
+closeBtn.onclick = closeModal;
+cancelBtn.onclick = closeModal;
+saveBtn.addEventListener('click', saveEvent);
+
+// Cerrar modal al hacer clic fuera
+modal.onclick = (e) => {
+  if (e.target === modal) closeModal();
+};
+
+// Cerrar con ESC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modal.style.display === 'flex') {
+    closeModal();
+  }
 });
 
 document.getElementById('typeFilter')?.addEventListener('change', renderEvents);

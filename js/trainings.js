@@ -48,9 +48,18 @@ if (!canManage) {
 
 // Estado
 let editingId = null;
+let currentMode = 'create';
 let allTrainings = [];
 
 const WEEKDAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+// Elementos del modal
+const modal = document.getElementById('trainingModal');
+const modalTitle = document.getElementById('modalTitle');
+const fabBtn = document.getElementById('fabBtn');
+const closeBtn = document.getElementById('closeModalBtn');
+const cancelBtn = document.getElementById('cancelModalBtn');
+const saveBtn = document.getElementById('saveBtn');
 
 /**
  * Cargar entrenamientos
@@ -86,9 +95,7 @@ function renderTrainings() {
   if (allTrainings.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">⚽</div>
         <p>Aún no hay entrenamientos configurados</p>
-        <p class="empty-hint">Usa el formulario de abajo para añadir los horarios semanales</p>
       </div>
     `;
     return;
@@ -96,106 +103,140 @@ function renderTrainings() {
 
   container.innerHTML = '';
   
-  // Agrupar por día
-  const byDay = {};
-  allTrainings.forEach(t => {
-    if (!byDay[t.weekday]) byDay[t.weekday] = [];
-    byDay[t.weekday].push(t);
+  // Renderizar cada entrenamiento como card
+  allTrainings.forEach(training => {
+    const card = createTrainingCard(training);
+    container.appendChild(card);
   });
-
-  // Renderizar por día (ordenado)
-  [1, 2, 3, 4, 5, 6, 0].forEach(day => {
-    if (!byDay[day]) return;
-    
-    const dayCard = document.createElement('div');
-    dayCard.className = 'training-day-card';
-    
-    const dayHeader = document.createElement('div');
-    dayHeader.className = 'training-day-header';
-    dayHeader.textContent = WEEKDAYS[day];
-    dayCard.appendChild(dayHeader);
-    
-    byDay[day].forEach(training => {
-      const item = createTrainingItem(training);
-      dayCard.appendChild(item);
-    });
-    
-    container.appendChild(dayCard);
-  });
+  
+  // Agregar manejadores para menú de 3 puntos
+  attachMenuHandlers();
 }
 
 /**
- * Crear item de entrenamiento
+ * Crear card de entrenamiento
  */
-function createTrainingItem(training) {
-  const item = document.createElement('div');
-  item.className = 'training-item fade-in';
+function createTrainingCard(training) {
+  const div = document.createElement('div');
+  div.className = 'item-card';
+  div.dataset.trainingid = training.id;
 
-  const startTime = training.start_time.substring(0, 5); // HH:MM
+  const startTime = training.start_time.substring(0, 5);
   const endTime = training.end_time.substring(0, 5);
+  const dayName = WEEKDAYS[training.weekday];
 
-  item.innerHTML = `
-    <div class="training-time">
-      <span class="time-badge">🕐 ${startTime} - ${endTime}</span>
+  div.innerHTML = `
+    <div class="item-card-header">
+      <div class="item-info">
+        <div class="item-title">🕐 ${startTime} - ${endTime}</div>
+        <div class="item-subtitle">${dayName}</div>
+      </div>
+      ${canManage ? `
+        <div class="item-menu">
+          <button class="menu-btn" data-id="${training.id}">⋮</button>
+          <div class="menu-dropdown">
+            <button class="menu-item edit-item" data-id="${training.id}">✏️ Editar</button>
+            <button class="menu-item delete delete-item" data-id="${training.id}">🗑️ Eliminar</button>
+          </div>
+        </div>
+      ` : ''}
     </div>
-    <div class="training-details">
-      ${training.location ? `<div class="training-location">📍 ${escapeHtml(training.location)}</div>` : ''}
-      ${training.notes ? `<div class="training-notes">${escapeHtml(training.notes)}</div>` : ''}
-    </div>
-    <div class="training-actions" id="actions-${training.id}"></div>
+    ${training.location || training.notes ? `
+      <div class="item-meta">
+        ${training.location ? `<div class="item-meta-row">📍 ${escapeHtml(training.location)}</div>` : ''}
+        ${training.notes ? `<div class="item-meta-row">${escapeHtml(training.notes)}</div>` : ''}
+      </div>
+    ` : ''}
   `;
 
-  if (canManage) {
-    const actionsContainer = item.querySelector(`#actions-${training.id}`);
-    
-    const editBtn = document.createElement('button');
-    editBtn.className = 'btn btn-outline btn-sm';
-    editBtn.textContent = '✏️';
-    editBtn.onclick = () => openEditForm(training);
-    actionsContainer.appendChild(editBtn);
+  return div;
+}
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'btn btn-danger btn-sm';
-    deleteBtn.textContent = '🗑️';
-    deleteBtn.onclick = () => deleteTraining(training.id);
-    actionsContainer.appendChild(deleteBtn);
+/**
+ * Agregar manejadores para menú de 3 puntos
+ */
+function attachMenuHandlers() {
+  // Toggle menú
+  document.querySelectorAll('.menu-btn').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const dropdown = btn.nextElementSibling;
+      
+      document.querySelectorAll('.menu-dropdown.show').forEach(menu => {
+        if (menu !== dropdown) menu.classList.remove('show');
+      });
+      
+      dropdown.classList.toggle('show');
+    };
+  });
+
+  // Editar
+  document.querySelectorAll('.edit-item').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const trainingId = btn.dataset.id;
+      const training = allTrainings.find(t => t.id === trainingId);
+      if (training) openModal('edit', training);
+      btn.closest('.menu-dropdown').classList.remove('show');
+    };
+  });
+
+  // Eliminar
+  document.querySelectorAll('.delete-item').forEach(btn => {
+    btn.onclick = async (e) => {
+      e.stopPropagation();
+      const trainingId = btn.dataset.id;
+      await deleteTraining(trainingId);
+      btn.closest('.menu-dropdown').classList.remove('show');
+    };
+  });
+}
+
+// Cerrar menús al hacer clic fuera
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.item-menu')) {
+    document.querySelectorAll('.menu-dropdown.show').forEach(menu => {
+      menu.classList.remove('show');
+    });
   }
+});
 
-  return item;
+/**
+ * Abrir modal
+ */
+function openModal(mode = 'create', training = null) {
+  currentMode = mode;
+  editingId = training ? training.id : null;
+  
+  if (mode === 'create') {
+    modalTitle.textContent = 'Añadir entrenamiento';
+    document.getElementById('weekday').value = '';
+    document.getElementById('startTime').value = '';
+    document.getElementById('endTime').value = '';
+    document.getElementById('location').value = '';
+    document.getElementById('notes').value = '';
+  } else {
+    modalTitle.textContent = 'Editar entrenamiento';
+    document.getElementById('weekday').value = training.weekday;
+    document.getElementById('startTime').value = training.start_time;
+    document.getElementById('endTime').value = training.end_time;
+    document.getElementById('location').value = training.location || '';
+    document.getElementById('notes').value = training.notes || '';
+  }
+  
+  modal.classList.add('show');
+  modal.style.display = 'flex';
 }
 
 /**
- * Abrir formulario para editar
+ * Cerrar modal
  */
-function openEditForm(training) {
-  editingId = training.id;
-  document.getElementById('formTitle').textContent = 'Editar entrenamiento';
-  document.getElementById('weekday').value = training.weekday;
-  document.getElementById('startTime').value = training.start_time;
-  document.getElementById('endTime').value = training.end_time;
-  document.getElementById('location').value = training.location || '';
-  document.getElementById('notes').value = training.notes || '';
-  
-  document.getElementById('cancelBtn').style.display = 'inline-block';
-  document.getElementById('saveBtn').textContent = '💾 Guardar';
-  
-  const formBox = document.getElementById('formBox');
-  if (formBox) formBox.scrollIntoView({ behavior: 'smooth' });
-}
-
-/**
- * Resetear formulario
- */
-function resetForm() {
+function closeModal() {
+  modal.classList.remove('show');
+  setTimeout(() => {
+    modal.style.display = 'none';
+  }, 200);
   editingId = null;
-  document.getElementById('formTitle').textContent = 'Añadir entrenamiento';
-  document.getElementById('weekday').value = '';
-  document.getElementById('startTime').value = '';
-  document.getElementById('endTime').value = '';
-  document.getElementById('location').value = '';
-  document.getElementById('notes').value = '';
-  document.getElementById('cancelBtn').style.display = 'none';
-  document.getElementById('saveBtn').textContent = '➕ Añadir';
 }
 
 /**
@@ -246,14 +287,16 @@ async function saveTraining(e) {
         .update(trainingData)
         .eq('id', editingId);
       if (error) throw error;
+      alert('Entrenamiento actualizado');
     } else {
       const { error } = await supabase
         .from('team_training_sessions')
         .insert(trainingData);
       if (error) throw error;
+      alert('Entrenamiento añadido');
     }
 
-    resetForm();
+    closeModal();
     await loadTrainings();
   } catch (error) {
     console.error('Error saving training:', error);
@@ -292,10 +335,21 @@ function escapeHtml(text) {
 }
 
 // Event listeners
-document.getElementById('saveBtn')?.addEventListener('click', saveTraining);
-document.getElementById('cancelBtn')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  resetForm();
+fabBtn.onclick = () => openModal('create');
+closeBtn.onclick = closeModal;
+cancelBtn.onclick = closeModal;
+saveBtn.addEventListener('click', saveTraining);
+
+// Cerrar modal al hacer clic fuera
+modal.onclick = (e) => {
+  if (e.target === modal) closeModal();
+};
+
+// Cerrar con ESC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && modal.style.display === 'flex') {
+    closeModal();
+  }
 });
 
 // Cargar inicial

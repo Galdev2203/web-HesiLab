@@ -59,9 +59,9 @@ async function loadTeams() {
       .eq('team_id', team.id)
       .eq('active', true);
     
-    // Obtener conteo de entrenamientos
+    // Obtener conteo de entrenamientos (tabla correcta: team_training_sessions)
     const { count: trainingsCount } = await supabase
-      .from('trainings')
+      .from('team_training_sessions')
       .select('*', { count: 'exact', head: true })
       .eq('team_id', team.id);
     
