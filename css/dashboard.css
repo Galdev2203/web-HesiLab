@@ -575,7 +575,7 @@ body {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .stats-grid {
     grid-template-columns: 1fr;
   }
@@ -1127,7 +1127,7 @@ body {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .dashboard-main {
     padding: var(--spacing-md) var(--spacing-xs);
   }

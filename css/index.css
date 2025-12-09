@@ -164,7 +164,7 @@ body::after {
 }
 
 /* Responsive */
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   #box {
     padding: var(--spacing-xl);
   }

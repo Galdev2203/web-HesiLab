@@ -320,7 +320,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   /* En móvil, mostrar cada fila como una card */
   .attendance-table {
     display: block;
