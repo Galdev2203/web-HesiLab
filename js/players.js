@@ -79,9 +79,24 @@ class PlayerCardRenderer extends CardRenderer {
     if (searchTerm) {
       filteredPlayers = this.items.filter(p =>
         p.name.toLowerCase().includes(searchTerm) ||
-        (p.number && String(p.number).includes(searchTerm)) ||
+        (p.number && String(p.number).toLowerCase().includes(searchTerm)) ||
         (p.position && p.position.toLowerCase().includes(searchTerm))
       );
+      
+      // Ordenar los resultados filtrados por dorsal
+      filteredPlayers.sort((a, b) => {
+        const numA = a.number ? parseInt(a.number, 10) : 999999;
+        const numB = b.number ? parseInt(b.number, 10) : 999999;
+        
+        if (numA !== numB) {
+          return numA - numB;
+        }
+        
+        // Si son iguales numéricamente, ordenar por longitud (más largo primero)
+        const lenA = a.number ? a.number.length : 0;
+        const lenB = b.number ? b.number.length : 0;
+        return lenB - lenA;
+      });
     }
 
     if (filteredPlayers.length === 0) {

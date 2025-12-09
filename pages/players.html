@@ -21,6 +21,22 @@
   
   <!-- Analytics -->
   <script src="../js/analytics.js"></script>
+  
+  <!-- Silenciar errores de extensiones del navegador -->
+  <script>
+    window.addEventListener('error', function(e) {
+      if (e.message && e.message.includes('message channel closed')) {
+        e.preventDefault();
+        return true;
+      }
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      if (e.reason && e.reason.message && e.reason.message.includes('message channel closed')) {
+        e.preventDefault();
+        return true;
+      }
+    });
+  </script>
 </head>
 <body class="has-unified-header">
 
