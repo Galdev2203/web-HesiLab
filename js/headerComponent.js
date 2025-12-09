@@ -163,9 +163,14 @@ function setupHeaderListeners(user) {
   });
 
   // Logout
-  document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+  document.getElementById('logoutBtn')?.addEventListener('click', async (e) => {
+    e.preventDefault();
+    try {
       await signOut();
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      // Forzar redirección incluso si hay error
+      window.location.href = '/pages/index.html';
     }
   });
 
