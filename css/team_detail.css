@@ -335,11 +335,91 @@ body {
     gap: var(--spacing-md);
   }
   
-  #actions {
-    grid-template-columns: 1fr;
+  .team-header-info h2 {
+    font-size: 1.5rem;
   }
   
-  .team-header-info {
-    width: 100%;
+  .team-detail-main {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+  
+  .actions-grid-compact {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+  
+  .action-card-compact {
+    padding: var(--spacing-md);
+    min-height: 100px;
+  }
+  
+  .action-icon-small {
+    font-size: 2rem;
+  }
+  
+  .action-text {
+    font-size: 0.8125rem;
+  }
+  
+  .user-info-card {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .team-header-info h2 {
+    font-size: 1.25rem;
+  }
+  
+  .team-detail-main {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+  
+  .section-title h2 {
+    font-size: 1.125rem;
+  }
+  
+  .actions-grid-compact {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  
+  .action-card-compact {
+    padding: var(--spacing-sm);
+    min-height: 85px;
+    border-radius: var(--radius-md);
+  }
+  
+  .action-icon-small {
+    font-size: 1.75rem;
+    margin-bottom: 4px;
+  }
+  
+  .action-text {
+    font-size: 0.75rem;
+    line-height: 1.2;
+  }
+  
+  .user-info-card {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .user-info-card h3 {
+    font-size: 1rem;
+  }
+  
+  .role-badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+  
+  .permissions-list {
+    font-size: 0.8125rem;
+  }
+  
+  .back-link {
+    font-size: 0.8125rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
   }
 }

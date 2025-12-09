@@ -1129,26 +1129,30 @@ body {
 
 @media (max-width: 480px) {
   .dashboard-main {
-    padding: var(--spacing-lg) var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-xs);
+  }
+  
+  .section-header {
+    margin-bottom: var(--spacing-md);
   }
   
   .section-header h2 {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
   
-  /* Cambiar calendario a lista vertical en móvil */
+  /* Calendario optimizado para móvil */
   .weekly-calendar {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
   
   .day-column {
     min-height: auto;
-    padding: 12px;
+    padding: 10px;
     display: grid;
-    grid-template-columns: 60px 1fr;
-    gap: 12px;
+    grid-template-columns: 55px 1fr;
+    gap: 10px;
     align-items: start;
   }
   
@@ -1160,53 +1164,60 @@ body {
   }
   
   .day-name {
-    font-size: 0.7rem;
-    margin-bottom: 2px;
+    font-size: 0.65rem;
+    margin-bottom: 1px;
+    font-weight: 700;
+    text-transform: uppercase;
   }
   
   .day-number {
-    font-size: 1.5rem;
+    font-size: 1.375rem;
+    font-weight: 700;
   }
   
   .day-events {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
   }
   
   .event-item {
-    padding: 8px;
+    padding: 6px 8px;
     margin-bottom: 0;
+    border-radius: 6px;
   }
   
   .event-time {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     margin-bottom: 2px;
+    font-weight: 600;
   }
   
   .event-title {
-    font-size: 0.8rem;
-    line-height: 1.2;
+    font-size: 0.75rem;
+    line-height: 1.3;
     margin-bottom: 2px;
+    font-weight: 600;
   }
   
   .event-team {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
   }
   
   .no-events {
-    font-size: 0.75rem;
-    padding: 8px 0;
+    font-size: 0.7rem;
+    padding: 6px 0;
+    opacity: 0.6;
   }
   
   #weekRange {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
   }
   
   .week-nav-btn {
-    width: 32px;
-    height: 32px;
-    font-size: 1rem;
+    width: 34px;
+    height: 34px;
+    font-size: 1.125rem;
   }
   
   .today-training-card {
@@ -1214,15 +1225,19 @@ body {
   }
   
   .training-info h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
   
   .training-info p {
-    font-size: 0.8rem;
+    font-size: 0.8125rem;
   }
   
   .attendance-btn {
     padding: 10px 16px;
     font-size: 0.875rem;
+  }
+  
+  .header-brand h1 {
+    font-size: 1.25rem;
   }
 }
