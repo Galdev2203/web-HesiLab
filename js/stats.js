@@ -220,11 +220,11 @@ function calculateGlobalStats(attendance) {
   });
 
   // Calcular porcentaje de asistencia
+  // Ahora justificadas cuentan como ausencias (no asistió)
   const totalSessions = attendance.length;
-  const effectiveSessions = totalSessions - stats.excused;
   const attendedSessions = stats.present + stats.late;
-  const attendanceRate = effectiveSessions > 0 
-    ? ((attendedSessions / effectiveSessions) * 100).toFixed(1)
+  const attendanceRate = totalSessions > 0 
+    ? ((attendedSessions / totalSessions) * 100).toFixed(1)
     : 0;
 
   // Actualizar DOM
@@ -274,11 +274,11 @@ function calculatePlayerStats(attendance) {
   });
 
   // Convertir a array y calcular porcentajes
+  // Justificadas cuentan como ausencias (no asistió)
   const playerStatsArray = Array.from(playerStatsMap.values()).map(stats => {
-    const effectiveSessions = stats.total - stats.excused;
     const attendedSessions = stats.present + stats.late;
-    const percentage = effectiveSessions > 0 
-      ? ((attendedSessions / effectiveSessions) * 100).toFixed(1)
+    const percentage = stats.total > 0 
+      ? ((attendedSessions / stats.total) * 100).toFixed(1)
       : 0;
     
     return {
