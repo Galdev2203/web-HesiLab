@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Contacta con HesiLab - Soporte, preguntas y asistencia para tu gestión deportiva.">
+  <meta name="robots" content="index, follow">
+  
+  <title>Contacto - HesiLab</title>
+
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8303721499770704"
+       crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/legal.css">
+</head>
+
+<body>
+  <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+  <header class="legal-header" role="banner">
+    <nav class="legal-nav" role="navigation">
+      <a href="../pages/index.html" class="nav-logo">
+        <span class="logo-icon">🏀</span>
+        <span class="logo-text">HesiLab</span>
+      </a>
+      <a href="../pages/index.html" class="back-link">← Volver al inicio</a>
+    </nav>
+  </header>
+
+  <main class="legal-main" id="main-content" role="main">
+    <article class="legal-container contact-page">
+      <header class="legal-page-header">
+        <h1>Contáctanos</h1>
+        <p class="page-description">
+          ¿Tienes preguntas, sugerencias o necesitas ayuda? Estamos aquí para ayudarte.
+        </p>
+      </header>
+
+      <section class="contact-grid">
+        <div class="contact-methods">
+          
+          <div class="contact-card">
+            <div class="contact-icon">📧</div>
+            <h3>Soporte General</h3>
+            <p>Para preguntas generales, asistencia técnica o sugerencias.</p>
+            <a href="mailto:contact@hesilab.com" class="contact-link">contact@hesilab.com</a>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-icon">🔐</div>
+            <h3>Privacidad y Datos</h3>
+            <p>Para consultas sobre privacidad, GDPR o protección de datos.</p>
+            <a href="mailto:privacy@hesilab.com" class="contact-link">privacy@hesilab.com</a>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-icon">⚖️</div>
+            <h3>Legal</h3>
+            <p>Para asuntos legales, términos de servicio o contratos.</p>
+            <a href="mailto:legal@hesilab.com" class="contact-link">legal@hesilab.com</a>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-icon">🐛</div>
+            <h3>Reportar Bugs</h3>
+            <p>Encontraste un error? Ayúdanos a mejorar reportándolo.</p>
+            <a href="mailto:bugs@hesilab.com" class="contact-link">bugs@hesilab.com</a>
+          </div>
+
+        </div>
+
+        <div class="contact-form-section">
+          <h2>Envíanos un Mensaje</h2>
+          <form class="contact-form" id="contactForm" aria-labelledby="form-heading">
+            <div class="form-group">
+              <label for="name">Nombre completo *</label>
+              <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                required 
+                aria-required="true"
+                placeholder="Tu nombre">
+            </div>
+
+            <div class="form-group">
+              <label for="email">Correo electrónico *</label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                required 
+                aria-required="true"
+                placeholder="tu@email.com">
+            </div>
+
+            <div class="form-group">
+              <label for="subject">Asunto *</label>
+              <select id="subject" name="subject" required aria-required="true">
+                <option value="">Selecciona un asunto</option>
+                <option value="support">Soporte Técnico</option>
+                <option value="bug">Reportar Bug</option>
+                <option value="feature">Sugerencia de Función</option>
+                <option value="privacy">Privacidad y Datos</option>
+                <option value="legal">Asunto Legal</option>
+                <option value="other">Otro</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="message">Mensaje *</label>
+              <textarea 
+                id="message" 
+                name="message" 
+                rows="6" 
+                required 
+                aria-required="true"
+                placeholder="Describe tu consulta o problema en detalle..."></textarea>
+            </div>
+
+            <div class="form-group checkbox-group">
+              <input 
+                type="checkbox" 
+                id="privacy" 
+                name="privacy" 
+                required 
+                aria-required="true">
+              <label for="privacy">
+                He leído y acepto la <a href="privacy-policy.html" target="_blank">Política de Privacidad</a> *
+              </label>
+            </div>
+
+            <button type="submit" class="submit-btn">
+              <span class="btn-text">Enviar Mensaje</span>
+              <span class="btn-icon" aria-hidden="true">→</span>
+            </button>
+
+            <p class="form-note">
+              * Campos obligatorios. Responderemos en un plazo de 24-48 horas hábiles.
+            </p>
+          </form>
+
+          <div id="formSuccess" class="form-message success-message" style="display: none;" role="alert">
+            <span class="message-icon">✅</span>
+            <div>
+              <strong>¡Mensaje enviado!</strong>
+              <p>Hemos recibido tu mensaje. Te responderemos pronto.</p>
+            </div>
+          </div>
+
+          <div id="formError" class="form-message error-message" style="display: none;" role="alert">
+            <span class="message-icon">❌</span>
+            <div>
+              <strong>Error al enviar</strong>
+              <p>Por favor, intenta de nuevo o envíanos un email directamente.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="faq-section">
+        <h2>Preguntas Frecuentes</h2>
+        <div class="faq-grid">
+          
+          <div class="faq-item">
+            <h3>¿Cuánto tiempo tarda la respuesta?</h3>
+            <p>
+              Normalmente respondemos en 24-48 horas hábiles. Para consultas urgentes, 
+              contáctanos directamente por email.
+            </p>
+          </div>
+
+          <div class="faq-item">
+            <h3>¿HesiLab es gratis?</h3>
+            <p>
+              Sí, actualmente HesiLab es completamente gratuito. No hay costos ocultos ni 
+              se requiere tarjeta de crédito para registrarse.
+            </p>
+          </div>
+
+          <div class="faq-item">
+            <h3>¿Cómo elimino mi cuenta?</h3>
+            <p>
+              Puedes eliminar tu cuenta desde la configuración de tu perfil o contactándonos 
+              directamente. Todos tus datos serán eliminados permanentemente.
+            </p>
+          </div>
+
+          <div class="faq-item">
+            <h3>¿Mis datos están seguros?</h3>
+            <p>
+              Sí, utilizamos encriptación de nivel bancario y seguimos las mejores prácticas 
+              de seguridad. Lee nuestra <a href="privacy-policy.html">Política de Privacidad</a> 
+              para más detalles.
+            </p>
+          </div>
+
+          <div class="faq-item">
+            <h3>¿Puedo sugerir nuevas funcionalidades?</h3>
+            <p>
+              ¡Absolutamente! Valoramos mucho el feedback de nuestros usuarios. Envíanos tus 
+              sugerencias usando el formulario o por email.
+            </p>
+          </div>
+
+          <div class="faq-item">
+            <h3>¿Hay soporte en otros idiomas?</h3>
+            <p>
+              Actualmente ofrecemos soporte en español. Estamos trabajando para agregar más 
+              idiomas en el futuro.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+    </article>
+  </main>
+
+  <footer class="legal-footer" role="contentinfo">
+    <div class="footer-content">
+      <p>&copy; 2024 HesiLab. Todos los derechos reservados.</p>
+      <nav class="footer-nav">
+        <a href="privacy-policy.html">Privacidad</a>
+        <a href="terms-of-service.html">Términos</a>
+        <a href="cookie-policy.html">Cookies</a>
+        <a href="contact.html">Contacto</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    // Manejo del formulario de contacto
+    const contactForm = document.getElementById('contactForm');
+    const formSuccess = document.getElementById('formSuccess');
+    const formError = document.getElementById('formError');
+
+    if (contactForm) {
+      contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Ocultar mensajes previos
+        formSuccess.style.display = 'none';
+        formError.style.display = 'none';
+
+        // Obtener datos del formulario
+        const formData = {
+          name: document.getElementById('name').value,
+          email: document.getElementById('email').value,
+          subject: document.getElementById('subject').value,
+          message: document.getElementById('message').value,
+          timestamp: new Date().toISOString()
+        };
+
+        // Simulación de envío (reemplazar con llamada real a backend/email service)
+        try {
+          // Aquí iría la llamada a tu backend o servicio de email
+          // Por ahora, simulamos un envío exitoso
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Mostrar mensaje de éxito
+          formSuccess.style.display = 'flex';
+          contactForm.reset();
+          
+          // Scroll al mensaje
+          formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // Log para debugging (remover en producción)
+          console.log('Formulario enviado:', formData);
+          
+        } catch (error) {
+          // Mostrar mensaje de error
+          formError.style.display = 'flex';
+          console.error('Error al enviar formulario:', error);
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>

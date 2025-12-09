@@ -1,0 +1,627 @@
+/* legal.css - Estilos para páginas legales */
+
+/* ============================================
+   LAYOUT GENERAL
+   ============================================ */
+body {
+  background: var(--gray-50);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.legal-header {
+  background: white;
+  border-bottom: 1px solid var(--gray-200);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.legal-nav {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-600);
+  text-decoration: none;
+  transition: transform 0.2s;
+}
+
+.nav-logo:hover {
+  transform: scale(1.05);
+}
+
+.logo-icon {
+  font-size: 2rem;
+}
+
+.back-link {
+  color: var(--gray-600);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: var(--primary-600);
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+.legal-main {
+  flex: 1;
+  padding: 3rem 2rem;
+}
+
+.legal-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: white;
+  padding: 3rem;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.legal-page-header {
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid var(--gray-200);
+}
+
+.legal-page-header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  margin-bottom: 0.5rem;
+}
+
+.last-updated {
+  color: var(--gray-500);
+  font-size: 0.9375rem;
+  font-style: italic;
+}
+
+.page-description {
+  color: var(--gray-600);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  margin-top: 1rem;
+}
+
+/* ============================================
+   SECTIONS
+   ============================================ */
+.legal-section {
+  margin-bottom: 2.5rem;
+}
+
+.legal-section h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 1rem;
+  padding-top: 1rem;
+}
+
+.legal-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin: 1.5rem 0 0.75rem;
+}
+
+.legal-section p {
+  color: var(--gray-700);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.legal-section ul,
+.legal-section ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.legal-section li {
+  color: var(--gray-700);
+  line-height: 1.7;
+  margin-bottom: 0.5rem;
+}
+
+.legal-section a {
+  color: var(--primary-600);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.legal-section a:hover {
+  color: var(--primary-700);
+  text-decoration: underline;
+}
+
+.legal-section strong {
+  color: var(--gray-900);
+  font-weight: 600;
+}
+
+.contact-list {
+  list-style: none;
+  margin-left: 0;
+}
+
+.contact-list li {
+  padding: 0.5rem 0;
+}
+
+/* ============================================
+   COOKIE POLICY - SPECIFIC STYLES
+   ============================================ */
+.cookie-category {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.cookie-category.essential {
+  background: var(--primary-600);
+  color: white;
+}
+
+.cookie-category.analytics {
+  background: var(--info-500);
+  color: white;
+}
+
+.cookie-category.functional {
+  background: var(--secondary-500);
+  color: white;
+}
+
+.cookie-category.advertising {
+  background: var(--warning-500);
+  color: white;
+}
+
+.cookie-table {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cookie-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.cookie-table thead {
+  background: var(--gray-100);
+}
+
+.cookie-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--gray-900);
+  border-bottom: 2px solid var(--gray-200);
+}
+
+.cookie-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+  color: var(--gray-700);
+}
+
+.cookie-table tbody tr:hover {
+  background: var(--gray-50);
+}
+
+.cookie-table code {
+  background: var(--gray-100);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--primary-600);
+}
+
+.browser-guides {
+  background: var(--gray-50);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  margin-top: 1rem;
+}
+
+.browser-guides h4 {
+  margin-bottom: 0.75rem;
+  color: var(--gray-900);
+}
+
+.browser-guides ul {
+  margin-left: 0;
+  list-style: none;
+}
+
+.browser-guides li {
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================
+   CONTACT PAGE - SPECIFIC STYLES
+   ============================================ */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 3rem;
+  margin-top: 2rem;
+}
+
+.contact-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.contact-card {
+  background: var(--gray-50);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  border-left: 4px solid var(--primary-600);
+  transition: all 0.2s;
+}
+
+.contact-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.contact-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.contact-card h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 0.5rem;
+}
+
+.contact-card p {
+  font-size: 0.9375rem;
+  color: var(--gray-600);
+  margin-bottom: 0.75rem;
+}
+
+.contact-link {
+  color: var(--primary-600);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.contact-link:hover {
+  color: var(--primary-700);
+  text-decoration: underline;
+}
+
+/* Contact Form */
+.contact-form-section h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 1.5rem;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--gray-900);
+  font-size: 0.9375rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-600);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.checkbox-group {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 0.25rem;
+  cursor: pointer;
+}
+
+.checkbox-group label {
+  font-weight: 400;
+  font-size: 0.9375rem;
+  color: var(--gray-700);
+  cursor: pointer;
+}
+
+.submit-btn {
+  background: var(--primary-600);
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.submit-btn:hover {
+  background: var(--primary-700);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+.form-note {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  text-align: center;
+  margin-top: -0.5rem;
+}
+
+.form-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-lg);
+  margin-top: 1rem;
+}
+
+.success-message {
+  background: rgba(72, 187, 120, 0.1);
+  border: 2px solid var(--secondary-500);
+}
+
+.error-message {
+  background: rgba(245, 101, 101, 0.1);
+  border: 2px solid var(--danger-500);
+}
+
+.message-icon {
+  font-size: 1.5rem;
+}
+
+.form-message strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.form-message p {
+  font-size: 0.9375rem;
+  margin: 0;
+}
+
+/* FAQ Section */
+.faq-section {
+  margin-top: 4rem;
+  padding-top: 3rem;
+  border-top: 2px solid var(--gray-200);
+}
+
+.faq-section h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.faq-item {
+  background: var(--gray-50);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  border-top: 3px solid var(--primary-600);
+}
+
+.faq-item h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 0.75rem;
+}
+
+.faq-item p {
+  font-size: 0.9375rem;
+  color: var(--gray-700);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.legal-footer {
+  background: var(--gray-900);
+  color: var(--gray-400);
+  padding: 2rem;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-content p {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.footer-nav {
+  display: flex;
+  gap: 2rem;
+}
+
+.footer-nav a {
+  color: var(--gray-400);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  transition: color 0.2s;
+}
+
+.footer-nav a:hover {
+  color: white;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .legal-container {
+    padding: 2rem 1.5rem;
+  }
+
+  .legal-page-header h1 {
+    font-size: 2rem;
+  }
+
+  .legal-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .faq-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .cookie-table {
+    font-size: 0.875rem;
+  }
+
+  .cookie-table th,
+  .cookie-table td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .legal-main {
+    padding: 2rem 1rem;
+  }
+
+  .legal-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .legal-nav {
+    padding: 0 1rem;
+  }
+
+  .nav-logo {
+    font-size: 1.25rem;
+  }
+
+  .back-link {
+    font-size: 0.875rem;
+  }
+
+  .legal-page-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .legal-section h2 {
+    font-size: 1.375rem;
+  }
+
+  .contact-icon {
+    font-size: 2rem;
+  }
+}
