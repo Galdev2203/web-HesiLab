@@ -93,7 +93,7 @@ body {
 /* Actions Grid Compacto */
 .actions-grid-compact {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-md);
   max-width: 1200px;
 }
@@ -345,7 +345,7 @@ body {
   
   .actions-grid-compact {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: var(--spacing-sm);
+    gap: 10px;
   }
   
   .action-card-compact {

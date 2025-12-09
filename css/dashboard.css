@@ -973,6 +973,7 @@ body {
   align-items: center;
   margin-bottom: var(--spacing-2xl);
   animation: slideIn 0.5s ease-out;
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .training-info h3 {
@@ -1006,9 +1007,16 @@ body {
   gap: var(--spacing-sm);
 }
 
-.primary-btn-large::before {
-  content: '📋';
+.primary-btn-large .btn-icon {
   font-size: 1.5rem;
+}
+
+.primary-btn-large .btn-text {
+  font-weight: 700;
+}
+
+.primary-btn-large::before {
+  content: none;
 }
 
 .primary-btn-large:hover {
