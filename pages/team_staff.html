@@ -44,10 +44,11 @@
       <h3>Añadir entrenador</h3>
       <button class="close-modal" id="closeModalBtn">&times;</button>
     </div>
+    <form id="staffForm">
     <div class="modal-body">
       <div class="form-group">
         <label for="emailInput">Email del entrenador</label>
-        <input id="emailInput" type="email" placeholder="email@ejemplo.com" autocomplete="email" />
+        <input id="emailInput" name="email" type="email" placeholder="email@ejemplo.com" autocomplete="email" />
       </div>
       <div class="form-group">
         <label for="roleInput">Rol</label>
@@ -87,11 +88,12 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="secondary-btn" id="cancelModalBtn">Cancelar</button>
-      <button id="addBtn" class="primary-btn">Añadir Entrenador</button>
+      <button type="button" class="secondary-btn" id="cancelModalBtn">Cancelar</button>
+      <button type="button" id="addBtn" class="primary-btn">Añadir Entrenador</button>
     </div>
+    </form>
   </div>
-</main>
+</div>
 
 <!-- JS -->
 <script type="module" src="../js/team_staff.js"></script>
