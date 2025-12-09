@@ -2,6 +2,7 @@
 import { supabase } from './supabaseClient.js';
 import { requireSession } from './utils/supabaseHelpers.js';
 import { formatDate as formatDateUtil, formatTime } from './utils/domHelpers.js';
+import { announce, updateAriaExpanded } from './utils/accessibility.js';
 
 // Estado del calendario
 let currentWeekStart = getWeekStart(new Date());
@@ -33,15 +34,26 @@ class SidebarManager {
   }
 
   toggle() {
+    const isActive = this.sidebar.classList.toggle('active');
     this.menuToggle.classList.toggle('active');
-    this.sidebar.classList.toggle('active');
     this.overlay.classList.toggle('active');
+    
+    // Actualizar ARIA
+    this.menuToggle.setAttribute('aria-expanded', isActive.toString());
+    this.sidebar.setAttribute('aria-hidden', (!isActive).toString());
+    
+    // Anunciar estado
+    announce(isActive ? 'Menú abierto' : 'Menú cerrado', 'polite');
   }
 
   close() {
     this.menuToggle.classList.remove('active');
     this.sidebar.classList.remove('active');
     this.overlay.classList.remove('active');
+    
+    // Actualizar ARIA
+    this.menuToggle.setAttribute('aria-expanded', 'false');
+    this.sidebar.setAttribute('aria-hidden', 'true');
   }
 }
 

@@ -3,7 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - HesiLab</title>
+  <meta name="description" content="Panel de control HesiLab - Gestiona tu equipo, entrenamientos, asistencias y eventos deportivos.">
+  <meta name="keywords" content="dashboard deportivo, panel control, gestión equipo, entrenamientos">
+  <meta name="robots" content="noindex, nofollow">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Dashboard - HesiLab">
+  <meta property="og:description" content="Panel de control para gestión deportiva profesional.">
+  
+  <title>Dashboard - HesiLab | Gestión Deportiva</title>
 
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8303721499770704"
@@ -18,13 +27,16 @@
 </head>
 
 <body>
+  <!-- Skip to main content -->
+  <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+  
   <!-- Header Profesional -->
-  <header class="modern-header">
+  <header class="modern-header" role="banner">
     <div class="header-content">
-      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
-        <span></span>
-        <span></span>
-        <span></span>
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="sidebar">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
       </button>
       
       <div class="header-brand">
@@ -32,13 +44,13 @@
       </div>
 
       <div class="header-actions">
-        <button class="icon-btn" id="notificationsBtn" title="Notificaciones">
-          <span class="icon">🔔</span>
-          <span class="badge">3</span>
+        <button class="icon-btn" id="notificationsBtn" aria-label="Notificaciones (3 nuevas)">
+          <span class="icon" aria-hidden="true">🔔</span>
+          <span class="badge" aria-label="3 notificaciones nuevas">3</span>
         </button>
         <div class="user-menu">
-          <button class="user-avatar" id="userMenuBtn">
-            <img id="headerAvatar" src="" alt="Avatar">
+          <button class="user-avatar" id="userMenuBtn" aria-label="Menú de usuario" aria-haspopup="true">
+            <img id="headerAvatar" src="" alt="Avatar de usuario">
           </button>
         </div>
       </div>
@@ -46,7 +58,7 @@
   </header>
 
   <!-- Sidebar Navegación -->
-  <aside class="sidebar" id="sidebar">
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Menú principal">
     <div class="sidebar-header">
       <div class="user-profile">
         <img id="sidebarAvatar" src="" alt="Avatar" class="sidebar-avatar">
@@ -93,18 +105,18 @@
   </aside>
 
   <!-- Overlay para cerrar sidebar en móvil -->
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
   <!-- Main Content -->
-  <main class="dashboard-main">
+  <main class="dashboard-main" id="main-content" role="main" aria-label="Contenido principal del dashboard">
     <div class="container">
       
       <!-- Sección HOY -->
-      <div class="collapsible-section">
+      <section class="collapsible-section" aria-labelledby="todayHeader">
         <div class="section-header-collapsible" id="todayHeader">
-          <h2>📅 Hoy</h2>
-          <button class="collapse-btn" aria-label="Colapsar sección">
-            <span class="collapse-icon">▼</span>
+          <h2><span aria-hidden="true">📅</span> Hoy</h2>
+          <button class="collapse-btn" aria-label="Expandir o colapsar sección Hoy" aria-expanded="true">
+            <span class="collapse-icon" aria-hidden="true">▼</span>
           </button>
         </div>
         <div class="section-content" id="todayContent">

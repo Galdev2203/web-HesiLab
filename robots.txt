@@ -1,0 +1,31 @@
+# robots.txt - HesiLab
+
+# Permitir todos los bots en páginas públicas
+User-agent: *
+Allow: /
+Allow: /pages/index.html
+
+# Bloquear páginas privadas/autenticadas
+Disallow: /pages/dashboard.html
+Disallow: /pages/teams.html
+Disallow: /pages/players.html
+Disallow: /pages/trainings.html
+Disallow: /pages/events.html
+Disallow: /pages/attendance.html
+Disallow: /pages/stats.html
+Disallow: /pages/team_detail.html
+Disallow: /pages/team_staff.html
+Disallow: /pages/profile.html
+Disallow: /pages/staff.html
+
+# Permitir crawling de recursos estáticos
+Allow: /css/
+Allow: /js/
+Allow: /assets/
+
+# Bloquear archivos de configuración
+Disallow: /.git/
+Disallow: /node_modules/
+
+# Sitemap
+Sitemap: https://hesilab.com/sitemap.xml
