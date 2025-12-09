@@ -459,7 +459,12 @@ class AttendanceController {
       // Ocultar controles de edición si no hay permisos
       if (!canManage) {
         const saveBtn = document.getElementById('saveAllBtn');
+        const markAllPresentBtn = document.getElementById('markAllPresentBtn');
+        const markAllAbsentBtn = document.getElementById('markAllAbsentBtn');
+        
         if (saveBtn) saveBtn.style.display = 'none';
+        if (markAllPresentBtn) markAllPresentBtn.style.display = 'none';
+        if (markAllAbsentBtn) markAllAbsentBtn.style.display = 'none';
         
         // Deshabilitar todos los botones de estado
         document.querySelectorAll('.status-btn').forEach(btn => {
