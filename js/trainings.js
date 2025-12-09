@@ -68,7 +68,6 @@ class TrainingCardRenderer extends CardRenderer {
 }
 
 const cardRenderer = new TrainingCardRenderer('trainingsList');
-cardRenderer.setCanManage(canManage);
 
 /**
  * Cargar entrenamientos
@@ -87,6 +86,11 @@ async function loadTrainings() {
       'Error cargando entrenamientos'
     );
 
+    // Configurar permisos y handlers ANTES de setear items
+    cardRenderer.setCanManage(canManage);
+    cardRenderer.onEdit(openEditModal);
+    cardRenderer.onDelete(handleDelete);
+    
     cardRenderer.setItems(trainings);
     cardRenderer.render('Aún no hay entrenamientos configurados');
     
@@ -95,10 +99,6 @@ async function loadTrainings() {
     if (fab) {
       fab.style.display = canManage ? 'flex' : 'none';
     }
-    
-    // Configurar handlers
-    cardRenderer.onEdit(openEditModal);
-    cardRenderer.onDelete(handleDelete);
     
   } catch (error) {
     showError(error.message);

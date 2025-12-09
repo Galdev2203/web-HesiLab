@@ -160,9 +160,10 @@
 }
 
 .status-btn.active.present {
-  background: var(--success-500);
-  border-color: var(--success-600);
+  background: #10b981;
+  border-color: #059669;
   color: white;
+  font-weight: 600;
 }
 
 .status-btn.active.absent {

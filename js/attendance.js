@@ -334,19 +334,22 @@ class AttendanceRenderer {
         <input type="text" class="notes-input" 
                data-player-id="${player.id}"
                placeholder="Añadir nota..."
-               value="${escapeHtml(displayNotes || '')}">
+               value="${escapeHtml(displayNotes || '')}"
+               ${!canManage ? 'disabled' : ''}>
       </td>
     `;
 
     // Eventos
     row.querySelectorAll('.status-btn').forEach(btn => {
       btn.addEventListener('click', () => {
+        if (!canManage) return;
         this.recordsManager.updateStatus(btn.dataset.playerId, btn.dataset.status);
         this.render();
       });
     });
 
     row.querySelector('.notes-input').addEventListener('input', (e) => {
+      if (!canManage) return;
       this.recordsManager.updateNotes(e.target.dataset.playerId, e.target.value);
     });
 
