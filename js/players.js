@@ -113,13 +113,28 @@ async function loadPlayers() {
     .from('players')
     .select('*')
     .eq('team_id', teamId)
-    .eq('active', true)
-    .order('number', { ascending: true });
+    .eq('active', true);
 
   const players = await loadData(query, 'Error al cargar jugadores');
   if (players) {
-    allPlayers = players;
-    cardRenderer.setItems(players);
+    // Ordenar por dorsal numéricamente (convertir texto a número)
+    // Si tienen el mismo valor numérico (ej: "0" y "00"), ordenar por longitud descendente ("00" antes que "0")
+    const sortedPlayers = players.sort((a, b) => {
+      const numA = a.number ? parseInt(a.number, 10) : 999999;
+      const numB = b.number ? parseInt(b.number, 10) : 999999;
+      
+      if (numA !== numB) {
+        return numA - numB;
+      }
+      
+      // Si son iguales numéricamente, ordenar por longitud (más largo primero)
+      const lenA = a.number ? a.number.length : 0;
+      const lenB = b.number ? b.number.length : 0;
+      return lenB - lenA;
+    });
+    
+    allPlayers = sortedPlayers;
+    cardRenderer.setItems(sortedPlayers);
     cardRenderer.render();
     
     // Ocultar FAB si no hay permisos de gestión
