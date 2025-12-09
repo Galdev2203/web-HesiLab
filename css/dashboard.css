@@ -769,21 +769,36 @@ body {
 
 .training-item-btn {
   padding: 12px 24px;
-  background: var(--success-600);
-  color: white;
-  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--primary-700);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: var(--radius-md);
   font-weight: 600;
   font-size: 0.9375rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   white-space: nowrap;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.training-item-btn .btn-icon {
+  font-size: 1.125rem;
 }
 
 .training-item-btn:hover {
-  background: var(--success-700);
+  background: white;
+  color: var(--primary-800);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.training-item-btn:hover .btn-text {
+  color: var(--primary-800);
 }
 
 .empty-message {
