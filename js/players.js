@@ -167,13 +167,17 @@ async function savePlayer() {
   
   let number = null;
   if (numberStr) {
-    // Permitir números como 0, 00, 1, etc.
-    const parsedNumber = parseInt(numberStr, 10);
-    if (isNaN(parsedNumber) || parsedNumber < 0) {
-      validator.addError('El dorsal debe ser un número válido (se permite 0 y 00)');
+    // Validar que solo contenga dígitos
+    if (!/^\d+$/.test(numberStr)) {
+      validator.addError('El dorsal debe contener solo números');
     } else {
-      // Guardar como string para preservar '00'
-      number = numberStr;
+      const parsedNumber = parseInt(numberStr, 10);
+      if (parsedNumber < 0 || parsedNumber > 999) {
+        validator.addError('El dorsal debe estar entre 0 y 999');
+      } else {
+        // Guardar como string para preservar '00', '0', etc.
+        number = numberStr;
+      }
     }
   }
 
