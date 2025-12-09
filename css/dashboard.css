@@ -721,6 +721,8 @@ body {
   padding: var(--spacing-lg);
   background: linear-gradient(135deg, var(--success-50), var(--success-100));
   border-left: 4px solid var(--success-600);
+  border: 2px solid var(--success-300);
+  border-left: 4px solid var(--success-600);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   transition: all 0.2s;
@@ -729,6 +731,7 @@ body {
 .today-training-item:hover {
   transform: translateX(4px);
   box-shadow: var(--shadow-md);
+  border-color: var(--success-500);
 }
 
 .training-item-info {
@@ -874,6 +877,7 @@ body {
   border-radius: var(--radius-lg);
   padding: var(--spacing-md);
   box-shadow: var(--shadow-sm);
+  border: 2px solid var(--gray-200);
   transition: all 0.2s;
   min-height: 200px;
   display: flex;
@@ -883,11 +887,13 @@ body {
 .day-column:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
+  border-color: var(--primary-300);
 }
 
 .day-column.today {
   border: 2px solid var(--primary-600);
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(76, 81, 191, 0.05));
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
 }
 
 .day-header {
@@ -1281,9 +1287,13 @@ body {
     font-size: 0.8125rem;
   }
   
-  .attendance-btn {
+  .training-item-btn {
     padding: 10px 16px;
     font-size: 0.875rem;
+  }
+  
+  .training-item-btn .btn-icon {
+    font-size: 1rem;
   }
   
   .header-brand h1 {
