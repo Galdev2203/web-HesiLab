@@ -169,11 +169,11 @@ async function savePlayer() {
   if (numberStr) {
     // Validar que solo contenga dígitos
     if (!/^\d+$/.test(numberStr)) {
-      validator.addError('El dorsal debe contener solo números');
+      validator.errors.push('El dorsal debe contener solo números');
     } else {
       const parsedNumber = parseInt(numberStr, 10);
       if (parsedNumber < 0 || parsedNumber > 999) {
-        validator.addError('El dorsal debe estar entre 0 y 999');
+        validator.errors.push('El dorsal debe estar entre 0 y 999');
       } else {
         // Guardar como string para preservar '00', '0', etc.
         number = numberStr;
