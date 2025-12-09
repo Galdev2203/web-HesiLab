@@ -38,18 +38,8 @@ class TeamNavigationManager {
       // Configurar URL
       btn.href = `/pages/${key}.html?team_id=${this.teamId}`;
 
-      // Configurar visibilidad según permisos
-      if (config.permission === null) {
-        // Siempre visible (como stats)
-        btn.style.display = 'flex';
-      } else if (Array.isArray(config.permission)) {
-        // Múltiples permisos (OR)
-        const hasPermission = config.permission.some(p => this.userPermissions[p]);
-        toggleElementByPermission(btn, hasPermission);
-      } else {
-        // Permiso único
-        toggleElementByPermission(btn, this.userPermissions[config.permission]);
-      }
+      // Todas las tarjetas son visibles (modo consulta permitido)
+      btn.style.display = 'flex';
     });
 
     // Mostrar sección de acciones
