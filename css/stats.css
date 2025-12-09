@@ -316,71 +316,158 @@
 }
 
 @media (max-width: 480px) {
-  .section-title h2 {
-    font-size: 1.25rem;
+  .stats-main {
+    padding: var(--spacing-md) var(--spacing-xs);
   }
   
+  .section-title h2 {
+    font-size: 1.125rem;
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .filters-card {
+    padding: var(--spacing-md);
+  }
+  
+  .filters-card h3 {
+    font-size: 1rem;
+  }
+  
+  .filter-group label {
+    font-size: 0.8125rem;
+  }
+  
+  .filter-select,
+  .filter-input {
+    font-size: 0.875rem;
+    padding: 8px 12px;
+  }
+  
+  .btn {
+    font-size: 0.875rem;
+    padding: 8px 16px;
+  }
+  
+  .stats-summary-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+  
+  .stat-card {
+    padding: var(--spacing-md);
+  }
+  
+  .stat-icon {
+    font-size: 1.75rem;
+    width: 45px;
+    height: 45px;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .stat-label {
+    font-size: 0.8125rem;
+  }
+  
+  /* Ocultar el thead */
   .stats-table thead {
     display: none;
   }
   
+  /* Cada fila es una tarjeta */
   .stats-table tbody tr {
     display: block;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
     border: 1px solid var(--gray-200);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
     background: white;
     box-shadow: var(--shadow-sm);
   }
   
-  .stats-table td {
+  /* Header de la tarjeta: número + nombre */
+  .stats-table td[data-label="#"] {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 0 0 var(--spacing-sm) 0;
+    border: none;
+    margin-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--gray-200);
+  }
+  
+  .stats-table td[data-label="Jugador"] {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0;
+    border: none;
+    margin: 0;
+    position: absolute;
+    left: 75px;
+    top: var(--spacing-md);
+  }
+  
+  .stats-table td[data-label="#"]::before,
+  .stats-table td[data-label="Jugador"]::before {
+    display: none;
+  }
+  
+  .stats-table td[data-label="Jugador"] .player-name {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+  
+  .stats-table .player-number {
+    width: 42px;
+    height: 42px;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  
+  /* Stats individuales */
+  .stats-table td:not([data-label="#"]):not([data-label="Jugador"]) {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
+    padding: 8px 0;
     border: none;
     border-bottom: 1px solid var(--gray-100);
   }
   
+  .stats-table td:not([data-label="#"]):not([data-label="Jugador"]):first-of-type {
+    margin-top: var(--spacing-lg);
+  }
+  
   .stats-table td:last-child {
     border-bottom: none;
-    padding-top: var(--spacing-md);
-    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    margin-top: var(--spacing-xs);
     border-top: 2px solid var(--gray-200);
+    font-size: 1rem;
   }
   
   .stats-table td::before {
     content: attr(data-label);
     font-weight: 600;
     color: var(--gray-600);
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
   
-  /* Especial para el número y nombre del jugador */
-  .stats-table td[data-label="#"] {
-    border-bottom: none;
-    padding-bottom: 5px;
+  .stats-table td:not([data-label="#"]):not([data-label="Jugador"]) {
+    font-size: 0.9375rem;
+    font-weight: 600;
   }
   
-  .stats-table td[data-label="Jugador"] {
-    padding-top: 5px;
-    padding-bottom: var(--spacing-md);
-    margin-bottom: var(--spacing-sm);
-    border-bottom: 2px solid var(--gray-200);
-  }
-  
-  .stats-table td[data-label="Jugador"]::before {
-    display: none;
-  }
-  
-  .stats-table td[data-label="#"]::before {
-    display: none;
-  }
-  
-  .stats-table td[data-label="Jugador"] .player-name {
+  .percentage-high,
+  .percentage-medium,
+  .percentage-low {
     font-size: 1.125rem;
     font-weight: 700;
   }
