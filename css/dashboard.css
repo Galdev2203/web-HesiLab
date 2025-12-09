@@ -551,6 +551,7 @@ body {
   }
 }
 
+/* Responsive - Mobile First approach */
 @media (max-width: 768px) {
   .header-brand h1 {
     font-size: 1.25rem;
@@ -575,10 +576,12 @@ body {
   }
 }
 
-@media (max-width: 640px) {
+/* Smartphones y tablets pequeñas */
+@media (max-width: 768px) and (min-width: 0px) {
   .stats-grid {
     grid-template-columns: 1fr;
   }
+}
   
   .stat-card {
     padding: var(--spacing-lg);
@@ -989,18 +992,33 @@ body {
   background: white;
   color: var(--primary-600);
   border: none;
-  padding: var(--spacing-md) var(--spacing-2xl);
+  padding: var(--spacing-lg) var(--spacing-2xl);
   border-radius: var(--radius-lg);
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.primary-btn-large::before {
+  content: '📋';
+  font-size: 1.5rem;
 }
 
 .primary-btn-large:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #ffffff, #f3f4f6);
+}
+
+.primary-btn-large:active {
+  transform: translateY(-1px) scale(1);
 }
 
 /* Accesos Rápidos Minimalista */
@@ -1127,7 +1145,8 @@ body {
   }
 }
 
-@media (max-width: 640px) {
+/* Calendario y contenido principal - Todos los m\u00f3viles */
+@media (max-width: 768px) {
   .dashboard-main {
     padding: var(--spacing-md) var(--spacing-xs);
   }

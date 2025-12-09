@@ -164,7 +164,8 @@ body::after {
 }
 
 /* Responsive */
-@media (max-width: 640px) {
+/* Responsive - Todos los dispositivos móviles */
+@media (max-width: 768px) {
   #box {
     padding: var(--spacing-xl);
   }

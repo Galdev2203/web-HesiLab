@@ -315,7 +315,8 @@
   }
 }
 
-@media (max-width: 640px) {
+/* Responsive - Todos los dispositivos móviles */
+@media (max-width: 768px) {
   .stats-main {
     padding: var(--spacing-md) var(--spacing-xs);
   }
