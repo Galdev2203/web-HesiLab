@@ -329,7 +329,7 @@ class CalendarManager {
           </div>
           <button class="training-item-btn" onclick="window.location.href='/pages/attendance.html?team_id=${training.team_id}'">
             <span class="btn-icon">📋</span>
-            <span class="btn-text">Pasar Lista Ahora</span>
+            <span class="btn-text">Pasar Lista</span>
           </button>
         `;
         todayContainer.appendChild(trainingCard);
