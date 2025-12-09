@@ -409,6 +409,7 @@ async function loadStatistics() {
     }
 
     // Calcular porcentaje de asistencia promedio
+    // Presente + Tarde cuenta como asistió, Justificado + Ausente como no asistió
     if (!playersError && playersData) {
       const teamIds = playersData.map(t => t.team_id);
       
@@ -419,9 +420,9 @@ async function loadStatistics() {
           .in('team_id', teamIds);
         
         if (attendance && attendance.length > 0) {
-          const present = attendance.filter(a => a.status === 'PRESENT').length;
+          const attended = attendance.filter(a => a.status === 'PRESENT' || a.status === 'LATE').length;
           const total = attendance.length;
-          const rate = Math.round((present / total) * 100);
+          const rate = Math.round((attended / total) * 100);
           document.getElementById('attendanceRate').textContent = `${rate}%`;
         }
       }
