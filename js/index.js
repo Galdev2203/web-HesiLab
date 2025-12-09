@@ -5,12 +5,6 @@ import { setupAuthListener } from "../js/authGuard.js";
 // Configurar listener de autenticación
 setupAuthListener();
 
-// Verificar si ya hay una sesión activa
-const { data: sessionData } = await supabase.auth.getSession();
-if (sessionData.session) {
-  window.location.href = "/pages/dashboard.html";
-}
-
 // ============================================
 // FUNCIONES DE AUTENTICACIÓN
 // ============================================

@@ -89,14 +89,17 @@ export async function signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     
-    // Limpiar localStorage adicional si es necesario
-    localStorage.removeItem('hesilab-auth-token');
+    // Limpiar completamente localStorage y sessionStorage
+    localStorage.clear();
+    sessionStorage.clear();
     
-    redirectToLogin();
+    // Redirigir a la landing page (no al login interno)
+    window.location.href = '/pages/index.html';
   } catch (error) {
     console.error('Error al cerrar sesión:', error);
     // Forzar limpieza y redirección incluso si hay error
     localStorage.clear();
-    redirectToLogin();
+    sessionStorage.clear();
+    window.location.href = '/pages/index.html';
   }
 }
