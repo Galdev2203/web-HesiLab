@@ -19,7 +19,7 @@
   <meta name="twitter:title" content="HesiLab - Sistema de Gestión Deportiva">
   <meta name="twitter:description" content="Sistema profesional de gestión para equipos deportivos.">
   
-  <title>Iniciar Sesión - HesiLab | Gestión Deportiva</title>
+  <title>HesiLab - Gestión Deportiva Profesional | Control Total de tu Equipo</title>
 
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8303721499770704"
@@ -27,22 +27,329 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="../css/global.css">
-  <link rel="stylesheet" href="../css/index.css">
+  <link rel="stylesheet" href="../css/landing.css">
   
   <!-- Analytics -->
   <script src="../js/analytics.js"></script>
 </head>
 
 <body>
-  <main role="main" aria-label="Página de inicio de sesión">
-    <div id="box">
-      <h1>Inicia sesión en HesiLab</h1>
-      <p class="subtitle">Sistema de gestión deportiva profesional</p>
-      <button class="google-btn" id="loginBtn" aria-label="Iniciar sesión con cuenta de Google">
-        <span aria-hidden="true">🔐</span> Iniciar sesión con Google
+  <!-- Skip Navigation -->
+  <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
+
+  <!-- Navigation Header -->
+  <header class="landing-header" role="banner">
+    <nav class="nav-container" role="navigation" aria-label="Navegación principal">
+      <div class="nav-logo">
+        <span class="logo-icon">🏀</span>
+        <span class="logo-text">HesiLab</span>
+      </div>
+      <div class="nav-links">
+        <a href="#features" class="nav-link">Características</a>
+        <a href="#benefits" class="nav-link">Beneficios</a>
+        <a href="#how-it-works" class="nav-link">Cómo Funciona</a>
+        <button class="nav-cta-btn" id="navLoginBtn" aria-label="Iniciar sesión con Google">
+          Comenzar Gratis
+        </button>
+      </div>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú móvil" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
       </button>
-    </div>
+    </nav>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+    <a href="#features" class="mobile-link">Características</a>
+    <a href="#benefits" class="mobile-link">Beneficios</a>
+    <a href="#how-it-works" class="mobile-link">Cómo Funciona</a>
+    <button class="mobile-cta-btn" id="mobileLoginBtn">Comenzar Gratis</button>
+  </div>
+
+  <!-- Main Content -->
+  <main role="main" id="main-content">
+    
+    <!-- Hero Section -->
+    <section class="hero-section" aria-labelledby="hero-title">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 id="hero-title" class="hero-title">
+            Gestiona tu Equipo Deportivo de Forma Profesional
+          </h1>
+          <p class="hero-subtitle">
+            HesiLab es la plataforma completa para entrenadores y gestores deportivos. 
+            Controla asistencias, planifica entrenamientos, gestiona eventos y analiza estadísticas 
+            en tiempo real.
+          </p>
+          <div class="hero-cta">
+            <button class="cta-primary" id="heroLoginBtn" aria-label="Comenzar gratis con Google">
+              <span class="cta-icon">🚀</span>
+              <span>Comenzar Gratis</span>
+            </button>
+            <a href="#how-it-works" class="cta-secondary">
+              <span>Ver cómo funciona</span>
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <span class="stat-number">100%</span>
+              <span class="stat-label">Gratis</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">☁️</span>
+              <span class="stat-label">En la nube</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">📱</span>
+              <span class="stat-label">Mobile-first</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-image">
+          <div class="hero-card card-1">
+            <span class="card-icon">📊</span>
+            <span class="card-text">Estadísticas en tiempo real</span>
+          </div>
+          <div class="hero-card card-2">
+            <span class="card-icon">✅</span>
+            <span class="card-text">Control de asistencias</span>
+          </div>
+          <div class="hero-card card-3">
+            <span class="card-icon">📅</span>
+            <span class="card-text">Calendario de entrenamientos</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features" aria-labelledby="features-title">
+      <div class="section-container">
+        <div class="section-header">
+          <h2 id="features-title" class="section-title">Características Principales</h2>
+          <p class="section-subtitle">Todo lo que necesitas para gestionar tu equipo en un solo lugar</p>
+        </div>
+        
+        <div class="features-grid">
+          <article class="feature-card">
+            <div class="feature-icon">👥</div>
+            <h3 class="feature-title">Gestión de Jugadores</h3>
+            <p class="feature-description">
+              Administra tu plantilla completa: datos de contacto, posiciones, dorsales y estadísticas personales.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">📋</div>
+            <h3 class="feature-title">Control de Asistencias</h3>
+            <p class="feature-description">
+              Pasa lista en segundos, registra asistencias, retrasos y ausencias con un solo clic.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🏋️</div>
+            <h3 class="feature-title">Planificación de Entrenamientos</h3>
+            <p class="feature-description">
+              Programa sesiones, define horarios, ubicaciones y mantén al equipo informado automáticamente.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🏆</div>
+            <h3 class="feature-title">Gestión de Eventos</h3>
+            <p class="feature-description">
+              Organiza partidos, torneos y eventos especiales con calendario integrado y notificaciones.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3 class="feature-title">Estadísticas Avanzadas</h3>
+            <p class="feature-description">
+              Analiza rendimiento, porcentaje de asistencia, puntuación y métricas personalizadas en tiempo real.
+            </p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">🔐</div>
+            <h3 class="feature-title">Permisos y Roles</h3>
+            <p class="feature-description">
+              Control granular de acceso: entrenadores, asistentes y staff con permisos personalizados.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits-section" id="benefits" aria-labelledby="benefits-title">
+      <div class="section-container">
+        <div class="section-header">
+          <h2 id="benefits-title" class="section-title">¿Por qué elegir HesiLab?</h2>
+          <p class="section-subtitle">Beneficios que transformarán la gestión de tu equipo</p>
+        </div>
+
+        <div class="benefits-grid">
+          <div class="benefit-item">
+            <div class="benefit-number">01</div>
+            <h3 class="benefit-title">Ahorra Tiempo</h3>
+            <p class="benefit-description">
+              Automatiza tareas repetitivas y reduce el tiempo administrativo hasta un 70%. 
+              Más tiempo para entrenar, menos para el papeleo.
+            </p>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-number">02</div>
+            <h3 class="benefit-title">Mejora la Comunicación</h3>
+            <p class="benefit-description">
+              Mantén a todo el equipo sincronizado con notificaciones automáticas, 
+              calendarios compartidos y actualizaciones en tiempo real.
+            </p>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-number">03</div>
+            <h3 class="benefit-title">Toma Decisiones Informadas</h3>
+            <p class="benefit-description">
+              Accede a estadísticas detalladas y reportes visuales que te ayudan a 
+              tomar mejores decisiones sobre tu equipo.
+            </p>
+          </div>
+
+          <div class="benefit-item">
+            <div class="benefit-number">04</div>
+            <h3 class="benefit-title">Acceso desde Cualquier Lugar</h3>
+            <p class="benefit-description">
+              100% en la nube, accesible desde móvil, tablet o PC. 
+              Tus datos siempre disponibles, sincronizados y seguros.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it Works Section -->
+    <section class="how-it-works-section" id="how-it-works" aria-labelledby="how-title">
+      <div class="section-container">
+        <div class="section-header">
+          <h2 id="how-title" class="section-title">Comienza en 3 Pasos</h2>
+          <p class="section-subtitle">Configurar tu equipo es rápido y sencillo</p>
+        </div>
+
+        <div class="steps-container">
+          <div class="step-item">
+            <div class="step-circle">
+              <span class="step-number">1</span>
+            </div>
+            <div class="step-content">
+              <h3 class="step-title">Inicia Sesión con Google</h3>
+              <p class="step-description">
+                Acceso rápido y seguro con tu cuenta de Google. Sin registros complicados.
+              </p>
+            </div>
+          </div>
+
+          <div class="step-arrow" aria-hidden="true">→</div>
+
+          <div class="step-item">
+            <div class="step-circle">
+              <span class="step-number">2</span>
+            </div>
+            <div class="step-content">
+              <h3 class="step-title">Crea tu Equipo</h3>
+              <p class="step-description">
+                Añade información básica de tu equipo y empieza a agregar jugadores.
+              </p>
+            </div>
+          </div>
+
+          <div class="step-arrow" aria-hidden="true">→</div>
+
+          <div class="step-item">
+            <div class="step-circle">
+              <span class="step-number">3</span>
+            </div>
+            <div class="step-content">
+              <h3 class="step-title">¡Listo para Gestionar!</h3>
+              <p class="step-description">
+                Comienza a programar entrenamientos, pasar lista y analizar estadísticas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section" aria-labelledby="cta-title">
+      <div class="cta-container">
+        <h2 id="cta-title" class="cta-title">¿Listo para Transformar tu Equipo?</h2>
+        <p class="cta-description">
+          Únete a HesiLab hoy y descubre cómo la tecnología puede 
+          llevar la gestión de tu equipo al siguiente nivel.
+        </p>
+        <button class="cta-button" id="footerLoginBtn" aria-label="Comenzar gratis con Google">
+          <span class="cta-icon">🚀</span>
+          <span>Comenzar Gratis Ahora</span>
+        </button>
+        <p class="cta-note">No se requiere tarjeta de crédito • Configuración en minutos</p>
+      </div>
+    </section>
+
   </main>
+
+  <!-- Footer -->
+  <footer class="landing-footer" role="contentinfo">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="logo-icon">🏀</span>
+          <span class="logo-text">HesiLab</span>
+        </div>
+        <p class="footer-tagline">Gestión deportiva profesional para equipos modernos</p>
+      </div>
+
+      <div class="footer-links">
+        <div class="footer-column">
+          <h4 class="footer-heading">Producto</h4>
+          <ul class="footer-list">
+            <li><a href="#features" class="footer-link">Características</a></li>
+            <li><a href="#benefits" class="footer-link">Beneficios</a></li>
+            <li><a href="#how-it-works" class="footer-link">Cómo Funciona</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-heading">Legal</h4>
+          <ul class="footer-list">
+            <li><a href="#" class="footer-link">Política de Privacidad</a></li>
+            <li><a href="#" class="footer-link">Términos de Servicio</a></li>
+            <li><a href="#" class="footer-link">Política de Cookies</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4 class="footer-heading">Soporte</h4>
+          <ul class="footer-list">
+            <li><a href="#" class="footer-link">Centro de Ayuda</a></li>
+            <li><a href="#" class="footer-link">Contacto</a></li>
+            <li><a href="#" class="footer-link">Estado del Servicio</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copyright">
+        &copy; 2024 HesiLab. Todos los derechos reservados.
+      </p>
+    </div>
+  </footer>
 
   <!-- JS -->
   <script type="module" src="../js/index.js"></script>
