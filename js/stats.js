@@ -329,17 +329,17 @@ function renderPlayerStatsTable(playerStats) {
     }
 
     tr.innerHTML = `
-      <td class="text-center">
+      <td class="text-center" data-label="#">
         <span class="player-number">${stats.player.number || '-'}</span>
       </td>
-      <td>
+      <td data-label="Jugador">
         <span class="player-name">${stats.player.name}</span>
       </td>
-      <td class="text-center">${stats.present}</td>
-      <td class="text-center">${stats.absent}</td>
-      <td class="text-center">${stats.late}</td>
-      <td class="text-center">${stats.excused}</td>
-      <td class="text-center">
+      <td class="text-center" data-label="Presentes">${stats.present}</td>
+      <td class="text-center" data-label="Ausentes">${stats.absent}</td>
+      <td class="text-center" data-label="Tarde">${stats.late}</td>
+      <td class="text-center" data-label="Justif.">${stats.excused}</td>
+      <td class="text-center" data-label="% Asistencia">
         <span class="${percentageClass}">${stats.percentage}%</span>
       </td>
     `;
