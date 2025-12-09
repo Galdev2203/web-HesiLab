@@ -991,14 +991,14 @@ body {
 .primary-btn-large {
   background: white;
   color: var(--primary-600);
-  border: none;
+  border: 3px solid var(--primary-600);
   padding: var(--spacing-lg) var(--spacing-2xl);
   border-radius: var(--radius-lg);
   font-size: 1.125rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   display: inline-flex;
@@ -1013,8 +1013,10 @@ body {
 
 .primary-btn-large:hover {
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  background: linear-gradient(135deg, #ffffff, #f3f4f6);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  background: var(--primary-600);
+  color: white;
+  border-color: var(--primary-700);
 }
 
 .primary-btn-large:active {

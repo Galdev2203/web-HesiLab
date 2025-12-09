@@ -344,7 +344,7 @@ body {
   }
   
   .actions-grid-compact {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: var(--spacing-sm);
   }
   
@@ -366,7 +366,8 @@ body {
   }
 }
 
-@media (max-width: 768px) {
+/* Ajustes adicionales para pantallas más pequeñas */
+@media (max-width: 480px) {
   .team-header-info h2 {
     font-size: 1.25rem;
   }
@@ -377,11 +378,6 @@ body {
   
   .section-title h2 {
     font-size: 1.125rem;
-  }
-  
-  .actions-grid-compact {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
   }
   
   .action-card-compact {
