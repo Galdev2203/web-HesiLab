@@ -15,6 +15,21 @@ let teamId = null;
 let canManage = false;
 let activePlayers = [];
 
+function sortPlayersByNumber(players) {
+  return (players || []).sort((a, b) => {
+    const numA = a.number ? parseInt(a.number, 10) : 999999;
+    const numB = b.number ? parseInt(b.number, 10) : 999999;
+
+    if (numA !== numB) {
+      return numA - numB;
+    }
+
+    const lenA = a.number ? String(a.number).length : 0;
+    const lenB = b.number ? String(b.number).length : 0;
+    return lenB - lenA;
+  });
+}
+
 // ============================================
 // GESTOR DE SESIONES Y EVENTOS
 // ============================================
@@ -441,11 +456,10 @@ class AttendanceController {
         .from('players')
         .select('*')
         .eq('team_id', this.teamId)
-        .eq('active', true)
-        .order('number');
+        .eq('active', true);
 
       if (playersError) throw playersError;
-      activePlayers = players || [];
+      activePlayers = sortPlayersByNumber(players);
 
       if (activePlayers.length === 0) {
         this.renderer.showNoPlayers();
