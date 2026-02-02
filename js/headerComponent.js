@@ -1,6 +1,6 @@
 // headerComponent.js - Componente reutilizable del header unificado
 import { supabase } from './supabaseClient.js';
-import { setupAuthListener, signOut } from './authGuard.js';
+import { requireAuth, setupAuthListener, signOut } from './authGuard.js';
 
 /**
  * Inicializa el header unificado con sidebar
@@ -22,13 +22,14 @@ export async function initHeader(options = {}) {
     window._authListenerSetup = true;
   }
 
-  // Verificar sesión
-  const { data: sessionData } = await supabase.auth.getSession();
-  if (!sessionData?.session) {
-    window.location.href = '/pages/index.html';
+  // Verificar sesión (con reintentos para evitar falsos negativos)
+  let user;
+  try {
+    const authData = await requireAuth();
+    user = authData.user;
+  } catch (error) {
     return;
   }
-  const user = sessionData.session.user;
 
   // Determinar el HTML del botón de volver
   let backButtonHTML = '<div style="width: 40px;"></div>';

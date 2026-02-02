@@ -1,6 +1,29 @@
 // authGuard.js - Verificación centralizada de autenticación
 import { supabase } from './supabaseClient.js';
 
+const SESSION_RETRY_DELAY_MS = 200;
+const SESSION_MAX_RETRIES = 5;
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function getSessionWithRetry() {
+  for (let attempt = 0; attempt <= SESSION_MAX_RETRIES; attempt++) {
+    const { data: sessionData, error } = await supabase.auth.getSession();
+
+    if (sessionData?.session) {
+      return { sessionData, error };
+    }
+
+    if (attempt < SESSION_MAX_RETRIES) {
+      await sleep(SESSION_RETRY_DELAY_MS);
+    }
+  }
+
+  return { sessionData: null, error: null };
+}
+
 /**
  * Verifica que el usuario tenga una sesión activa
  * Redirige al login si no hay sesión
@@ -8,8 +31,8 @@ import { supabase } from './supabaseClient.js';
  */
 export async function requireAuth() {
   try {
-    // Intentar obtener la sesión actual
-    const { data: sessionData, error } = await supabase.auth.getSession();
+    // Intentar obtener la sesión actual con reintentos (evita falsos negativos)
+    const { sessionData, error } = await getSessionWithRetry();
     
     if (error) {
       console.error('Error al obtener sesión:', error);
@@ -43,7 +66,7 @@ export async function requireAuth() {
  */
 export async function checkAuth() {
   try {
-    const { data: sessionData } = await supabase.auth.getSession();
+    const { sessionData } = await getSessionWithRetry();
     return !!(sessionData && sessionData.session);
   } catch (error) {
     console.error('Error al verificar autenticación:', error);
