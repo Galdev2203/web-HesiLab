@@ -30,6 +30,27 @@ function sortPlayersByNumber(players) {
   });
 }
 
+function sortRecordsByPlayerNumber(records) {
+  return (records || []).slice().sort((a, b) => {
+    const numA = a?._playerData?.number;
+    const numB = b?._playerData?.number;
+    const valA = numA !== undefined && numA !== null && numA !== ''
+      ? parseInt(numA, 10)
+      : 999999;
+    const valB = numB !== undefined && numB !== null && numB !== ''
+      ? parseInt(numB, 10)
+      : 999999;
+
+    if (valA !== valB) {
+      return valA - valB;
+    }
+
+    const lenA = numA !== undefined && numA !== null ? String(numA).length : 0;
+    const lenB = numB !== undefined && numB !== null ? String(numB).length : 0;
+    return lenB - lenA;
+  });
+}
+
 // ============================================
 // GESTOR DE SESIONES Y EVENTOS
 // ============================================
@@ -300,7 +321,7 @@ class AttendanceRenderer {
 
     const tbody = table.querySelector('#attendanceTableBody');
 
-    this.recordsManager.records.forEach(record => {
+    sortRecordsByPlayerNumber(this.recordsManager.records).forEach(record => {
       const row = this.createRow(record);
       tbody.appendChild(row);
     });
