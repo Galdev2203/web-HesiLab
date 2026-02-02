@@ -32,6 +32,21 @@ if (!canManage) {
 // Estado
 let allPlayers = [];
 
+function sortPlayersByNumber(players) {
+  return (players || []).sort((a, b) => {
+    const numA = a.number ? parseInt(a.number, 10) : 999999;
+    const numB = b.number ? parseInt(b.number, 10) : 999999;
+
+    if (numA !== numB) {
+      return numA - numB;
+    }
+
+    const lenA = a.number ? String(a.number).length : 0;
+    const lenB = b.number ? String(b.number).length : 0;
+    return lenB - lenA;
+  });
+}
+
 // Modal manager
 const modal = new ModalManager('playerModal');
 const validator = new FormValidator();
@@ -82,22 +97,10 @@ class PlayerCardRenderer extends CardRenderer {
         (p.number && String(p.number).toLowerCase().includes(searchTerm)) ||
         (p.position && p.position.toLowerCase().includes(searchTerm))
       );
-      
-      // Ordenar los resultados filtrados por dorsal
-      filteredPlayers.sort((a, b) => {
-        const numA = a.number ? parseInt(a.number, 10) : 999999;
-        const numB = b.number ? parseInt(b.number, 10) : 999999;
-        
-        if (numA !== numB) {
-          return numA - numB;
-        }
-        
-        // Si son iguales numéricamente, ordenar por longitud (más largo primero)
-        const lenA = a.number ? a.number.length : 0;
-        const lenB = b.number ? b.number.length : 0;
-        return lenB - lenA;
-      });
     }
+
+    // Ordenar siempre por dorsal numérico
+    filteredPlayers = sortPlayersByNumber(filteredPlayers);
 
     if (filteredPlayers.length === 0) {
       container.innerHTML = `
@@ -134,19 +137,7 @@ async function loadPlayers() {
   if (players) {
     // Ordenar por dorsal numéricamente (convertir texto a número)
     // Si tienen el mismo valor numérico (ej: "0" y "00"), ordenar por longitud descendente ("00" antes que "0")
-    const sortedPlayers = players.sort((a, b) => {
-      const numA = a.number ? parseInt(a.number, 10) : 999999;
-      const numB = b.number ? parseInt(b.number, 10) : 999999;
-      
-      if (numA !== numB) {
-        return numA - numB;
-      }
-      
-      // Si son iguales numéricamente, ordenar por longitud (más largo primero)
-      const lenA = a.number ? a.number.length : 0;
-      const lenB = b.number ? b.number.length : 0;
-      return lenB - lenA;
-    });
+    const sortedPlayers = sortPlayersByNumber(players);
     
     allPlayers = sortedPlayers;
     cardRenderer.setItems(sortedPlayers);
