@@ -332,14 +332,21 @@ body {
 
 @media (max-width: 1024px) {
   html,
-  body,
-  .planner-main {
+  body {
     overflow-x: hidden;
   }
 
   .players-panel,
   .quarters-panel {
     overflow: visible;
+    min-width: 0;
+  }
+
+  .planner-main,
+  .container,
+  .planner-layout {
+    width: 100%;
+    max-width: 100%;
   }
 
   .players-list {
@@ -349,6 +356,7 @@ body {
     overflow-y: hidden;
     width: 100%;
     min-height: 96px;
+    max-width: 100%;
     gap: var(--spacing-sm);
     padding-bottom: var(--spacing-xs);
     scroll-snap-type: x proximity;
@@ -371,6 +379,7 @@ body {
     overflow-y: hidden;
     width: 100%;
     min-height: 240px;
+    max-width: 100%;
     padding-bottom: var(--spacing-xs);
     scroll-snap-type: x proximity;
     -webkit-overflow-scrolling: touch;
