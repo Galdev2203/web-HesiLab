@@ -28,11 +28,11 @@ export async function initHeader(options = {}) {
   // Verificar sesión
   let user;
   if (allowGuest) {
+    renderGuestHeader({ title, backUrl, activeNav, guestCtaLabel, guestCtaHref });
     const session = await getSessionWithRetry();
     user = session?.user || null;
 
     if (!user) {
-      renderGuestHeader({ title, backUrl, activeNav, guestCtaLabel, guestCtaHref });
       return;
     }
   } else {
@@ -130,6 +130,7 @@ export async function initHeader(options = {}) {
   `;
 
   // Insertar al inicio del body
+  clearExistingHeader();
   document.body.insertAdjacentHTML('afterbegin', headerHTML);
   document.body.classList.add('has-unified-header');
 
@@ -204,10 +205,17 @@ function renderGuestHeader({ title, backUrl, activeNav, guestCtaLabel, guestCtaH
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
   `;
 
+  clearExistingHeader();
   document.body.insertAdjacentHTML('afterbegin', headerHTML);
   document.body.classList.add('has-unified-header');
 
   setupGuestHeaderListeners();
+}
+
+function clearExistingHeader() {
+  document.querySelector('.unified-header')?.remove();
+  document.getElementById('sidebar')?.remove();
+  document.getElementById('sidebarOverlay')?.remove();
 }
 
 function setupGuestHeaderListeners() {
