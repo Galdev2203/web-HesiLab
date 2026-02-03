@@ -48,6 +48,47 @@ body {
   }
 }
 
+@media (max-width: 640px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .players-list {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: var(--spacing-sm);
+    padding-bottom: var(--spacing-xs);
+    scroll-snap-type: x proximity;
+  }
+
+  .player-item {
+    min-width: 180px;
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+  }
+
+  .quarters-grid {
+    display: flex;
+    gap: var(--spacing-md);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: var(--spacing-xs);
+    scroll-snap-type: x proximity;
+  }
+
+  .quarter-card {
+    min-width: 240px;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  .quarter-dropzone {
+    max-height: 360px;
+    overflow-y: auto;
+  }
+}
+
 .players-panel,
 .quarters-panel {
   background: white;
