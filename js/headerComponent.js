@@ -85,7 +85,7 @@ export async function initHeader(options = {}) {
         </a>
         <a href="/pages/match_planner.html" class="nav-item ${activeNav === 'match_planner' ? 'active' : ''}">
           <span class="icon">🧩</span>
-          <span class="text">Planificador</span>
+          <span class="text">Planificador de partidos</span>
         </a>
         <a href="/pages/teams.html" class="nav-item ${activeNav === 'teams' ? 'active' : ''}">
           <span class="icon">👥</span>
