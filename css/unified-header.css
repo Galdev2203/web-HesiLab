@@ -160,6 +160,24 @@ body.has-unified-header main {
   transform: translateX(4px);
 }
 
+.guest-login-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-lg);
+  background: var(--primary-600);
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.guest-login-btn:hover {
+  background: var(--primary-700);
+}
+
 .logout-btn .icon {
   font-size: 1.25rem;
 }

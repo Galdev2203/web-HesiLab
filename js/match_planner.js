@@ -36,34 +36,9 @@ function renderGuestHeader() {
           <span class="logo-text">HesiLab</span>
         </div>
         <div class="nav-links">
-          <a href="/pages/index.html#features" class="nav-link">Características</a>
-          <a href="/pages/index.html#benefits" class="nav-link">Beneficios</a>
-          <a href="/pages/index.html#how-it-works" class="nav-link">Cómo Funciona</a>
-          <a href="/pages/index.html" class="nav-link">Volver</a>
         </div>
-      </nav>
-    </header>
-  `;
 }
-
 function sortPlayersByNumber(players) {
-  return (players || []).sort((a, b) => {
-    const numA = a.number ? parseInt(a.number, 10) : 999999;
-    const numB = b.number ? parseInt(b.number, 10) : 999999;
-
-    if (numA !== numB) {
-      return numA - numB;
-    }
-
-    const lenA = a.number ? String(a.number).length : 0;
-    const lenB = b.number ? String(b.number).length : 0;
-    return lenB - lenA;
-  });
-}
-
-class PlannerState {
-  constructor() {
-    this.teamId = null;
     this.teams = [];
     this.players = [];
     this.tempPlayers = [];
@@ -86,7 +61,14 @@ class PlannerState {
   }
 
   setTeams(teams) {
-    this.teams = teams;
+    await initHeader({
+      title: 'Planificador de Partidos',
+      backUrl: true,
+      activeNav: 'match_planner',
+      allowGuest: true,
+      guestCtaLabel: 'Iniciar sesión',
+      guestCtaHref: '/pages/index.html'
+    });
   }
 
   setPlayers(players) {

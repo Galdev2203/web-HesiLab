@@ -13,7 +13,10 @@ export async function initHeader(options = {}) {
   const {
     title = 'HesiLab',
     backUrl = null,
-    activeNav = null
+    activeNav = null,
+    allowGuest = false,
+    guestCtaLabel = 'Iniciar sesión',
+    guestCtaHref = '/pages/index.html'
   } = options;
 
   // Configurar listener de autenticación (solo una vez)
@@ -22,13 +25,23 @@ export async function initHeader(options = {}) {
     window._authListenerSetup = true;
   }
 
-  // Verificar sesión (con reintentos para evitar falsos negativos)
+  // Verificar sesión
   let user;
-  try {
-    const authData = await requireAuth();
-    user = authData.user;
-  } catch (error) {
-    return;
+  if (allowGuest) {
+    const session = await getSessionWithRetry();
+    user = session?.user || null;
+
+    if (!user) {
+      renderGuestHeader({ title, backUrl, activeNav, guestCtaLabel, guestCtaHref });
+      return;
+    }
+  } else {
+    try {
+      const authData = await requireAuth();
+      user = authData.user;
+    } catch (error) {
+      return;
+    }
   }
 
   // Determinar el HTML del botón de volver
@@ -123,6 +136,114 @@ export async function initHeader(options = {}) {
   // Inicializar funcionalidad
   setupHeaderListeners(user);
   await loadUserProfile(user);
+}
+
+async function getSessionWithRetry() {
+  const maxRetries = 5;
+  const retryDelay = 200;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (sessionData?.session) {
+      return sessionData.session;
+    }
+
+    if (attempt < maxRetries) {
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+    }
+  }
+
+  return null;
+}
+
+function renderGuestHeader({ title, backUrl, activeNav, guestCtaLabel, guestCtaHref }) {
+  // Determinar el HTML del botón de volver
+  let backButtonHTML = '<div style="width: 40px;"></div>';
+  if (backUrl === true) {
+    backButtonHTML = '<button class="back-btn" id="backBtn" title="Volver">←</button>';
+  } else if (backUrl) {
+    backButtonHTML = `<a href="${backUrl}" class="back-btn" title="Volver">←</a>`;
+  }
+
+  const headerHTML = `
+    <header class="unified-header">
+      <div class="unified-header-content">
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        ${backButtonHTML}
+
+        <h1 class="header-title">${title}</h1>
+
+        <div class="header-actions">
+          <a href="${guestCtaHref}" class="guest-login-btn">${guestCtaLabel}</a>
+        </div>
+      </div>
+    </header>
+
+    <aside class="sidebar" id="sidebar">
+      <nav class="sidebar-nav">
+        <a href="/pages/index.html" class="nav-item">
+          <span class="icon">🏠</span>
+          <span class="text">Inicio</span>
+        </a>
+        <a href="/pages/match_planner.html" class="nav-item ${activeNav === 'match_planner' ? 'active' : ''}">
+          <span class="icon">🧩</span>
+          <span class="text">Planificador de partidos</span>
+        </a>
+        <a href="${guestCtaHref}" class="nav-item">
+          <span class="icon">🔐</span>
+          <span class="text">Iniciar sesión</span>
+        </a>
+      </nav>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  `;
+
+  document.body.insertAdjacentHTML('afterbegin', headerHTML);
+  document.body.classList.add('has-unified-header');
+
+  setupGuestHeaderListeners();
+}
+
+function setupGuestHeaderListeners() {
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const backBtn = document.getElementById('backBtn');
+
+  if (backBtn) {
+    backBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      history.back();
+    });
+  }
+
+  menuToggle?.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+    menuToggle.classList.toggle('active');
+    sidebarOverlay.classList.toggle('active');
+  });
+
+  sidebarOverlay?.addEventListener('click', () => {
+    sidebar.classList.remove('active');
+    menuToggle.classList.remove('active');
+    sidebarOverlay.classList.remove('active');
+  });
+
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth < 1024) {
+        sidebar.classList.remove('active');
+        menuToggle.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+      }
+    });
+  });
 }
 
 /**
