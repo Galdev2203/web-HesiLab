@@ -48,7 +48,7 @@ body {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 900px) {
   body {
     overflow-x: hidden;
   }
@@ -60,6 +60,7 @@ body {
     gap: var(--spacing-sm);
     padding-bottom: var(--spacing-xs);
     scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
   }
 
   .player-item {
@@ -75,6 +76,7 @@ body {
     overflow-y: hidden;
     padding-bottom: var(--spacing-xs);
     scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
   }
 
   .quarter-card {
