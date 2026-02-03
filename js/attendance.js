@@ -601,16 +601,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       dateInput.value = todayString;
     }
 
+    // Cargar automáticamente al iniciar
+    if (dateInput?.value) {
+      controller.loadForDate(dateInput.value);
+    }
+
     // Event listeners
-    document.getElementById('loadBtn')?.addEventListener('click', () => {
-      const dateInput = document.getElementById('selectedDate');
+    dateInput?.addEventListener('change', () => {
       const selectedDate = dateInput.value;
-      
       if (!selectedDate) {
-        alert('Selecciona una fecha');
         return;
       }
-      
       controller.loadForDate(selectedDate);
     });
 
