@@ -329,3 +329,51 @@ body {
 .quarter-slot.slot-stacked .quarter-player.no-number .player-name {
   display: inline;
 }
+
+@media (max-width: 1024px) {
+  html,
+  body,
+  .planner-main,
+  .planner-layout {
+    overflow-x: hidden;
+  }
+
+  .players-list {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: var(--spacing-sm);
+    padding-bottom: var(--spacing-xs);
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .player-item {
+    min-width: 180px;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  .quarters-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--spacing-md);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: var(--spacing-xs);
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .quarter-card {
+    min-width: 260px;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  .quarter-dropzone {
+    max-height: 360px;
+    overflow-y: auto;
+  }
+}
