@@ -26,6 +26,8 @@ function renderGuestHeader() {
   const container = document.getElementById('guestHeader');
   if (!container) return;
 
+  document.body.classList.add('guest-header');
+
   container.innerHTML = `
     <header class="landing-header" role="banner">
       <nav class="nav-container" role="navigation" aria-label="Navegación principal">
@@ -511,6 +513,7 @@ async function init() {
       activeNav: 'match_planner'
     });
     document.body.classList.add('has-unified-header');
+    document.body.classList.remove('guest-header');
     const guestHeader = document.getElementById('guestHeader');
     if (guestHeader) guestHeader.innerHTML = '';
   } else {

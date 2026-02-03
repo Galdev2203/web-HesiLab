@@ -5,6 +5,10 @@ body {
   min-height: 100vh;
 }
 
+body.guest-header {
+  padding-top: 70px;
+}
+
 .planner-main {
   padding: 0 var(--spacing-lg) var(--spacing-2xl);
 }
