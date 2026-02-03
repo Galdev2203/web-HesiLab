@@ -1,16 +1,8 @@
 // match_planner.js - Planificador de Partidos
 import { supabase } from './supabaseClient.js';
 import { initHeader } from './headerComponent.js';
-import { requireSession, getUrlParam, loadData } from './utils/supabaseHelpers.js';
+import { getUrlParam, loadData } from './utils/supabaseHelpers.js';
 import { escapeHtml, showError, hideError } from './utils/domHelpers.js';
-
-await requireSession();
-
-await initHeader({
-  title: 'Planificador de Partidos',
-  backUrl: true,
-  activeNav: 'match_planner'
-});
 
 const elements = {
   errorMsg: document.getElementById('errorMsg'),
@@ -26,6 +18,7 @@ const elements = {
 
 const TEAM_ID_PARAM = 'team_id';
 let tempPlayerCounter = 1;
+const GUEST_TEAM_ID = 'guest';
 
 function sortPlayersByNumber(players) {
   return (players || []).sort((a, b) => {
@@ -404,9 +397,22 @@ function handleQuarterCountChange() {
 }
 
 async function init() {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData?.session?.user;
+
+  if (user) {
+    await initHeader({
+      title: 'Planificador de Partidos',
+      backUrl: true,
+      activeNav: 'match_planner'
+    });
+  } else {
+    document.body.classList.remove('has-unified-header');
+  }
+
   const teamIdFromUrl = getUrlParam(TEAM_ID_PARAM);
 
-  if (teamIdFromUrl) {
+  if (teamIdFromUrl && user) {
     state.setTeamId(teamIdFromUrl);
     ui.setPlannerEnabled(true);
     try {
@@ -415,6 +421,14 @@ async function init() {
     } catch (error) {
       console.error(error);
       showError('No se pudieron cargar los jugadores.');
+    }
+  } else if (!user) {
+    state.setTeamId(GUEST_TEAM_ID);
+    state.setPlayers([]);
+    ui.setPlannerEnabled(true);
+    ui.renderTeamSelector();
+    if (teamIdFromUrl) {
+      showError('Inicia sesión para cargar jugadores de un equipo. Puedes usar el modo temporal sin cuenta.');
     }
   } else {
     const teams = await loadTeams();
