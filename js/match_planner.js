@@ -22,23 +22,24 @@ const SLOT_COUNT = 5;
 const SLOT_CAPACITY = 3;
 let tempPlayerCounter = 1;
 
-function renderGuestHeader() {
-  const container = document.getElementById('guestHeader');
-  if (!container) return;
-
-  document.body.classList.add('guest-header');
-
-  container.innerHTML = `
-    <header class="landing-header" role="banner">
-      <nav class="nav-container" role="navigation" aria-label="Navegación principal">
-        <div class="nav-logo">
-          <span class="logo-icon">🏀</span>
-          <span class="logo-text">HesiLab</span>
-        </div>
-        <div class="nav-links">
-        </div>
-}
 function sortPlayersByNumber(players) {
+  return (players || []).sort((a, b) => {
+    const numA = a.number ? parseInt(a.number, 10) : 999999;
+    const numB = b.number ? parseInt(b.number, 10) : 999999;
+
+    if (numA !== numB) {
+      return numA - numB;
+    }
+
+    const lenA = a.number ? String(a.number).length : 0;
+    const lenB = b.number ? String(b.number).length : 0;
+    return lenB - lenA;
+  });
+}
+
+class PlannerState {
+  constructor() {
+    this.teamId = null;
     this.teams = [];
     this.players = [];
     this.tempPlayers = [];
@@ -61,14 +62,7 @@ function sortPlayersByNumber(players) {
   }
 
   setTeams(teams) {
-    await initHeader({
-      title: 'Planificador de Partidos',
-      backUrl: true,
-      activeNav: 'match_planner',
-      allowGuest: true,
-      guestCtaLabel: 'Iniciar sesión',
-      guestCtaHref: '/pages/index.html'
-    });
+    this.teams = teams;
   }
 
   setPlayers(players) {
@@ -485,23 +479,17 @@ function handleQuarterCountChange() {
 }
 
 async function init() {
+  await initHeader({
+    title: 'Planificador de Partidos',
+    backUrl: true,
+    activeNav: 'match_planner',
+    allowGuest: true,
+    guestCtaLabel: 'Iniciar sesión',
+    guestCtaHref: '/pages/index.html'
+  });
+
   const session = await getSessionWithRetry();
   const user = session?.user;
-
-  if (user) {
-    await initHeader({
-      title: 'Planificador de Partidos',
-      backUrl: true,
-      activeNav: 'match_planner'
-    });
-    document.body.classList.add('has-unified-header');
-    document.body.classList.remove('guest-header');
-    const guestHeader = document.getElementById('guestHeader');
-    if (guestHeader) guestHeader.innerHTML = '';
-  } else {
-    document.body.classList.remove('has-unified-header');
-    renderGuestHeader();
-  }
 
   const teamIdFromUrl = getUrlParam(TEAM_ID_PARAM);
 
