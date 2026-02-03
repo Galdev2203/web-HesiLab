@@ -19,6 +19,8 @@ const elements = {
 const TEAM_ID_PARAM = 'team_id';
 let tempPlayerCounter = 1;
 const GUEST_TEAM_ID = 'guest';
+const SLOT_COUNT = 5;
+const SLOT_CAPACITY = 3;
 
 function sortPlayersByNumber(players) {
   return (players || []).sort((a, b) => {
@@ -46,7 +48,11 @@ class PlannerState {
   }
 
   createQuarters(count) {
-    return Array.from({ length: count }, () => []);
+    return Array.from({ length: count }, () => this.createSlots());
+  }
+
+  createSlots() {
+    return Array.from({ length: SLOT_COUNT }, () => []);
   }
 
   setTeamId(teamId) {
@@ -101,22 +107,48 @@ class PlannerState {
     return this.getAllPlayers().find(player => player.id === playerId);
   }
 
-  assignPlayerToQuarter(quarterIndex, playerId) {
+  isPlayerInQuarter(quarterIndex, playerId) {
+    const quarter = this.quarters[quarterIndex];
+    if (!quarter) return false;
+
+    return quarter.some(slot => slot.includes(playerId));
+  }
+
+  assignPlayerToQuarter(quarterIndex, slotIndex, playerId) {
     const quarter = this.quarters[quarterIndex];
     if (!quarter) {
       return { success: false, reason: 'invalid-quarter' };
     }
 
-    if (quarter.includes(playerId)) {
+    const slot = quarter[slotIndex];
+    if (!slot) {
+      return { success: false, reason: 'invalid-slot' };
+    }
+
+    if (this.isPlayerInQuarter(quarterIndex, playerId)) {
       return { success: false, reason: 'already-assigned' };
     }
 
-    if (quarter.length >= 5) {
-      return { success: false, reason: 'quarter-full' };
+    if (slot.length >= SLOT_CAPACITY) {
+      return { success: false, reason: 'slot-full' };
     }
 
-    quarter.push(playerId);
+    slot.push(playerId);
     return { success: true };
+  }
+
+  removePlayerFromQuarter(quarterIndex, slotIndex, playerId) {
+    const quarter = this.quarters[quarterIndex];
+    if (!quarter) return false;
+
+    const slot = quarter[slotIndex];
+    if (!slot) return false;
+
+    const index = slot.indexOf(playerId);
+    if (index === -1) return false;
+
+    slot.splice(index, 1);
+    return true;
   }
 }
 
@@ -212,38 +244,63 @@ class PlannerUI {
     dropzone.className = 'quarter-dropzone';
     dropzone.dataset.quarterIndex = String(index);
 
-    dropzone.addEventListener('dragover', (event) => {
-      event.preventDefault();
-      dropzone.classList.add('drag-over');
-    });
+    for (let slotIndex = 0; slotIndex < SLOT_COUNT; slotIndex += 1) {
+      const slot = document.createElement('div');
+      slot.className = 'quarter-slot';
+      slot.dataset.quarterIndex = String(index);
+      slot.dataset.slotIndex = String(slotIndex);
 
-    dropzone.addEventListener('dragleave', () => {
-      dropzone.classList.remove('drag-over');
-    });
+      const slotHeader = document.createElement('div');
+      slotHeader.className = 'quarter-slot-header';
 
-    dropzone.addEventListener('drop', (event) => {
-      event.preventDefault();
-      dropzone.classList.remove('drag-over');
-      const playerId = event.dataTransfer.getData('text/plain');
-      this.handleDrop(index, playerId);
-    });
+      const slotBody = document.createElement('div');
+      slotBody.className = 'quarter-slot-body';
 
-    this.renderQuarterPlayers(dropzone, index);
+      slot.appendChild(slotHeader);
+      slot.appendChild(slotBody);
+
+      slot.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        slot.classList.add('drag-over');
+      });
+
+      slot.addEventListener('dragleave', () => {
+        slot.classList.remove('drag-over');
+      });
+
+      slot.addEventListener('drop', (event) => {
+        event.preventDefault();
+        slot.classList.remove('drag-over');
+        const playerId = event.dataTransfer.getData('text/plain');
+        this.handleDrop(index, slotIndex, playerId);
+      });
+
+      this.renderQuarterPlayers(slot, index, slotIndex);
+      dropzone.appendChild(slot);
+    }
 
     card.appendChild(header);
     card.appendChild(dropzone);
     return card;
   }
 
-  renderQuarterPlayers(dropzone, index) {
-    const assigned = this.state.quarters[index] || [];
+  renderQuarterPlayers(slot, index, slotIndex) {
+    const header = slot.querySelector('.quarter-slot-header');
+    const body = slot.querySelector('.quarter-slot-body');
+    const assigned = this.state.quarters[index]?.[slotIndex] || [];
 
-    if (assigned.length === 0) {
-      dropzone.innerHTML = '<div class="quarter-placeholder">Arrastra jugadores aquí</div>';
-      return;
+    if (header) {
+      header.textContent = `Hueco ${slotIndex + 1} (${assigned.length}/${SLOT_CAPACITY})`;
     }
 
-    dropzone.innerHTML = '';
+    if (!body) return;
+
+    body.innerHTML = '';
+
+    if (assigned.length === 0) {
+      body.innerHTML = '<div class="quarter-placeholder">Arrastra jugadores aquí</div>';
+      return;
+    }
 
     assigned.forEach(playerId => {
       const player = this.state.getPlayerById(playerId);
@@ -255,11 +312,18 @@ class PlannerUI {
         ${player.number ? `<span class="player-number">${escapeHtml(player.number)}</span>` : ''}
         ${escapeHtml(player.name)}
       `;
-      dropzone.appendChild(playerEl);
+      playerEl.title = 'Quitar jugador';
+      playerEl.addEventListener('click', () => {
+        const removed = this.state.removePlayerFromQuarter(index, slotIndex, playerId);
+        if (removed) {
+          this.renderQuarters();
+        }
+      });
+      body.appendChild(playerEl);
     });
   }
 
-  handleDrop(quarterIndex, playerId) {
+  handleDrop(quarterIndex, slotIndex, playerId) {
     hideError();
 
     if (!this.state.teamId) {
@@ -273,10 +337,10 @@ class PlannerUI {
       return;
     }
 
-    const result = this.state.assignPlayerToQuarter(quarterIndex, playerId);
+    const result = this.state.assignPlayerToQuarter(quarterIndex, slotIndex, playerId);
     if (!result.success) {
-      if (result.reason === 'quarter-full') {
-        showError('Este cuarto ya tiene 5 jugadores.');
+      if (result.reason === 'slot-full') {
+        showError('Este hueco ya tiene 3 jugadores.');
         return;
       }
 
