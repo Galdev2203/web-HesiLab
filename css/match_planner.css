@@ -333,9 +333,13 @@ body {
 @media (max-width: 1024px) {
   html,
   body,
-  .planner-main,
-  .planner-layout {
+  .planner-main {
     overflow-x: hidden;
+  }
+
+  .players-panel,
+  .quarters-panel {
+    overflow: visible;
   }
 
   .players-list {
@@ -344,11 +348,13 @@ body {
     overflow-x: auto;
     overflow-y: hidden;
     width: 100%;
+    min-height: 96px;
     gap: var(--spacing-sm);
     padding-bottom: var(--spacing-xs);
     scroll-snap-type: x proximity;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-x;
+    overscroll-behavior-x: contain;
   }
 
   .player-item {
@@ -364,14 +370,18 @@ body {
     overflow-x: auto;
     overflow-y: hidden;
     width: 100%;
+    min-height: 240px;
     padding-bottom: var(--spacing-xs);
     scroll-snap-type: x proximity;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-x;
+    overscroll-behavior-x: contain;
   }
 
   .quarter-card {
     min-width: 260px;
+    width: 80vw;
+    max-width: 340px;
     flex: 0 0 auto;
     scroll-snap-align: start;
   }
