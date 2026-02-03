@@ -428,6 +428,8 @@ class AttendanceRenderer {
     `;
     
     document.getElementById('sessionInfo').style.display = 'none';
+    this.summaryContainer.style.display = 'none';
+    this.summaryContainer.innerHTML = '';
     this.actionsBar.style.display = 'none';
   }
 
