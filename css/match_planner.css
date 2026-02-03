@@ -48,8 +48,10 @@ body {
   }
 }
 
-@media (max-width: 900px) {
-  body {
+@media (max-width: 1024px) {
+  body,
+  .planner-main,
+  .planner-layout {
     overflow-x: hidden;
   }
 
@@ -80,7 +82,7 @@ body {
   }
 
   .quarter-card {
-    min-width: 240px;
+    min-width: 260px;
     flex: 0 0 auto;
     scroll-snap-align: start;
   }
