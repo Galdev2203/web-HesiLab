@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Planificador de Partidos - HesiLab</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/unified-header.css">
+  <link rel="stylesheet" href="../css/match_planner.css">
+
+  <!-- Analytics -->
+  <script src="../js/analytics.js"></script>
+</head>
+<body class="has-unified-header">
+
+<!-- El header y sidebar se generan dinámicamente con headerComponent.js -->
+
+<main class="planner-main">
+  <div class="container">
+    <p id="errorMsg" class="error-message" style="display:none;"></p>
+
+    <div id="teamSelectorSection" class="team-selector" style="display:none;">
+      <label for="teamSelector">Equipo:</label>
+      <select id="teamSelector">
+        <option value="">Selecciona un equipo</option>
+      </select>
+    </div>
+
+    <div class="planner-layout">
+      <section class="players-panel">
+        <div class="panel-header">
+          <h3>Jugadores</h3>
+        </div>
+
+        <div id="playersList" class="players-list">
+          Selecciona un equipo para cargar jugadores.
+        </div>
+
+        <div class="temp-player-card">
+          <h4>Jugador temporal</h4>
+          <div class="temp-player-form">
+            <input id="tempPlayerName" type="text" placeholder="Nombre y apellidos" />
+            <input id="tempPlayerNumber" type="text" placeholder="Dorsal" maxlength="3" inputmode="numeric" />
+            <button id="addTempPlayerBtn" class="btn btn-primary">Añadir</button>
+          </div>
+          <p class="temp-player-note">Solo disponible dentro del planificador.</p>
+        </div>
+      </section>
+
+      <section class="quarters-panel">
+        <div class="panel-header">
+          <h3>Cuartos</h3>
+          <div class="quarters-control">
+            <label for="quartersCount">Nº de cuartos</label>
+            <input id="quartersCount" type="number" min="1" value="4" />
+          </div>
+        </div>
+
+        <div id="quartersGrid" class="quarters-grid">
+          <!-- Cuartos renderizados dinámicamente -->
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script type="module" src="../js/match_planner.js"></script>
+</body>
+</html>
