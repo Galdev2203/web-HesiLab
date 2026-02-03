@@ -343,10 +343,12 @@ body {
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
+    width: 100%;
     gap: var(--spacing-sm);
     padding-bottom: var(--spacing-xs);
     scroll-snap-type: x proximity;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
   }
 
   .player-item {
@@ -361,9 +363,11 @@ body {
     gap: var(--spacing-md);
     overflow-x: auto;
     overflow-y: hidden;
+    width: 100%;
     padding-bottom: var(--spacing-xs);
     scroll-snap-type: x proximity;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
   }
 
   .quarter-card {
@@ -373,7 +377,7 @@ body {
   }
 
   .quarter-dropzone {
-    max-height: 360px;
-    overflow-y: auto;
+    max-height: none;
+    overflow-y: visible;
   }
 }
