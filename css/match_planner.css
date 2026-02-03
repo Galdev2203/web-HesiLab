@@ -226,6 +226,8 @@ body {
   color: var(--gray-600);
   background: white;
   border-bottom: 1px solid var(--gray-200);
+  min-height: 0;
+  display: none;
 }
 
 .quarter-slot-body {
@@ -239,7 +241,8 @@ body {
 .quarter-player {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: var(--spacing-xs);
   text-align: center;
   padding: var(--spacing-sm);
   border-bottom: 1px solid var(--gray-200);
@@ -255,4 +258,29 @@ body {
 
 .quarter-player .player-number {
   margin-right: var(--spacing-xs);
+}
+
+.quarter-slot.slot-stacked .quarter-slot-body {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+}
+
+.quarter-slot.slot-stacked .quarter-player {
+  border-bottom: none;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: 4px 6px;
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  background: var(--primary-50);
+}
+
+.quarter-slot.slot-stacked .quarter-player .player-name {
+  display: none;
+}
+
+.quarter-slot.slot-stacked .quarter-player.no-number .player-name {
+  display: inline;
 }

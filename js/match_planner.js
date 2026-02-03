@@ -22,6 +22,27 @@ const GUEST_TEAM_ID = 'guest';
 const SLOT_COUNT = 5;
 const SLOT_CAPACITY = 3;
 
+function renderGuestHeader() {
+  const container = document.getElementById('guestHeader');
+  if (!container) return;
+
+  container.innerHTML = `
+    <header class="landing-header" role="banner">
+      <nav class="nav-container" role="navigation" aria-label="Navegación principal">
+        <div class="nav-logo">
+          <span class="logo-icon">🏀</span>
+          <span class="logo-text">HesiLab</span>
+        </div>
+        <div class="nav-links">
+          <a href="/pages/index.html#features" class="nav-link">Características</a>
+          <a href="/pages/index.html#benefits" class="nav-link">Beneficios</a>
+          <a href="/pages/index.html#how-it-works" class="nav-link">Cómo Funciona</a>
+          <a href="/pages/index.html" class="nav-link">Volver</a>
+        </div>
+      </nav>
+    </header>
+  `;
+}
 function sortPlayersByNumber(players) {
   return (players || []).sort((a, b) => {
     const numA = a.number ? parseInt(a.number, 10) : 999999;
@@ -472,6 +493,7 @@ async function init() {
     });
   } else {
     document.body.classList.remove('has-unified-header');
+    renderGuestHeader();
   }
 
   const teamIdFromUrl = getUrlParam(TEAM_ID_PARAM);
@@ -495,8 +517,9 @@ async function init() {
       showError('Inicia sesión para cargar jugadores de un equipo. Puedes usar el modo temporal sin cuenta.');
     }
   } else {
-    const teams = await loadTeams();
+      header.textContent = '';
     state.setTeams(teams);
+
     ui.setPlannerEnabled(false);
     ui.renderTeamSelector();
   }
@@ -504,7 +527,7 @@ async function init() {
   ui.renderPlayers();
   ui.renderQuarters();
   ui.renderTeamSelector();
-
+      body.innerHTML = '';
   if (elements.teamSelector) {
     elements.teamSelector.addEventListener('change', (event) => {
       handleTeamSelection(event.target.value);
@@ -514,9 +537,12 @@ async function init() {
   if (elements.addTempPlayerBtn) {
     elements.addTempPlayerBtn.addEventListener('click', handleTempPlayerAdd);
   }
+      if (!player.number) {
+        playerEl.classList.add('no-number');
+      }
 
-  if (elements.quartersCount) {
-    elements.quartersCount.addEventListener('change', handleQuarterCountChange);
+        ${player.number ? `<span class="player-number">${escapeHtml(player.number)}</span>` : ''}
+        <span class="player-name">${escapeHtml(player.name)}</span>
   }
 }
 
