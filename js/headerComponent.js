@@ -83,6 +83,10 @@ export async function initHeader(options = {}) {
           <span class="icon">🏠</span>
           <span class="text">Inicio</span>
         </a>
+        <a href="/pages/match_planner.html" class="nav-item ${activeNav === 'match_planner' ? 'active' : ''}">
+          <span class="icon">🧩</span>
+          <span class="text">Planificador</span>
+        </a>
         <a href="/pages/teams.html" class="nav-item ${activeNav === 'teams' ? 'active' : ''}">
           <span class="icon">👥</span>
           <span class="text">Mis Equipos</span>

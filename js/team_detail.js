@@ -26,6 +26,7 @@ class TeamNavigationManager {
       trainings: { id: 'trainingsBtn', permission: 'MANAGE_TRAININGS' },
       events: { id: 'eventsBtn', permission: 'MANAGE_EVENTS' },
       attendance: { id: 'attendanceBtn', permission: 'MANAGE_ATTENDANCE' },
+      match_planner: { id: 'matchPlannerBtn', permission: null },
       stats: { id: 'statsBtn', permission: null } // Siempre visible
     };
   }

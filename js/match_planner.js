@@ -9,7 +9,7 @@ await requireSession();
 await initHeader({
   title: 'Planificador de Partidos',
   backUrl: true,
-  activeNav: null
+  activeNav: 'match_planner'
 });
 
 const elements = {
