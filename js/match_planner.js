@@ -497,6 +497,7 @@ class PlannerUI {
       });
 
       slot.addEventListener('click', (event) => {
+        event.stopPropagation();
         const assigned = this.state.quarters[index]?.[slotIndex] || [];
         if (assigned.length === 0) {
           this.openSlotMenu({
@@ -547,7 +548,8 @@ class PlannerUI {
         <span class="player-name">${escapeHtml(player.name)}</span>
       `;
       playerEl.title = 'Quitar jugador';
-      playerEl.addEventListener('click', () => {
+      playerEl.addEventListener('click', (event) => {
+        event.stopPropagation();
         this.openSlotMenu({
           quarterIndex: index,
           slotIndex,
