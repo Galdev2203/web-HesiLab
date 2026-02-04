@@ -568,10 +568,13 @@ class PlannerUI {
 
     body.innerHTML = '';
 
-    assigned.forEach(playerId => {
-      const player = this.state.getPlayerById(playerId);
-      if (!player) return;
+    const assignedPlayers = assigned
+      .map(playerId => this.state.getPlayerById(playerId))
+      .filter(Boolean);
 
+    const sortedPlayers = sortPlayersByNumber(assignedPlayers);
+
+    sortedPlayers.forEach(player => {
       const playerEl = document.createElement('div');
       playerEl.className = 'quarter-player';
       if (!player.number) {
