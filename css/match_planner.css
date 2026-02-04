@@ -292,6 +292,11 @@ body {
   background: white;
 }
 
+.quarter-slot.slot-multi .quarter-slot-body {
+  flex-direction: row;
+  gap: 0;
+}
+
 .quarter-player {
   display: flex;
   align-items: center;
@@ -312,6 +317,20 @@ body {
 
 .quarter-player .player-number {
   margin-right: var(--spacing-xs);
+}
+
+.quarter-slot.slot-multi .quarter-player {
+  justify-content: center;
+  border-bottom: none;
+  border-right: 1px solid var(--gray-200);
+}
+
+.quarter-slot.slot-multi .quarter-player:last-child {
+  border-right: none;
+}
+
+.quarter-slot.slot-multi .quarter-player .player-name {
+  display: none;
 }
 
 .quarter-slot.slot-stacked .quarter-slot-body {
@@ -335,9 +354,6 @@ body {
   display: none;
 }
 
-.quarter-slot.slot-stacked .quarter-player.no-number .player-name {
-  display: inline;
-}
 
 @media (max-width: 1024px) {
   html,

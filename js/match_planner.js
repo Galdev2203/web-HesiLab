@@ -305,6 +305,7 @@ class PlannerUI {
     }
 
     slot.classList.toggle('slot-stacked', assigned.length > 2);
+    slot.classList.toggle('slot-multi', assigned.length > 1);
 
     if (!body) return;
 
