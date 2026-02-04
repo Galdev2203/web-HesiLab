@@ -882,6 +882,10 @@ function renderGuestNotice() {
   const { guestNotice } = elements;
   if (!guestNotice) return;
 
+  if (elements.previewPlannerPdf) {
+    elements.previewPlannerPdf.disabled = !state.isLoggedIn();
+  }
+
   if (state.isLoggedIn()) {
     guestNotice.style.display = 'none';
     guestNotice.textContent = '';
