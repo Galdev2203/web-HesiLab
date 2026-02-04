@@ -7,6 +7,7 @@ import { ModalManager } from './utils/modalManager.js';
 
 const elements = {
   errorMsg: document.getElementById('errorMsg'),
+  guestNotice: document.getElementById('guestNotice'),
   teamSelectorSection: document.getElementById('teamSelectorSection'),
   teamSelector: document.getElementById('teamSelector'),
   playersList: document.getElementById('playersList'),
@@ -830,6 +831,7 @@ function handleTeamSelection(teamId) {
   if (elements.matchTitle) {
     elements.matchTitle.value = getTeamName();
   }
+  renderGuestNotice();
   loadPlayers(teamId)
     .then(players => {
       state.setPlayers(players);
@@ -874,6 +876,20 @@ function handleMatchTypeChange() {
   const count = MATCH_TYPES[type] || MATCH_TYPES.basket;
   state.setQuarterCount(count);
   ui.renderQuarters();
+}
+
+function renderGuestNotice() {
+  const { guestNotice } = elements;
+  if (!guestNotice) return;
+
+  if (state.isLoggedIn()) {
+    guestNotice.style.display = 'none';
+    guestNotice.textContent = '';
+    return;
+  }
+
+  guestNotice.textContent = 'Estás en modo invitado: no se guardará lo que realices. Regístrate para poder descargar la planificación.';
+  guestNotice.style.display = 'block';
 }
 
 function getTeamName() {
@@ -1078,6 +1094,7 @@ async function init() {
   if (teamIdFromUrl && user) {
     state.setTeamId(teamIdFromUrl);
     ui.setPlannerEnabled(true);
+    renderGuestNotice();
     try {
       const players = await loadPlayers(teamIdFromUrl);
       state.setPlayers(players);
@@ -1090,6 +1107,7 @@ async function init() {
     state.setPlayers([]);
     state.setUserId(null);
     ui.setPlannerEnabled(true);
+    renderGuestNotice();
     ui.renderTeamSelector();
     if (teamIdFromUrl) {
       showError('Inicia sesión para cargar jugadores de un equipo. Puedes usar el modo temporal sin cuenta.');
@@ -1099,6 +1117,7 @@ async function init() {
     state.setTeams(teams);
     state.setUserId(user?.id);
     ui.setPlannerEnabled(false);
+    renderGuestNotice();
     ui.renderTeamSelector();
   }
 

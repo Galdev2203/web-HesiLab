@@ -18,6 +18,15 @@ body {
   margin-bottom: var(--spacing-lg);
 }
 
+.info-message {
+  background: #eef4ff;
+  color: var(--gray-800);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid #c9d8ff;
+  margin-bottom: var(--spacing-lg);
+}
+
 .team-selector {
   display: flex;
   align-items: center;
