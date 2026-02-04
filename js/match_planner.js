@@ -16,7 +16,8 @@ const elements = {
   matchType: document.getElementById('matchType'),
   quartersGrid: document.getElementById('quartersGrid'),
   slotModalInfo: document.getElementById('slotModalInfo'),
-  slotModalList: document.getElementById('slotModalList')
+  slotModalList: document.getElementById('slotModalList'),
+  downloadPlannerPdf: document.getElementById('downloadPlannerPdf')
 };
 
 const TEAM_ID_PARAM = 'team_id';
@@ -787,6 +788,82 @@ function handleMatchTypeChange() {
   ui.renderQuarters();
 }
 
+function getTeamName() {
+  if (!state.teamId || state.teamId === GUEST_TEAM_ID) return 'Partido sin equipo';
+  const team = state.teams?.find(item => item.id === state.teamId);
+  return team?.name || 'Planificación de partido';
+}
+
+function formatPlayerLabel(player) {
+  if (!player) return 'Jugador desconocido';
+  if (player.number) {
+    return `${player.number} - ${player.name}`;
+  }
+  return player.name;
+}
+
+function handleDownloadPlannerPdf() {
+  if (!window.jspdf?.jsPDF) {
+    showError('No se pudo cargar el generador de PDF.');
+    return;
+  }
+
+  const doc = new window.jspdf.jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
+
+  const title = getTeamName();
+  const date = new Date();
+  const dateLabel = `${date.toLocaleDateString('es-ES')} ${date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+
+  doc.setFontSize(16);
+  doc.text(title, 14, 18);
+  doc.setFontSize(10);
+  doc.setTextColor(90);
+  doc.text(`Generado: ${dateLabel}`, 14, 24);
+  doc.setTextColor(0);
+
+  let y = 32;
+  const lineHeight = 6;
+
+  state.quarters.forEach((quarter, quarterIndex) => {
+    if (y > 270) {
+      doc.addPage();
+      y = 18;
+    }
+
+    doc.setFontSize(12);
+    doc.text(`Cuarto ${quarterIndex + 1}`, 14, y);
+    y += lineHeight;
+
+    quarter.forEach((slot, slotIndex) => {
+      const players = slot.map(playerId => state.getPlayerById(playerId)).filter(Boolean);
+      const label = players.length > 0
+        ? players.map(formatPlayerLabel).join(', ')
+        : 'Sin jugadores';
+
+      const slotText = `Hueco ${slotIndex + 1}: ${label}`;
+      const lines = doc.splitTextToSize(slotText, 180);
+
+      doc.setFontSize(10);
+      lines.forEach(line => {
+        if (y > 280) {
+          doc.addPage();
+          y = 18;
+        }
+        doc.text(line, 18, y);
+        y += lineHeight;
+      });
+    });
+
+    y += 2;
+  });
+
+  doc.save('planificacion-partido.pdf');
+}
+
 async function init() {
   await initHeader({
     title: 'Planificador de Partidos',
@@ -843,6 +920,10 @@ async function init() {
 
   if (elements.matchType) {
     elements.matchType.addEventListener('change', handleMatchTypeChange);
+  }
+
+  if (elements.downloadPlannerPdf) {
+    elements.downloadPlannerPdf.addEventListener('click', handleDownloadPlannerPdf);
   }
 }
 

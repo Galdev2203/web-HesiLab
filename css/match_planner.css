@@ -414,6 +414,7 @@ body {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  flex-wrap: wrap;
 }
 
 .quarters-control select {
