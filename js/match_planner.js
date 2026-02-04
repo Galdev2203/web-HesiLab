@@ -249,6 +249,7 @@ class PlannerUI {
 
     const { quarterIndex, slotIndex } = this.activeSlotContext;
     const slotPlayers = this.state.quarters[quarterIndex]?.[slotIndex] || [];
+    const slotOrderMap = new Map(slotPlayers.map((playerId, order) => [playerId, order + 1]));
 
     if (slotModalInfo) {
       slotModalInfo.textContent = `Selecciona hasta ${SLOT_CAPACITY} jugadores para este hueco.`;
@@ -274,6 +275,7 @@ class PlannerUI {
 
       if (inThisSlotIndex !== -1) {
         checkbox.checked = true;
+        checkbox.dataset.order = String(slotOrderMap.get(player.id) || inThisSlotIndex + 1);
       }
 
       if (inOtherSlot) {
@@ -315,11 +317,25 @@ class PlannerUI {
     const { slotModalList } = this.elements;
     if (!slotModalList) return;
 
+    const target = event.target;
     const checked = Array.from(slotModalList.querySelectorAll('input[type="checkbox"]:checked'));
     if (checked.length > SLOT_CAPACITY) {
-      event.target.checked = false;
+      if (target) {
+        target.checked = false;
+        delete target.dataset.order;
+      }
       showError(`Máximo ${SLOT_CAPACITY} jugadores por hueco.`);
       return;
+    }
+
+    if (target && target.checked) {
+      const orders = checked
+        .map(input => parseInt(input.dataset.order || '0', 10))
+        .filter(value => Number.isFinite(value) && value > 0);
+      const maxOrder = orders.length > 0 ? Math.max(...orders) : 0;
+      target.dataset.order = String(maxOrder + 1);
+    } else if (target && !target.checked) {
+      delete target.dataset.order;
     }
 
     this.updateSlotModalPositions();
@@ -330,7 +346,19 @@ class PlannerUI {
     if (!slotModalList) return;
 
     const items = Array.from(slotModalList.querySelectorAll('.slot-player-item'));
-    let positionCounter = 1;
+    const checkedInputs = Array.from(slotModalList.querySelectorAll('input[type="checkbox"]:checked'));
+    const orderedChecked = checkedInputs
+      .map(input => ({
+        input,
+        order: parseInt(input.dataset.order || '0', 10) || Number.MAX_SAFE_INTEGER
+      }))
+      .sort((a, b) => a.order - b.order);
+
+    const orderMap = new Map();
+    orderedChecked.forEach((entry, index) => {
+      orderMap.set(entry.input, index + 1);
+      entry.input.dataset.order = String(index + 1);
+    });
 
     items.forEach(item => {
       const checkbox = item.querySelector('input[type="checkbox"]');
@@ -338,8 +366,8 @@ class PlannerUI {
       if (!checkbox || !position) return;
 
       if (checkbox.checked && !checkbox.disabled) {
-        position.textContent = `Posición ${positionCounter}`;
-        positionCounter += 1;
+        const orderValue = orderMap.get(checkbox) || 0;
+        position.textContent = orderValue ? `Posición ${orderValue}` : '';
       } else {
         position.textContent = '';
       }
@@ -355,12 +383,16 @@ class PlannerUI {
     const currentPlayers = this.state.quarters[quarterIndex]?.[slotIndex] || [];
 
     const checkedIds = Array.from(slotModalList.querySelectorAll('input[type="checkbox"]:checked'))
-      .map(input => input.dataset.playerId)
-      .filter(Boolean);
+      .map(input => ({
+        playerId: input.dataset.playerId,
+        order: parseInt(input.dataset.order || '0', 10) || Number.MAX_SAFE_INTEGER
+      }))
+      .filter(item => item.playerId)
+      .sort((a, b) => a.order - b.order)
+      .map(item => item.playerId)
+      .slice(0, SLOT_CAPACITY);
 
-    const kept = currentPlayers.filter(playerId => checkedIds.includes(playerId));
-    const added = checkedIds.filter(playerId => !currentPlayers.includes(playerId));
-    const finalList = [...kept, ...added].slice(0, SLOT_CAPACITY);
+    const finalList = checkedIds;
 
     this.state.setSlotPlayers(quarterIndex, slotIndex, finalList);
     this.renderQuarters();
