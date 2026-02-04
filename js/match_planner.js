@@ -17,7 +17,8 @@ const elements = {
   quartersGrid: document.getElementById('quartersGrid'),
   slotModalInfo: document.getElementById('slotModalInfo'),
   slotModalList: document.getElementById('slotModalList'),
-  downloadPlannerPdf: document.getElementById('downloadPlannerPdf')
+  downloadPlannerPdf: document.getElementById('downloadPlannerPdf'),
+  positionNames: document.getElementById('positionNames')
 };
 
 const TEAM_ID_PARAM = 'team_id';
@@ -53,6 +54,7 @@ class PlannerState {
     this.tempPlayers = [];
     this.playerAvailability = {};
     this.quartersCount = 4;
+    this.positionNames = Array.from({ length: SLOT_COUNT }, (_, index) => `Posición ${index + 1}`);
     this.quarters = this.createQuarters(this.quartersCount);
   }
 
@@ -216,6 +218,16 @@ class PlannerState {
     });
     return removed;
   }
+
+  setPositionName(index, name) {
+    if (index < 0 || index >= SLOT_COUNT) return;
+    const trimmed = name?.trim();
+    this.positionNames[index] = trimmed ? trimmed : `Posición ${index + 1}`;
+  }
+
+  getPositionName(index) {
+    return this.positionNames[index] || `Posición ${index + 1}`;
+  }
 }
 
 class PlannerUI {
@@ -241,7 +253,7 @@ class PlannerUI {
 
     this.activeSlotContext = { quarterIndex, slotIndex };
     this.renderSlotModal();
-    this.slotModal.open('edit', `Hueco ${slotIndex + 1}`);
+    this.slotModal.open('edit', this.state.getPositionName(slotIndex));
   }
 
   renderSlotModal() {
@@ -253,7 +265,7 @@ class PlannerUI {
     const slotOrderMap = new Map(slotPlayers.map((playerId, order) => [playerId, order + 1]));
 
     if (slotModalInfo) {
-      slotModalInfo.textContent = `Selecciona hasta ${SLOT_CAPACITY} jugadores para este hueco.`;
+      slotModalInfo.textContent = `Selecciona hasta ${SLOT_CAPACITY} jugadores para ${this.state.getPositionName(slotIndex)}.`;
     }
 
     const availablePlayers = this.state
@@ -299,7 +311,7 @@ class PlannerUI {
       position.className = 'slot-player-position';
 
       if (inOtherSlot) {
-        meta.textContent = `En hueco ${slotIndexInQuarter + 1}`;
+        meta.textContent = `En ${this.state.getPositionName(slotIndexInQuarter)}`;
       }
 
       meta.appendChild(position);
@@ -507,6 +519,40 @@ class PlannerUI {
     });
   }
 
+  renderPositions() {
+    const { positionNames } = this.elements;
+    if (!positionNames) return;
+
+    positionNames.innerHTML = '';
+
+    this.state.positionNames.forEach((value, index) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'position-input';
+
+      const label = document.createElement('label');
+      label.textContent = `Posición ${index + 1}`;
+      label.setAttribute('for', `positionName-${index}`);
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.id = `positionName-${index}`;
+      input.value = value;
+      input.dataset.positionIndex = String(index);
+      input.placeholder = `Posición ${index + 1}`;
+
+      input.addEventListener('change', (event) => {
+        const target = event.target;
+        const positionIndex = parseInt(target.dataset.positionIndex || '0', 10);
+        this.state.setPositionName(positionIndex, target.value);
+        this.renderQuarters();
+      });
+
+      wrapper.appendChild(label);
+      wrapper.appendChild(input);
+      positionNames.appendChild(wrapper);
+    });
+  }
+
   renderQuarters() {
     const { quartersGrid } = this.elements;
     if (!quartersGrid) return;
@@ -591,7 +637,7 @@ class PlannerUI {
     const assigned = this.state.quarters[index]?.[slotIndex] || [];
 
     if (header) {
-      header.textContent = '';
+      header.textContent = this.state.getPositionName(slotIndex);
     }
 
     slot.classList.toggle('slot-stacked', assigned.length > 3);
@@ -844,7 +890,7 @@ function handleDownloadPlannerPdf() {
         ? players.map(formatPlayerLabel).join(', ')
         : 'Sin jugadores';
 
-      const slotText = `Hueco ${slotIndex + 1}: ${label}`;
+      const slotText = `${state.getPositionName(slotIndex)}: ${label}`;
       const lines = doc.splitTextToSize(slotText, 180);
 
       doc.setFontSize(10);
@@ -906,6 +952,7 @@ async function init() {
 
   ui.renderPlayers();
   handleMatchTypeChange();
+  ui.renderPositions();
   ui.renderTeamSelector();
 
   if (elements.teamSelector) {
