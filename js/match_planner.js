@@ -572,9 +572,7 @@ class PlannerUI {
       .map(playerId => this.state.getPlayerById(playerId))
       .filter(Boolean);
 
-    const sortedPlayers = sortPlayersByNumber(assignedPlayers);
-
-    sortedPlayers.forEach(player => {
+    assignedPlayers.forEach(player => {
       const playerEl = document.createElement('div');
       playerEl.className = 'quarter-player';
       if (!player.number) {
