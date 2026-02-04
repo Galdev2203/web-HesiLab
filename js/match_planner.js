@@ -12,7 +12,7 @@ const elements = {
   tempPlayerName: document.getElementById('tempPlayerName'),
   tempPlayerNumber: document.getElementById('tempPlayerNumber'),
   addTempPlayerBtn: document.getElementById('addTempPlayerBtn'),
-  quartersCount: document.getElementById('quartersCount'),
+  matchType: document.getElementById('matchType'),
   quartersGrid: document.getElementById('quartersGrid')
 };
 
@@ -20,6 +20,10 @@ const TEAM_ID_PARAM = 'team_id';
 const GUEST_TEAM_ID = 'guest';
 const SLOT_COUNT = 5;
 const SLOT_CAPACITY = 3;
+const MATCH_TYPES = {
+  basket: 4,
+  minibasket: 6
+};
 let tempPlayerCounter = 1;
 
 function sortPlayersByNumber(players) {
@@ -226,6 +230,13 @@ class PlannerUI {
     if (!quartersGrid) return;
 
     quartersGrid.innerHTML = '';
+    if (this.state.quartersCount === 4) {
+      quartersGrid.dataset.columns = '4';
+    } else if (this.state.quartersCount === 6) {
+      quartersGrid.dataset.columns = '3';
+    } else {
+      quartersGrid.removeAttribute('data-columns');
+    }
 
     this.state.quarters.forEach((_, index) => {
       quartersGrid.appendChild(this.createQuarterCard(index));
@@ -353,9 +364,9 @@ class PlannerUI {
   }
 
   setPlannerEnabled(enabled) {
-    const { tempPlayerName, tempPlayerNumber, addTempPlayerBtn, quartersCount } = this.elements;
+    const { tempPlayerName, tempPlayerNumber, addTempPlayerBtn, matchType } = this.elements;
 
-    [tempPlayerName, tempPlayerNumber, addTempPlayerBtn, quartersCount].forEach(element => {
+    [tempPlayerName, tempPlayerNumber, addTempPlayerBtn, matchType].forEach(element => {
       if (element) {
         element.disabled = !enabled;
       }
@@ -472,9 +483,10 @@ function handleTempPlayerAdd() {
   ui.renderPlayers();
 }
 
-function handleQuarterCountChange() {
-  const value = parseInt(elements.quartersCount?.value, 10);
-  state.setQuarterCount(value);
+function handleMatchTypeChange() {
+  const type = elements.matchType?.value || 'basket';
+  const count = MATCH_TYPES[type] || MATCH_TYPES.basket;
+  state.setQuarterCount(count);
   ui.renderQuarters();
 }
 
@@ -519,7 +531,7 @@ async function init() {
   }
 
   ui.renderPlayers();
-  ui.renderQuarters();
+  handleMatchTypeChange();
   ui.renderTeamSelector();
 
   if (elements.teamSelector) {
@@ -532,8 +544,8 @@ async function init() {
     elements.addTempPlayerBtn.addEventListener('click', handleTempPlayerAdd);
   }
 
-  if (elements.quartersCount) {
-    elements.quartersCount.addEventListener('change', handleQuarterCountChange);
+  if (elements.matchType) {
+    elements.matchType.addEventListener('change', handleMatchTypeChange);
   }
 }
 

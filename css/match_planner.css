@@ -203,17 +203,26 @@ body {
   gap: var(--spacing-sm);
 }
 
-.quarters-control input {
-  width: 80px;
+.quarters-control select {
+  min-width: 140px;
   padding: var(--spacing-xs) var(--spacing-sm);
   border: 1px solid var(--gray-300);
   border-radius: var(--radius-md);
+  background: white;
 }
 
 .quarters-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--spacing-lg);
+}
+
+.quarters-grid[data-columns="4"] {
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+}
+
+.quarters-grid[data-columns="3"] {
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
 }
 
 .quarter-card {
