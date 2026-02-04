@@ -182,39 +182,58 @@ body {
   font-size: 0.75rem;
 }
 
-.slot-menu {
-  position: absolute;
-  z-index: 2000;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm);
-  background: white;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  min-width: 220px;
+.slot-modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
-.slot-menu-section {
+.slot-modal-info {
+  margin: 0 0 var(--spacing-sm);
+  color: var(--gray-600);
+  font-size: 0.85rem;
+}
+
+.slot-modal-list {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
 }
 
-.slot-menu-label {
-  font-size: 0.75rem;
-  color: var(--gray-600);
-}
-
-.slot-menu-select {
-  padding: 4px 8px;
-  border: 1px solid var(--gray-300);
+.slot-player-item {
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-md);
-  background: white;
+  background: var(--gray-50);
 }
 
-.slot-menu-action {
-  width: 100%;
+.slot-player-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+.slot-player-label {
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.slot-player-meta {
+  display: inline-flex;
+  gap: var(--spacing-xs);
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+.slot-player-position {
+  color: var(--primary-600);
+  font-weight: 600;
+}
+
+.slot-player-disabled {
+  opacity: 0.6;
 }
 
 .temp-player-card {

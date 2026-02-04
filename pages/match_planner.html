@@ -70,6 +70,24 @@
   </div>
 </main>
 
+<!-- Modal para seleccionar jugadores de un hueco -->
+<div id="slotModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Seleccionar jugadores</h3>
+      <button class="close-modal" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="modal-body slot-modal-body">
+      <p id="slotModalInfo" class="slot-modal-info"></p>
+      <div id="slotModalList" class="slot-modal-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="secondary-btn">Cancelar</button>
+      <button class="primary-btn">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <script type="module" src="../js/match_planner.js"></script>
 </body>
 </html>

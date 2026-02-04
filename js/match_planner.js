@@ -3,6 +3,7 @@ import { supabase } from './supabaseClient.js';
 import { initHeader } from './headerComponent.js';
 import { getUrlParam, loadData } from './utils/supabaseHelpers.js';
 import { escapeHtml, showError, hideError } from './utils/domHelpers.js';
+import { ModalManager } from './utils/modalManager.js';
 
 const elements = {
   errorMsg: document.getElementById('errorMsg'),
@@ -13,7 +14,9 @@ const elements = {
   tempPlayerNumber: document.getElementById('tempPlayerNumber'),
   addTempPlayerBtn: document.getElementById('addTempPlayerBtn'),
   matchType: document.getElementById('matchType'),
-  quartersGrid: document.getElementById('quartersGrid')
+  quartersGrid: document.getElementById('quartersGrid'),
+  slotModalInfo: document.getElementById('slotModalInfo'),
+  slotModalList: document.getElementById('slotModalList')
 };
 
 const TEAM_ID_PARAM = 'team_id';
@@ -175,6 +178,30 @@ class PlannerState {
     return true;
   }
 
+  setSlotPlayers(quarterIndex, slotIndex, playerIds) {
+    const quarter = this.quarters[quarterIndex];
+    if (!quarter) return false;
+
+    const slot = quarter[slotIndex];
+    if (!slot) return false;
+
+    const unique = Array.from(new Set(playerIds)).slice(0, SLOT_CAPACITY);
+    quarter[slotIndex] = unique;
+    return true;
+  }
+
+  findPlayerSlotInQuarter(quarterIndex, playerId) {
+    const quarter = this.quarters[quarterIndex];
+    if (!quarter) return null;
+
+    for (let slotIndex = 0; slotIndex < quarter.length; slotIndex += 1) {
+      if (quarter[slotIndex].includes(playerId)) {
+        return slotIndex;
+      }
+    }
+    return null;
+  }
+
   removePlayerFromAllQuarters(playerId) {
     let removed = false;
     this.quarters.forEach(quarter => {
@@ -194,137 +221,150 @@ class PlannerUI {
   constructor(state, elements) {
     this.state = state;
     this.elements = elements;
-    this.slotMenu = this.createSlotMenu();
+    this.slotModal = new ModalManager('slotModal');
     this.activeSlotContext = null;
+    this.setupSlotModal();
   }
 
-  createSlotMenu() {
-    const menu = document.createElement('div');
-    menu.className = 'slot-menu';
-    menu.style.display = 'none';
-    menu.innerHTML = `
-      <div class="slot-menu-section" data-section="add">
-        <label class="slot-menu-label">Añadir jugador</label>
-        <select class="slot-menu-select"></select>
-        <button class="btn btn-primary slot-menu-action" data-action="add">Añadir</button>
-      </div>
-      <div class="slot-menu-section" data-section="remove">
-        <button class="btn btn-secondary slot-menu-action" data-action="remove">Eliminar de la posición</button>
-      </div>
-    `;
+  setupSlotModal() {
+    if (!this.slotModal) return;
 
-    document.body.appendChild(menu);
-
-    menu.addEventListener('click', (event) => {
-      event.stopPropagation();
-    });
-
-    document.addEventListener('click', () => {
-      this.closeSlotMenu();
-    });
-
-    const addBtn = menu.querySelector('[data-action="add"]');
-    const removeBtn = menu.querySelector('[data-action="remove"]');
-
-    if (addBtn) {
-      addBtn.addEventListener('click', () => this.handleSlotMenuAdd());
-    }
-
-    if (removeBtn) {
-      removeBtn.addEventListener('click', () => this.handleSlotMenuRemove());
-    }
-
-    return menu;
+    this.slotModal.onSave = () => this.handleSlotModalSave();
+    this.slotModal.onClose = () => {
+      this.activeSlotContext = null;
+    };
   }
 
-  openSlotMenu({ quarterIndex, slotIndex, playerId, anchor }) {
-    if (!this.slotMenu) return;
+  openSlotModal({ quarterIndex, slotIndex }) {
+    if (!this.slotModal) return;
 
-    const slotPlayers = this.state.quarters[quarterIndex]?.[slotIndex] || [];
-    const canAdd = slotPlayers.length < SLOT_CAPACITY;
-    const canRemove = Boolean(playerId);
-
-    const addSection = this.slotMenu.querySelector('[data-section="add"]');
-    const removeSection = this.slotMenu.querySelector('[data-section="remove"]');
-    const select = this.slotMenu.querySelector('.slot-menu-select');
-    const addBtn = this.slotMenu.querySelector('[data-action="add"]');
-
-    if (addSection) {
-      addSection.style.display = canAdd ? 'flex' : 'none';
-    }
-    if (removeSection) {
-      removeSection.style.display = canRemove ? 'flex' : 'none';
-    }
-
-    if (select) {
-      const availablePlayers = this.state.getSortedPlayers().filter(player => {
-        return this.state.isPlayerAvailable(player.id) && !this.state.isPlayerInQuarter(quarterIndex, player.id);
-      });
-
-      select.innerHTML = '';
-      if (availablePlayers.length === 0) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'Sin jugadores disponibles';
-        select.appendChild(option);
-        if (addBtn) addBtn.disabled = true;
-      } else {
-        availablePlayers.forEach(player => {
-          const option = document.createElement('option');
-          option.value = player.id;
-          option.textContent = `${player.number ? player.number + ' - ' : ''}${player.name}`;
-          select.appendChild(option);
-        });
-        if (addBtn) addBtn.disabled = false;
-      }
-    }
-
-    this.activeSlotContext = { quarterIndex, slotIndex, playerId };
-
-    const rect = anchor?.getBoundingClientRect();
-    if (rect) {
-      this.slotMenu.style.top = `${rect.bottom + window.scrollY + 6}px`;
-      this.slotMenu.style.left = `${rect.left + window.scrollX}px`;
-    }
-
-    this.slotMenu.style.display = 'flex';
+    this.activeSlotContext = { quarterIndex, slotIndex };
+    this.renderSlotModal();
+    this.slotModal.open('edit', `Hueco ${slotIndex + 1}`);
   }
 
-  closeSlotMenu() {
-    if (this.slotMenu) {
-      this.slotMenu.style.display = 'none';
-    }
-    this.activeSlotContext = null;
-  }
-
-  handleSlotMenuAdd() {
-    if (!this.activeSlotContext) return;
-    const select = this.slotMenu.querySelector('.slot-menu-select');
-    const playerId = select?.value;
-    if (!playerId) return;
+  renderSlotModal() {
+    const { slotModalInfo, slotModalList } = this.elements;
+    if (!slotModalList || !this.activeSlotContext) return;
 
     const { quarterIndex, slotIndex } = this.activeSlotContext;
-    const result = this.state.assignPlayerToQuarter(quarterIndex, slotIndex, playerId);
-    if (!result.success) {
-      if (result.reason === 'slot-full') {
-        showError('Este hueco ya tiene 3 jugadores.');
-      }
-      if (result.reason === 'already-assigned') {
-        showError('Este jugador ya está en ese cuarto.');
-      }
+    const slotPlayers = this.state.quarters[quarterIndex]?.[slotIndex] || [];
+
+    if (slotModalInfo) {
+      slotModalInfo.textContent = `Selecciona hasta ${SLOT_CAPACITY} jugadores para este hueco.`;
     }
 
-    this.closeSlotMenu();
-    this.renderQuarters();
+    const availablePlayers = this.state
+      .getSortedPlayers()
+      .filter(player => this.state.isPlayerAvailable(player.id));
+
+    slotModalList.innerHTML = '';
+
+    availablePlayers.forEach(player => {
+      const item = document.createElement('div');
+      item.className = 'slot-player-item';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.dataset.playerId = player.id;
+
+      const inThisSlotIndex = slotPlayers.indexOf(player.id);
+      const slotIndexInQuarter = this.state.findPlayerSlotInQuarter(quarterIndex, player.id);
+      const inOtherSlot = slotIndexInQuarter !== null && slotIndexInQuarter !== slotIndex;
+
+      if (inThisSlotIndex !== -1) {
+        checkbox.checked = true;
+      }
+
+      if (inOtherSlot) {
+        checkbox.disabled = true;
+        item.classList.add('slot-player-disabled');
+      }
+
+      checkbox.addEventListener('change', (event) => {
+        this.handleSlotModalSelectionChange(event);
+      });
+
+      const label = document.createElement('label');
+      label.className = 'slot-player-label';
+      label.textContent = `${player.number ? player.number + ' - ' : ''}${player.name}`;
+
+      const meta = document.createElement('span');
+      meta.className = 'slot-player-meta';
+
+      const position = document.createElement('span');
+      position.className = 'slot-player-position';
+
+      if (inOtherSlot) {
+        meta.textContent = `En hueco ${slotIndexInQuarter + 1}`;
+      }
+
+      meta.appendChild(position);
+
+      item.appendChild(checkbox);
+      item.appendChild(label);
+      item.appendChild(meta);
+
+      slotModalList.appendChild(item);
+    });
+
+    this.updateSlotModalPositions();
   }
 
-  handleSlotMenuRemove() {
+  handleSlotModalSelectionChange(event) {
+    const { slotModalList } = this.elements;
+    if (!slotModalList) return;
+
+    const checked = Array.from(slotModalList.querySelectorAll('input[type="checkbox"]:checked'));
+    if (checked.length > SLOT_CAPACITY) {
+      event.target.checked = false;
+      showError(`Máximo ${SLOT_CAPACITY} jugadores por hueco.`);
+      return;
+    }
+
+    this.updateSlotModalPositions();
+  }
+
+  updateSlotModalPositions() {
+    const { slotModalList } = this.elements;
+    if (!slotModalList) return;
+
+    const items = Array.from(slotModalList.querySelectorAll('.slot-player-item'));
+    let positionCounter = 1;
+
+    items.forEach(item => {
+      const checkbox = item.querySelector('input[type="checkbox"]');
+      const position = item.querySelector('.slot-player-position');
+      if (!checkbox || !position) return;
+
+      if (checkbox.checked && !checkbox.disabled) {
+        position.textContent = `Posición ${positionCounter}`;
+        positionCounter += 1;
+      } else {
+        position.textContent = '';
+      }
+    });
+  }
+
+  handleSlotModalSave() {
     if (!this.activeSlotContext) return;
-    const { quarterIndex, slotIndex, playerId } = this.activeSlotContext;
-    if (!playerId) return;
-    this.state.removePlayerFromQuarter(quarterIndex, slotIndex, playerId);
-    this.closeSlotMenu();
+    const { slotModalList } = this.elements;
+    if (!slotModalList) return;
+
+    const { quarterIndex, slotIndex } = this.activeSlotContext;
+    const currentPlayers = this.state.quarters[quarterIndex]?.[slotIndex] || [];
+
+    const checkedIds = Array.from(slotModalList.querySelectorAll('input[type="checkbox"]:checked'))
+      .map(input => input.dataset.playerId)
+      .filter(Boolean);
+
+    const kept = currentPlayers.filter(playerId => checkedIds.includes(playerId));
+    const added = checkedIds.filter(playerId => !currentPlayers.includes(playerId));
+    const finalList = [...kept, ...added].slice(0, SLOT_CAPACITY);
+
+    this.state.setSlotPlayers(quarterIndex, slotIndex, finalList);
     this.renderQuarters();
+    this.slotModal.close();
   }
 
   renderTeamSelector() {
@@ -439,7 +479,6 @@ class PlannerUI {
     if (!quartersGrid) return;
 
     quartersGrid.innerHTML = '';
-    this.closeSlotMenu();
     if (this.state.quartersCount === 4) {
       quartersGrid.dataset.columns = '4';
     } else if (this.state.quartersCount === 6) {
@@ -498,15 +537,10 @@ class PlannerUI {
 
       slot.addEventListener('click', (event) => {
         event.stopPropagation();
-        const assigned = this.state.quarters[index]?.[slotIndex] || [];
-        if (assigned.length === 0) {
-          this.openSlotMenu({
-            quarterIndex: index,
-            slotIndex,
-            playerId: null,
-            anchor: event.currentTarget
-          });
-        }
+        this.openSlotModal({
+          quarterIndex: index,
+          slotIndex
+        });
       });
 
       this.renderQuarterPlayers(slot, index, slotIndex);
@@ -550,11 +584,9 @@ class PlannerUI {
       playerEl.title = 'Quitar jugador';
       playerEl.addEventListener('click', (event) => {
         event.stopPropagation();
-        this.openSlotMenu({
+        this.openSlotModal({
           quarterIndex: index,
-          slotIndex,
-          playerId,
-          anchor: playerEl
+          slotIndex
         });
       });
       body.appendChild(playerEl);
