@@ -909,66 +909,72 @@ function buildPlannerPdf() {
   doc.text(`Generado: ${dateLabel}`, 14, 22);
   doc.setTextColor(0);
 
-  let y = 28;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
   const marginX = 10;
-  const tableWidth = 277;
-  const firstColWidth = 24;
-  const otherColWidth = (tableWidth - firstColWidth) / SLOT_COUNT;
-  const headerHeight = 10;
-  const rowMinHeight = 12;
+  const marginY = 10;
+  let y = 28;
 
-  // Tabla de cuartos
+  const clampLines = (lines, maxLines) => {
+    if (lines.length <= maxLines) return lines;
+    const trimmed = lines.slice(0, maxLines);
+    const lastIndex = trimmed.length - 1;
+    trimmed[lastIndex] = `${trimmed[lastIndex]}…`;
+    return trimmed;
+  };
+
+  // Tabla de cuartos (columnas: cuartos, filas: posiciones)
   doc.setFontSize(11);
   doc.text('Planificación de cuartos', marginX, y);
   y += 6;
 
-  // Encabezado tabla
+  const quarterCount = state.quarters.length;
+  const tableWidth = pageWidth - marginX * 2;
+  const positionColWidth = 32;
+  const quarterColWidth = (tableWidth - positionColWidth) / Math.max(1, quarterCount);
+  const headerHeight = 8;
+  const rowHeight = 16;
+
   doc.setFillColor(240, 242, 247);
   doc.rect(marginX, y, tableWidth, headerHeight, 'F');
   doc.setFontSize(9);
-  doc.text('Cuarto', marginX + 2, y + 7);
-  state.positionNames.forEach((name, index) => {
-    const x = marginX + firstColWidth + otherColWidth * index + 2;
-    doc.text(name, x, y + 7);
-  });
+  doc.text('Posición', marginX + 2, y + 6);
+  for (let q = 0; q < quarterCount; q += 1) {
+    const x = marginX + positionColWidth + quarterColWidth * q + 2;
+    doc.text(`Cuarto ${q + 1}`, x, y + 6);
+  }
   y += headerHeight;
 
-  state.quarters.forEach((quarter, quarterIndex) => {
-    const cellTexts = quarter.map(slot => {
-      const players = slot.map(playerId => state.getPlayerById(playerId)).filter(Boolean);
-      return players.length > 0 ? players.map(formatPlayerLabel).join(', ') : '-';
-    });
-
-    const wrapped = cellTexts.map(text => doc.splitTextToSize(text, otherColWidth - 4));
-    const maxLines = Math.max(1, ...wrapped.map(lines => lines.length));
-    const rowHeight = Math.max(rowMinHeight, maxLines * 4 + 4);
-
+  for (let posIndex = 0; posIndex < SLOT_COUNT; posIndex += 1) {
     doc.rect(marginX, y, tableWidth, rowHeight);
     doc.setFontSize(9);
-    doc.text(`Cuarto ${quarterIndex + 1}`, marginX + 2, y + 7);
+    doc.text(state.getPositionName(posIndex), marginX + 2, y + 6);
 
-    wrapped.forEach((lines, colIndex) => {
-      const x = marginX + firstColWidth + otherColWidth * colIndex + 2;
-      let lineY = y + 6;
+    for (let q = 0; q < quarterCount; q += 1) {
+      const slotPlayers = state.quarters[q]?.[posIndex] || [];
+      const players = slotPlayers.map(playerId => state.getPlayerById(playerId)).filter(Boolean);
+      const label = players.length > 0
+        ? players.map(formatPlayerLabel).join(' <-> ')
+        : '-';
+
+      const x = marginX + positionColWidth + quarterColWidth * q + 2;
+      const lines = clampLines(doc.splitTextToSize(label, quarterColWidth - 4), 2);
+      let lineY = y + 5;
       lines.forEach(line => {
         doc.text(line, x, lineY);
         lineY += 4;
       });
-    });
+    }
 
     y += rowHeight;
+  }
 
-    if (y > 170) {
-      doc.addPage();
-      y = 16;
-    }
-  });
-
-  // Listado de jugadores
-  y += 8;
-  doc.setFontSize(11);
-  doc.text('Jugadores', marginX, y);
+  // Listado de jugadores en tres columnas
   y += 6;
+  const listTop = y;
+  const listHeight = pageHeight - marginY - listTop;
+  const colGap = 6;
+  const colWidth = (tableWidth - colGap * 2) / 3;
 
   const playersByStatus = {
     available: [],
@@ -989,34 +995,31 @@ function buildPlannerPdf() {
     { key: 'unavailable', label: 'No convocados', color: [255, 193, 7] }
   ];
 
-  sections.forEach(section => {
-    if (playersByStatus[section.key].length === 0) return;
-    if (y > 190) {
-      doc.addPage();
-      y = 16;
-    }
+  sections.forEach((section, index) => {
+    const x = marginX + (colWidth + colGap) * index;
+    let cursorY = listTop;
     doc.setFontSize(10);
     doc.setTextColor(...section.color);
-    doc.text(section.label, marginX, y);
-    y += 5;
+    doc.text(section.label, x, cursorY);
+    cursorY += 5;
     doc.setFontSize(9);
-    doc.setTextColor(...section.color);
 
     const sorted = sortPlayersByNumber(playersByStatus[section.key]);
+    const maxLines = Math.floor((listHeight - 6) / 4);
+    let usedLines = 0;
+
     sorted.forEach(player => {
+      if (usedLines >= maxLines) return;
       const text = formatPlayerLabel(player);
-      const lines = doc.splitTextToSize(text, 120);
+      const lines = clampLines(doc.splitTextToSize(text, colWidth - 4), 1);
       lines.forEach(line => {
-        if (y > 200) {
-          doc.addPage();
-          y = 16;
-        }
-        doc.text(`• ${line}`, marginX + 2, y);
-        y += 4;
+        if (usedLines >= maxLines) return;
+        doc.text(`• ${line}`, x + 2, cursorY);
+        cursorY += 4;
+        usedLines += 1;
       });
     });
 
-    y += 4;
     doc.setTextColor(0);
   });
 
