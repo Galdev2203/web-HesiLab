@@ -136,6 +136,11 @@ body {
   cursor: grab;
 }
 
+.player-item.player-inactive {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .player-item:active {
   cursor: grabbing;
 }
@@ -161,6 +166,15 @@ body {
   border: 1px solid var(--gray-300);
   border-radius: 999px;
   padding: 2px 8px;
+}
+
+.player-status {
+  margin-left: auto;
+  padding: 2px 8px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  background: white;
+  font-size: 0.75rem;
 }
 
 .temp-player-card {

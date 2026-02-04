@@ -47,6 +47,7 @@ class PlannerState {
     this.teams = [];
     this.players = [];
     this.tempPlayers = [];
+    this.playerAvailability = {};
     this.quartersCount = 4;
     this.quarters = this.createQuarters(this.quartersCount);
   }
@@ -71,6 +72,11 @@ class PlannerState {
 
   setPlayers(players) {
     this.players = players;
+    this.players.forEach(player => {
+      if (!(player.id in this.playerAvailability)) {
+        this.playerAvailability[player.id] = true;
+      }
+    });
   }
 
   setQuarterCount(count) {
@@ -96,7 +102,16 @@ class PlannerState {
     };
 
     this.tempPlayers.push(player);
+    this.playerAvailability[player.id] = true;
     return player;
+  }
+
+  setPlayerAvailability(playerId, available) {
+    this.playerAvailability[playerId] = Boolean(available);
+  }
+
+  getPlayerAvailability(playerId) {
+    return this.playerAvailability[playerId] !== false;
   }
 
   getAllPlayers() {
@@ -204,7 +219,9 @@ class PlannerUI {
     players.forEach(player => {
       const item = document.createElement('div');
       item.className = 'player-item';
-      item.setAttribute('draggable', 'true');
+      const isAvailable = this.state.getPlayerAvailability(player.id);
+      item.classList.toggle('player-inactive', !isAvailable);
+      item.setAttribute('draggable', isAvailable ? 'true' : 'false');
       item.dataset.playerId = player.id;
 
       const numberHtml = player.number ? `<span class="player-number">${escapeHtml(player.number)}</span>` : '';
@@ -216,7 +233,32 @@ class PlannerUI {
         ${tempTag}
       `;
 
+      const statusSelect = document.createElement('select');
+      statusSelect.className = 'player-status';
+      statusSelect.setAttribute('aria-label', `Estado de ${player.name}`);
+      statusSelect.innerHTML = `
+        <option value="available">Convocado</option>
+        <option value="unavailable">No convocado</option>
+      `;
+      statusSelect.value = isAvailable ? 'available' : 'unavailable';
+      statusSelect.addEventListener('change', () => {
+        const available = statusSelect.value === 'available';
+        this.state.setPlayerAvailability(player.id, available);
+        item.classList.toggle('player-inactive', !available);
+        item.setAttribute('draggable', available ? 'true' : 'false');
+      });
+
+      statusSelect.addEventListener('mousedown', (event) => {
+        event.stopPropagation();
+      });
+
+      item.appendChild(statusSelect);
+
       item.addEventListener('dragstart', (event) => {
+        if (!this.state.getPlayerAvailability(player.id)) {
+          event.preventDefault();
+          return;
+        }
         event.dataTransfer.setData('text/plain', player.id);
         event.dataTransfer.effectAllowed = 'copy';
       });
@@ -346,6 +388,11 @@ class PlannerUI {
     const player = this.state.getPlayerById(playerId);
     if (!player) {
       showError('Jugador no válido.');
+      return;
+    }
+
+    if (!this.state.getPlayerAvailability(playerId)) {
+      showError('Este jugador no está convocado.');
       return;
     }
 
