@@ -182,6 +182,41 @@ body {
   font-size: 0.75rem;
 }
 
+.slot-menu {
+  position: absolute;
+  z-index: 2000;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  min-width: 220px;
+}
+
+.slot-menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.slot-menu-label {
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+.slot-menu-select {
+  padding: 4px 8px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  background: white;
+}
+
+.slot-menu-action {
+  width: 100%;
+}
+
 .temp-player-card {
   border-top: 1px solid var(--gray-200);
   padding-top: var(--spacing-md);

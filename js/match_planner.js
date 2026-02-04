@@ -194,6 +194,137 @@ class PlannerUI {
   constructor(state, elements) {
     this.state = state;
     this.elements = elements;
+    this.slotMenu = this.createSlotMenu();
+    this.activeSlotContext = null;
+  }
+
+  createSlotMenu() {
+    const menu = document.createElement('div');
+    menu.className = 'slot-menu';
+    menu.style.display = 'none';
+    menu.innerHTML = `
+      <div class="slot-menu-section" data-section="add">
+        <label class="slot-menu-label">Añadir jugador</label>
+        <select class="slot-menu-select"></select>
+        <button class="btn btn-primary slot-menu-action" data-action="add">Añadir</button>
+      </div>
+      <div class="slot-menu-section" data-section="remove">
+        <button class="btn btn-secondary slot-menu-action" data-action="remove">Eliminar de la posición</button>
+      </div>
+    `;
+
+    document.body.appendChild(menu);
+
+    menu.addEventListener('click', (event) => {
+      event.stopPropagation();
+    });
+
+    document.addEventListener('click', () => {
+      this.closeSlotMenu();
+    });
+
+    const addBtn = menu.querySelector('[data-action="add"]');
+    const removeBtn = menu.querySelector('[data-action="remove"]');
+
+    if (addBtn) {
+      addBtn.addEventListener('click', () => this.handleSlotMenuAdd());
+    }
+
+    if (removeBtn) {
+      removeBtn.addEventListener('click', () => this.handleSlotMenuRemove());
+    }
+
+    return menu;
+  }
+
+  openSlotMenu({ quarterIndex, slotIndex, playerId, anchor }) {
+    if (!this.slotMenu) return;
+
+    const slotPlayers = this.state.quarters[quarterIndex]?.[slotIndex] || [];
+    const canAdd = slotPlayers.length < SLOT_CAPACITY;
+    const canRemove = Boolean(playerId);
+
+    const addSection = this.slotMenu.querySelector('[data-section="add"]');
+    const removeSection = this.slotMenu.querySelector('[data-section="remove"]');
+    const select = this.slotMenu.querySelector('.slot-menu-select');
+    const addBtn = this.slotMenu.querySelector('[data-action="add"]');
+
+    if (addSection) {
+      addSection.style.display = canAdd ? 'flex' : 'none';
+    }
+    if (removeSection) {
+      removeSection.style.display = canRemove ? 'flex' : 'none';
+    }
+
+    if (select) {
+      const availablePlayers = this.state.getSortedPlayers().filter(player => {
+        return this.state.isPlayerAvailable(player.id) && !this.state.isPlayerInQuarter(quarterIndex, player.id);
+      });
+
+      select.innerHTML = '';
+      if (availablePlayers.length === 0) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Sin jugadores disponibles';
+        select.appendChild(option);
+        if (addBtn) addBtn.disabled = true;
+      } else {
+        availablePlayers.forEach(player => {
+          const option = document.createElement('option');
+          option.value = player.id;
+          option.textContent = `${player.number ? player.number + ' - ' : ''}${player.name}`;
+          select.appendChild(option);
+        });
+        if (addBtn) addBtn.disabled = false;
+      }
+    }
+
+    this.activeSlotContext = { quarterIndex, slotIndex, playerId };
+
+    const rect = anchor?.getBoundingClientRect();
+    if (rect) {
+      this.slotMenu.style.top = `${rect.bottom + window.scrollY + 6}px`;
+      this.slotMenu.style.left = `${rect.left + window.scrollX}px`;
+    }
+
+    this.slotMenu.style.display = 'flex';
+  }
+
+  closeSlotMenu() {
+    if (this.slotMenu) {
+      this.slotMenu.style.display = 'none';
+    }
+    this.activeSlotContext = null;
+  }
+
+  handleSlotMenuAdd() {
+    if (!this.activeSlotContext) return;
+    const select = this.slotMenu.querySelector('.slot-menu-select');
+    const playerId = select?.value;
+    if (!playerId) return;
+
+    const { quarterIndex, slotIndex } = this.activeSlotContext;
+    const result = this.state.assignPlayerToQuarter(quarterIndex, slotIndex, playerId);
+    if (!result.success) {
+      if (result.reason === 'slot-full') {
+        showError('Este hueco ya tiene 3 jugadores.');
+      }
+      if (result.reason === 'already-assigned') {
+        showError('Este jugador ya está en ese cuarto.');
+      }
+    }
+
+    this.closeSlotMenu();
+    this.renderQuarters();
+  }
+
+  handleSlotMenuRemove() {
+    if (!this.activeSlotContext) return;
+    const { quarterIndex, slotIndex, playerId } = this.activeSlotContext;
+    if (!playerId) return;
+    this.state.removePlayerFromQuarter(quarterIndex, slotIndex, playerId);
+    this.closeSlotMenu();
+    this.renderQuarters();
   }
 
   renderTeamSelector() {
@@ -308,6 +439,7 @@ class PlannerUI {
     if (!quartersGrid) return;
 
     quartersGrid.innerHTML = '';
+    this.closeSlotMenu();
     if (this.state.quartersCount === 4) {
       quartersGrid.dataset.columns = '4';
     } else if (this.state.quartersCount === 6) {
@@ -364,6 +496,18 @@ class PlannerUI {
         this.handleDrop(index, slotIndex, playerId);
       });
 
+      slot.addEventListener('click', (event) => {
+        const assigned = this.state.quarters[index]?.[slotIndex] || [];
+        if (assigned.length === 0) {
+          this.openSlotMenu({
+            quarterIndex: index,
+            slotIndex,
+            playerId: null,
+            anchor: event.currentTarget
+          });
+        }
+      });
+
       this.renderQuarterPlayers(slot, index, slotIndex);
       dropzone.appendChild(slot);
     }
@@ -404,10 +548,12 @@ class PlannerUI {
       `;
       playerEl.title = 'Quitar jugador';
       playerEl.addEventListener('click', () => {
-        const removed = this.state.removePlayerFromQuarter(index, slotIndex, playerId);
-        if (removed) {
-          this.renderQuarters();
-        }
+        this.openSlotMenu({
+          quarterIndex: index,
+          slotIndex,
+          playerId,
+          anchor: playerEl
+        });
       });
       body.appendChild(playerEl);
     });
