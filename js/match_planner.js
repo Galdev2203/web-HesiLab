@@ -74,7 +74,7 @@ class PlannerState {
     this.players = players;
     this.players.forEach(player => {
       if (!(player.id in this.playerAvailability)) {
-        this.playerAvailability[player.id] = true;
+        this.playerAvailability[player.id] = 'available';
       }
     });
   }
@@ -102,16 +102,21 @@ class PlannerState {
     };
 
     this.tempPlayers.push(player);
-    this.playerAvailability[player.id] = true;
+    this.playerAvailability[player.id] = 'available';
     return player;
   }
 
-  setPlayerAvailability(playerId, available) {
-    this.playerAvailability[playerId] = Boolean(available);
+  setPlayerAvailability(playerId, status) {
+    const safeStatus = status === 'injured' || status === 'unavailable' ? status : 'available';
+    this.playerAvailability[playerId] = safeStatus;
   }
 
   getPlayerAvailability(playerId) {
-    return this.playerAvailability[playerId] !== false;
+    return this.playerAvailability[playerId] || 'available';
+  }
+
+  isPlayerAvailable(playerId) {
+    return this.getPlayerAvailability(playerId) === 'available';
   }
 
   getAllPlayers() {
@@ -169,6 +174,20 @@ class PlannerState {
     slot.splice(index, 1);
     return true;
   }
+
+  removePlayerFromAllQuarters(playerId) {
+    let removed = false;
+    this.quarters.forEach(quarter => {
+      quarter.forEach(slot => {
+        const index = slot.indexOf(playerId);
+        if (index !== -1) {
+          slot.splice(index, 1);
+          removed = true;
+        }
+      });
+    });
+    return removed;
+  }
 }
 
 class PlannerUI {
@@ -207,7 +226,12 @@ class PlannerUI {
       return;
     }
 
-    const players = this.state.getSortedPlayers();
+    const players = this.state.getSortedPlayers().sort((a, b) => {
+      const statusA = this.state.getPlayerAvailability(a.id);
+      const statusB = this.state.getPlayerAvailability(b.id);
+      const order = { available: 0, injured: 1, unavailable: 2 };
+      return (order[statusA] ?? 3) - (order[statusB] ?? 3);
+    });
 
     if (players.length === 0) {
       playersList.innerHTML = '<div class="quarter-placeholder">No hay jugadores en este equipo.</div>';
@@ -219,8 +243,10 @@ class PlannerUI {
     players.forEach(player => {
       const item = document.createElement('div');
       item.className = 'player-item';
-      const isAvailable = this.state.getPlayerAvailability(player.id);
-      item.classList.toggle('player-inactive', !isAvailable);
+      const status = this.state.getPlayerAvailability(player.id);
+      const isAvailable = status === 'available';
+      item.classList.toggle('player-inactive', status !== 'available');
+      item.classList.toggle('player-injured', status === 'injured');
       item.setAttribute('draggable', isAvailable ? 'true' : 'false');
       item.dataset.playerId = player.id;
 
@@ -238,14 +264,24 @@ class PlannerUI {
       statusSelect.setAttribute('aria-label', `Estado de ${player.name}`);
       statusSelect.innerHTML = `
         <option value="available">Convocado</option>
+        <option value="injured">Lesionado</option>
         <option value="unavailable">No convocado</option>
       `;
-      statusSelect.value = isAvailable ? 'available' : 'unavailable';
+      statusSelect.value = status;
       statusSelect.addEventListener('change', () => {
-        const available = statusSelect.value === 'available';
-        this.state.setPlayerAvailability(player.id, available);
-        item.classList.toggle('player-inactive', !available);
+        const newStatus = statusSelect.value;
+        const available = newStatus === 'available';
+        this.state.setPlayerAvailability(player.id, newStatus);
+        if (!available) {
+          const removed = this.state.removePlayerFromAllQuarters(player.id);
+          if (removed) {
+            this.renderQuarters();
+          }
+        }
+        item.classList.toggle('player-inactive', newStatus !== 'available');
+        item.classList.toggle('player-injured', newStatus === 'injured');
         item.setAttribute('draggable', available ? 'true' : 'false');
+        this.renderPlayers();
       });
 
       statusSelect.addEventListener('mousedown', (event) => {
@@ -255,7 +291,7 @@ class PlannerUI {
       item.appendChild(statusSelect);
 
       item.addEventListener('dragstart', (event) => {
-        if (!this.state.getPlayerAvailability(player.id)) {
+        if (!this.state.isPlayerAvailable(player.id)) {
           event.preventDefault();
           return;
         }
@@ -391,7 +427,7 @@ class PlannerUI {
       return;
     }
 
-    if (!this.state.getPlayerAvailability(playerId)) {
+    if (!this.state.isPlayerAvailable(playerId)) {
       showError('Este jugador no está convocado.');
       return;
     }

@@ -141,6 +141,11 @@ body {
   cursor: not-allowed;
 }
 
+.player-item.player-injured {
+  background: #fff4f4;
+  border-color: #f5c2c7;
+}
+
 .player-item:active {
   cursor: grabbing;
 }
