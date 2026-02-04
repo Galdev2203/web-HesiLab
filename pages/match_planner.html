@@ -29,6 +29,11 @@
       </select>
     </div>
 
+    <div class="team-selector match-title" style="display:flex;">
+      <label for="matchTitle">Título del partido:</label>
+      <input id="matchTitle" type="text" placeholder="Título del partido" />
+    </div>
+
     <div class="planner-layout">
       <section class="players-panel">
         <div class="panel-header">
@@ -59,7 +64,7 @@
               <option value="basket" selected>Basket</option>
               <option value="minibasket">Minibasket</option>
             </select>
-            <button id="downloadPlannerPdf" class="btn btn-secondary" type="button">Descargar PDF</button>
+            <button id="previewPlannerPdf" class="btn btn-secondary" type="button">Previsualizar PDF</button>
           </div>
         </div>
 
@@ -90,6 +95,23 @@
     <div class="modal-footer">
       <button class="secondary-btn">Cancelar</button>
       <button class="primary-btn">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para previsualizar PDF -->
+<div id="pdfPreviewModal" class="modal">
+  <div class="modal-content pdf-preview-content">
+    <div class="modal-header">
+      <h3>Previsualización PDF</h3>
+      <button class="close-modal" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="modal-body pdf-preview-body">
+      <iframe id="pdfPreviewFrame" title="Previsualización PDF"></iframe>
+    </div>
+    <div class="modal-footer">
+      <button class="secondary-btn">Cerrar</button>
+      <button class="primary-btn">Descargar</button>
     </div>
   </div>
 </div>

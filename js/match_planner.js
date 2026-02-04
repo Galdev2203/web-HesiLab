@@ -14,11 +14,13 @@ const elements = {
   tempPlayerNumber: document.getElementById('tempPlayerNumber'),
   addTempPlayerBtn: document.getElementById('addTempPlayerBtn'),
   matchType: document.getElementById('matchType'),
+  matchTitle: document.getElementById('matchTitle'),
   quartersGrid: document.getElementById('quartersGrid'),
   slotModalInfo: document.getElementById('slotModalInfo'),
   slotModalList: document.getElementById('slotModalList'),
-  downloadPlannerPdf: document.getElementById('downloadPlannerPdf'),
-  positionNames: document.getElementById('positionNames')
+  previewPlannerPdf: document.getElementById('previewPlannerPdf'),
+  positionNames: document.getElementById('positionNames'),
+  pdfPreviewFrame: document.getElementById('pdfPreviewFrame')
 };
 
 const TEAM_ID_PARAM = 'team_id';
@@ -235,8 +237,11 @@ class PlannerUI {
     this.state = state;
     this.elements = elements;
     this.slotModal = new ModalManager('slotModal');
+    this.pdfPreviewModal = new ModalManager('pdfPreviewModal');
     this.activeSlotContext = null;
+    this.pdfObjectUrl = null;
     this.setupSlotModal();
+    this.setupPdfPreviewModal();
   }
 
   setupSlotModal() {
@@ -246,6 +251,31 @@ class PlannerUI {
     this.slotModal.onClose = () => {
       this.activeSlotContext = null;
     };
+  }
+
+  setupPdfPreviewModal() {
+    if (!this.pdfPreviewModal) return;
+
+    this.pdfPreviewModal.onSave = () => {
+      handleDownloadPlannerPdf();
+    };
+
+    this.pdfPreviewModal.onClose = () => {
+      if (this.pdfObjectUrl) {
+        URL.revokeObjectURL(this.pdfObjectUrl);
+        this.pdfObjectUrl = null;
+      }
+      if (this.elements.pdfPreviewFrame) {
+        this.elements.pdfPreviewFrame.src = '';
+      }
+    };
+  }
+
+  openPdfPreview(blobUrl) {
+    if (!this.pdfPreviewModal || !this.elements.pdfPreviewFrame) return;
+
+    this.elements.pdfPreviewFrame.src = blobUrl;
+    this.pdfPreviewModal.open('edit', 'Previsualización PDF');
   }
 
   openSlotModal({ quarterIndex, slotIndex }) {
@@ -788,6 +818,9 @@ function handleTeamSelection(teamId) {
 
   state.setTeamId(teamId);
   ui.setPlannerEnabled(true);
+  if (elements.matchTitle) {
+    elements.matchTitle.value = getTeamName();
+  }
   loadPlayers(teamId)
     .then(players => {
       state.setPlayers(players);
@@ -840,6 +873,11 @@ function getTeamName() {
   return team?.name || 'Planificación de partido';
 }
 
+function getMatchTitle() {
+  const title = elements.matchTitle?.value?.trim();
+  return title || getTeamName();
+}
+
 function formatPlayerLabel(player) {
   if (!player) return 'Jugador desconocido';
   if (player.number) {
@@ -848,66 +886,156 @@ function formatPlayerLabel(player) {
   return player.name;
 }
 
-function handleDownloadPlannerPdf() {
+function buildPlannerPdf() {
   if (!window.jspdf?.jsPDF) {
     showError('No se pudo cargar el generador de PDF.');
-    return;
+    return null;
   }
 
   const doc = new window.jspdf.jsPDF({
-    orientation: 'portrait',
+    orientation: 'landscape',
     unit: 'mm',
     format: 'a4'
   });
 
-  const title = getTeamName();
+  const title = getMatchTitle();
   const date = new Date();
   const dateLabel = `${date.toLocaleDateString('es-ES')} ${date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
 
   doc.setFontSize(16);
-  doc.text(title, 14, 18);
+  doc.text(title, 14, 16);
   doc.setFontSize(10);
   doc.setTextColor(90);
-  doc.text(`Generado: ${dateLabel}`, 14, 24);
+  doc.text(`Generado: ${dateLabel}`, 14, 22);
   doc.setTextColor(0);
 
-  let y = 32;
-  const lineHeight = 6;
+  let y = 28;
+  const marginX = 10;
+  const tableWidth = 277;
+  const firstColWidth = 24;
+  const otherColWidth = (tableWidth - firstColWidth) / SLOT_COUNT;
+  const headerHeight = 10;
+  const rowMinHeight = 12;
+
+  // Tabla de cuartos
+  doc.setFontSize(11);
+  doc.text('Planificación de cuartos', marginX, y);
+  y += 6;
+
+  // Encabezado tabla
+  doc.setFillColor(240, 242, 247);
+  doc.rect(marginX, y, tableWidth, headerHeight, 'F');
+  doc.setFontSize(9);
+  doc.text('Cuarto', marginX + 2, y + 7);
+  state.positionNames.forEach((name, index) => {
+    const x = marginX + firstColWidth + otherColWidth * index + 2;
+    doc.text(name, x, y + 7);
+  });
+  y += headerHeight;
 
   state.quarters.forEach((quarter, quarterIndex) => {
-    if (y > 270) {
-      doc.addPage();
-      y = 18;
-    }
-
-    doc.setFontSize(12);
-    doc.text(`Cuarto ${quarterIndex + 1}`, 14, y);
-    y += lineHeight;
-
-    quarter.forEach((slot, slotIndex) => {
+    const cellTexts = quarter.map(slot => {
       const players = slot.map(playerId => state.getPlayerById(playerId)).filter(Boolean);
-      const label = players.length > 0
-        ? players.map(formatPlayerLabel).join(', ')
-        : 'Sin jugadores';
+      return players.length > 0 ? players.map(formatPlayerLabel).join(', ') : '-';
+    });
 
-      const slotText = `${state.getPositionName(slotIndex)}: ${label}`;
-      const lines = doc.splitTextToSize(slotText, 180);
+    const wrapped = cellTexts.map(text => doc.splitTextToSize(text, otherColWidth - 4));
+    const maxLines = Math.max(1, ...wrapped.map(lines => lines.length));
+    const rowHeight = Math.max(rowMinHeight, maxLines * 4 + 4);
 
-      doc.setFontSize(10);
+    doc.rect(marginX, y, tableWidth, rowHeight);
+    doc.setFontSize(9);
+    doc.text(`Cuarto ${quarterIndex + 1}`, marginX + 2, y + 7);
+
+    wrapped.forEach((lines, colIndex) => {
+      const x = marginX + firstColWidth + otherColWidth * colIndex + 2;
+      let lineY = y + 6;
       lines.forEach(line => {
-        if (y > 280) {
-          doc.addPage();
-          y = 18;
-        }
-        doc.text(line, 18, y);
-        y += lineHeight;
+        doc.text(line, x, lineY);
+        lineY += 4;
       });
     });
 
-    y += 2;
+    y += rowHeight;
+
+    if (y > 170) {
+      doc.addPage();
+      y = 16;
+    }
   });
 
+  // Listado de jugadores
+  y += 8;
+  doc.setFontSize(11);
+  doc.text('Jugadores', marginX, y);
+  y += 6;
+
+  const playersByStatus = {
+    available: [],
+    injured: [],
+    unavailable: []
+  };
+
+  state.getSortedPlayers().forEach(player => {
+    const status = state.getPlayerAvailability(player.id);
+    if (playersByStatus[status]) {
+      playersByStatus[status].push(player);
+    }
+  });
+
+  const sections = [
+    { key: 'available', label: 'Convocados', color: [0, 0, 0] },
+    { key: 'injured', label: 'Lesionados', color: [220, 53, 69] },
+    { key: 'unavailable', label: 'No convocados', color: [255, 193, 7] }
+  ];
+
+  sections.forEach(section => {
+    if (playersByStatus[section.key].length === 0) return;
+    if (y > 190) {
+      doc.addPage();
+      y = 16;
+    }
+    doc.setFontSize(10);
+    doc.setTextColor(...section.color);
+    doc.text(section.label, marginX, y);
+    y += 5;
+    doc.setFontSize(9);
+    doc.setTextColor(...section.color);
+
+    const sorted = sortPlayersByNumber(playersByStatus[section.key]);
+    sorted.forEach(player => {
+      const text = formatPlayerLabel(player);
+      const lines = doc.splitTextToSize(text, 120);
+      lines.forEach(line => {
+        if (y > 200) {
+          doc.addPage();
+          y = 16;
+        }
+        doc.text(`• ${line}`, marginX + 2, y);
+        y += 4;
+      });
+    });
+
+    y += 4;
+    doc.setTextColor(0);
+  });
+
+  return doc;
+}
+
+function handleDownloadPlannerPdf() {
+  const doc = buildPlannerPdf();
+  if (!doc) return;
   doc.save('planificacion-partido.pdf');
+}
+
+function handlePreviewPlannerPdf() {
+  const doc = buildPlannerPdf();
+  if (!doc) return;
+  const blob = doc.output('blob');
+  const url = URL.createObjectURL(blob);
+  ui.pdfObjectUrl = url;
+  ui.openPdfPreview(url);
 }
 
 async function init() {
@@ -955,6 +1083,10 @@ async function init() {
   ui.renderPositions();
   ui.renderTeamSelector();
 
+  if (elements.matchTitle) {
+    elements.matchTitle.value = getTeamName();
+  }
+
   if (elements.teamSelector) {
     elements.teamSelector.addEventListener('change', (event) => {
       handleTeamSelection(event.target.value);
@@ -969,8 +1101,8 @@ async function init() {
     elements.matchType.addEventListener('change', handleMatchTypeChange);
   }
 
-  if (elements.downloadPlannerPdf) {
-    elements.downloadPlannerPdf.addEventListener('click', handleDownloadPlannerPdf);
+  if (elements.previewPlannerPdf) {
+    elements.previewPlannerPdf.addEventListener('click', handlePreviewPlannerPdf);
   }
 }
 

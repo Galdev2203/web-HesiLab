@@ -36,6 +36,13 @@ body {
   border: 1px solid var(--gray-300);
 }
 
+.team-selector.match-title input {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-300);
+}
+
 .planner-layout {
   display: grid;
   grid-template-columns: minmax(280px, 1fr) 2fr;
@@ -330,6 +337,22 @@ body {
   justify-content: flex-end;
   gap: var(--spacing-sm);
   flex-wrap: nowrap;
+}
+
+.pdf-preview-content {
+  max-width: 900px;
+  width: 95%;
+}
+
+.pdf-preview-body {
+  padding: var(--spacing-md);
+}
+
+.pdf-preview-body iframe {
+  width: 100%;
+  height: 70vh;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
 }
 
 .primary-btn,
