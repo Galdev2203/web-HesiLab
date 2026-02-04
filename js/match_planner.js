@@ -58,6 +58,7 @@ class PlannerState {
     this.quartersCount = 4;
     this.positionNames = Array.from({ length: SLOT_COUNT }, (_, index) => `Posición ${index + 1}`);
     this.quarters = this.createQuarters(this.quartersCount);
+    this.userId = null;
   }
 
   createQuarters(count) {
@@ -72,6 +73,14 @@ class PlannerState {
     this.teamId = teamId;
     this.tempPlayers = [];
     this.quarters = this.createQuarters(this.quartersCount);
+  }
+
+  setUserId(userId) {
+    this.userId = userId || null;
+  }
+
+  isLoggedIn() {
+    return Boolean(this.userId);
   }
 
   setTeams(teams) {
@@ -1027,12 +1036,20 @@ function buildPlannerPdf() {
 }
 
 function handleDownloadPlannerPdf() {
+  if (!state.isLoggedIn()) {
+    showError('Regístrate o inicia sesión para poder descargar la planificación.');
+    return;
+  }
   const doc = buildPlannerPdf();
   if (!doc) return;
   doc.save('planificacion-partido.pdf');
 }
 
 function handlePreviewPlannerPdf() {
+  if (!state.isLoggedIn()) {
+    showError('Regístrate o inicia sesión para poder descargar la planificación.');
+    return;
+  }
   const doc = buildPlannerPdf();
   if (!doc) return;
   const blob = doc.output('blob');
@@ -1054,6 +1071,8 @@ async function init() {
   const session = await getSessionWithRetry();
   const user = session?.user;
 
+  state.setUserId(user?.id);
+
   const teamIdFromUrl = getUrlParam(TEAM_ID_PARAM);
 
   if (teamIdFromUrl && user) {
@@ -1069,6 +1088,7 @@ async function init() {
   } else if (!user) {
     state.setTeamId(GUEST_TEAM_ID);
     state.setPlayers([]);
+    state.setUserId(null);
     ui.setPlannerEnabled(true);
     ui.renderTeamSelector();
     if (teamIdFromUrl) {
@@ -1077,6 +1097,7 @@ async function init() {
   } else {
     const teams = await loadTeams();
     state.setTeams(teams);
+    state.setUserId(user?.id);
     ui.setPlannerEnabled(false);
     ui.renderTeamSelector();
   }
