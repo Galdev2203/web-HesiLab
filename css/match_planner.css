@@ -286,6 +286,14 @@ body {
     color: var(--gray-600);
   }
 
+.players-content {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+}
   .team-selector select,
   .team-selector.match-title input,
   #matchType,
