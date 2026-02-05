@@ -613,6 +613,15 @@ body {
     align-items: start;
   }
 
+  .row-main > .players-panel {
+    grid-column: 1;
+  }
+
+  .row-main > .quarters-panel {
+    grid-column: 2;
+    min-width: 0;
+  }
+
   .planner-layout {
     display: contents;
   }
