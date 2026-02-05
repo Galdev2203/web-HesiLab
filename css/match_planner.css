@@ -607,8 +607,10 @@ body {
   }
 
   .row-main {
-    display: block;
-    position: relative;
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: var(--spacing-lg);
+    align-items: start;
     overflow: visible;
   }
 
@@ -623,8 +625,7 @@ body {
   }
 
   .planner-layout {
-    display: block;
-    width: 100%;
+    display: contents;
   }
 
   .team-selector,
@@ -674,11 +675,11 @@ body {
   .players-panel {
     width: 300px;
     max-width: 300px;
-    position: fixed;
+    position: sticky;
     top: 64px;
-    left: max(var(--spacing-lg), calc((100vw - 1280px) / 2 + var(--spacing-lg)));
-    height: calc(100vh - 64px);
-    z-index: 10;
+    height: auto;
+    max-height: calc(100vh - 64px);
+    z-index: 2;
     overflow-y: auto;
   }
 
@@ -808,14 +809,15 @@ body {
   }
 
   .row-main {
-    display: block;
-    position: relative;
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: var(--spacing-lg);
+    align-items: start;
     overflow: visible;
   }
 
   .planner-layout {
-    display: block;
-    width: 100%;
+    display: contents;
   }
 
   .team-selector,
@@ -865,17 +867,14 @@ body {
   .players-panel {
     width: 320px;
     max-width: 320px;
-    position: fixed;
+    position: sticky;
     top: 64px;
-    left: max(var(--spacing-lg), calc((100vw - 1280px) / 2 + var(--spacing-lg)));
-    height: calc(100vh - 64px);
-    z-index: 10;
+    height: auto;
+    max-height: calc(100vh - 64px);
+    z-index: 2;
     overflow-y: auto;
   }
 
-  .quarters-panel {
-    margin-left: calc(320px + var(--spacing-lg));
-  }
 
   .quarters-content {
     background: white;
