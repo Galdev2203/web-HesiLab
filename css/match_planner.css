@@ -409,7 +409,7 @@ body {
     grid-template-columns: minmax(260px, 1fr) minmax(200px, 320px) minmax(180px, 240px) minmax(160px, 200px);
     gap: var(--spacing-md);
     align-items: start;
-    padding: 6px var(--spacing-sm);
+    padding: 8px var(--spacing-sm) 10px;
     background: white;
     border: 1px solid var(--gray-200);
     border-radius: var(--radius-lg);
@@ -424,6 +424,7 @@ body {
 
   .row-positions {
     display: block;
+    margin-top: var(--spacing-sm);
   }
 
   .row-main {
@@ -497,7 +498,7 @@ body {
     padding: 4px 10px;
     font-size: 0.86rem;
     height: 32px;
-    align-self: start;
+    align-self: end;
   }
 
   .players-panel {
