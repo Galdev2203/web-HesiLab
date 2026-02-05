@@ -23,61 +23,69 @@
     <p id="errorMsg" class="error-message" style="display:none;"></p>
     <p id="guestNotice" class="info-message" style="display:none;"></p>
 
-    <div class="row-config">
-      <div class="team-selector match-title" style="display:flex;">
-        <label for="matchTitle">Título del partido:</label>
-        <input id="matchTitle" type="text" placeholder="Título del partido" />
-      </div>
+    <details class="match-data" open>
+      <summary>Datos del partido</summary>
+      <div class="match-data-content">
+        <div class="row-config">
+          <div class="team-selector match-title" style="display:flex;">
+            <label for="matchTitle">Título del partido:</label>
+            <input id="matchTitle" type="text" placeholder="Título del partido" />
+          </div>
 
-      <div id="teamSelectorSection" class="team-selector" style="display:none;">
-        <label for="teamSelector">Equipo:</label>
-        <select id="teamSelector">
-          <option value="">Selecciona un equipo</option>
-        </select>
-      </div>
+          <div id="teamSelectorSection" class="team-selector" style="display:none;">
+            <label for="teamSelector">Equipo:</label>
+            <select id="teamSelector">
+              <option value="">Selecciona un equipo</option>
+            </select>
+          </div>
 
-      <div class="config-field match-type-field">
-        <label for="matchType">Tipo de partido</label>
-        <select id="matchType">
-          <option value="basket" selected>Basket</option>
-          <option value="minibasket">Minibasket</option>
-        </select>
-      </div>
+          <div class="config-field match-type-field">
+            <label for="matchType">Tipo de partido</label>
+            <select id="matchType">
+              <option value="basket" selected>Basket</option>
+              <option value="minibasket">Minibasket</option>
+            </select>
+          </div>
 
-      <button id="previewPlannerPdf" class="btn btn-secondary" type="button">Previsualizar PDF</button>
-    </div>
-
-    <div class="row-positions">
-      <details class="positions-collapsible">
-        <summary>Posiciones</summary>
-        <div class="positions-panel">
-          <div id="positionNames" class="positions-grid"></div>
+          <button id="previewPlannerPdf" class="btn btn-secondary" type="button">Previsualizar PDF</button>
         </div>
-      </details>
-    </div>
+
+        <div class="row-positions">
+          <details class="positions-collapsible">
+            <summary>Posiciones</summary>
+            <div class="positions-panel">
+              <div id="positionNames" class="positions-grid"></div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </details>
 
     <div class="planner-layout row-main">
-      <section class="players-panel">
-        <div class="panel-header">
-          <h3>Jugadores</h3>
-        </div>
-
-        <div class="players-content">
-          <div id="playersList" class="players-list">
-            Selecciona un equipo para cargar jugadores.
+      <details class="players-collapsible" open>
+        <summary>Jugadores</summary>
+        <section class="players-panel">
+          <div class="panel-header">
+            <h3>Jugadores</h3>
           </div>
 
-          <div class="temp-player-card">
-            <h4>Jugador temporal</h4>
-            <div class="temp-player-form">
-              <input id="tempPlayerName" type="text" placeholder="Nombre y apellidos" />
-              <input id="tempPlayerNumber" type="text" placeholder="Dorsal" maxlength="3" inputmode="numeric" />
-              <button id="addTempPlayerBtn" class="btn btn-primary">Añadir</button>
+          <div class="players-content">
+            <div id="playersList" class="players-list">
+              Selecciona un equipo para cargar jugadores.
             </div>
-            <p class="temp-player-note">Solo disponible dentro del planificador.</p>
+
+            <div class="temp-player-card">
+              <h4>Jugador temporal</h4>
+              <div class="temp-player-form">
+                <input id="tempPlayerName" type="text" placeholder="Nombre y apellidos" />
+                <input id="tempPlayerNumber" type="text" placeholder="Dorsal" maxlength="3" inputmode="numeric" />
+                <button id="addTempPlayerBtn" class="btn btn-primary">Añadir</button>
+              </div>
+              <p class="temp-player-note">Solo disponible dentro del planificador.</p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </details>
 
       <section class="quarters-panel">
         <div class="panel-header quarters-header">
