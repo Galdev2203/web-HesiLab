@@ -9,6 +9,13 @@ body {
   padding: 0 var(--spacing-lg) var(--spacing-2xl);
 }
 
+.players-panel {
+  position: sticky;
+  top: 64px;
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+
 .error-message {
   background: #fee;
   color: var(--danger-600);
