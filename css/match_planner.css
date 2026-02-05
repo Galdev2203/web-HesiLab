@@ -401,7 +401,7 @@ body {
     grid-template-columns: minmax(320px, 1fr) 240px 220px 180px;
     gap: var(--spacing-md);
     align-items: center;
-    padding: 6px var(--spacing-sm);
+      grid-template-columns: minmax(260px, 1fr) minmax(200px, 320px) minmax(180px, 240px) minmax(160px, 200px);
     background: white;
     border: 1px solid var(--gray-200);
     border-radius: var(--radius-lg);
@@ -410,6 +410,7 @@ body {
   }
 
   .row-positions {
+      width: 100%;
     display: block;
   }
 
@@ -422,11 +423,13 @@ body {
   }
 
   .row-main > .players-panel {
+      width: 100%;
     width: 300px;
     max-width: 300px;
   }
 
   .row-main > .quarters-panel {
+      align-self: start;
     min-width: 0;
   }
 
@@ -438,6 +441,7 @@ body {
   }
 
   .team-selector,
+      width: 100%;
   .team-selector.match-title,
   .match-type-field,
   #previewPlannerPdf {
@@ -449,8 +453,13 @@ body {
   .team-selector.match-title {
     display: flex;
     align-items: center;
+      align-self: start;
     gap: var(--spacing-xs);
   }
+    .players-panel,
+    .quarters-panel {
+      min-width: 0;
+    }
 
   .team-selector label,
   .team-selector.match-title label,
