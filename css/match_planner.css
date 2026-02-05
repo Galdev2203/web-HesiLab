@@ -515,6 +515,163 @@ body {
   flex-wrap: wrap;
 }
 
+@media (min-width: 1024px) {
+  .planner-main {
+    --planner-toolbar-height: 72px;
+  }
+
+  .planner-main .container {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr) 320px;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "alerts alerts alerts"
+      "team title controls"
+      "players quarters quarters";
+    gap: var(--spacing-md) var(--spacing-lg);
+    align-items: start;
+  }
+
+  #errorMsg,
+  #guestNotice {
+    grid-column: 1 / -1;
+  }
+
+  .planner-layout,
+  .quarters-panel {
+    display: contents;
+  }
+
+  #teamSelectorSection {
+    grid-area: team;
+  }
+
+  .team-selector.match-title {
+    grid-area: title;
+  }
+
+  .quarters-header {
+    grid-area: controls;
+  }
+
+  .players-panel {
+    grid-area: players;
+  }
+
+  .quarters-content {
+    grid-area: quarters;
+  }
+
+  .team-selector,
+  .team-selector.match-title,
+  .quarters-header {
+    margin-bottom: 0;
+    padding: var(--spacing-sm) var(--spacing-md);
+    gap: var(--spacing-sm);
+    align-items: center;
+    position: sticky;
+    top: var(--spacing-sm);
+    z-index: 5;
+    background: white;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .team-selector label,
+  .team-selector.match-title label,
+  .quarters-control label {
+    white-space: nowrap;
+    font-size: 0.85rem;
+  }
+
+  .team-selector select,
+  .team-selector.match-title input,
+  .quarters-control select {
+    min-height: 36px;
+  }
+
+  .quarters-control {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+
+  .players-panel {
+    width: 320px;
+    max-width: 320px;
+    position: sticky;
+    top: calc(var(--planner-toolbar-height) + var(--spacing-md));
+    max-height: calc(100vh - var(--planner-toolbar-height) - var(--spacing-xl));
+    overflow-y: auto;
+  }
+
+  .quarters-content {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    min-width: 0;
+  }
+
+  .positions-panel {
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    max-height: 160px;
+    overflow-y: auto;
+  }
+
+  .positions-panel h4 {
+    font-size: 0.95rem;
+  }
+
+  .positions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .quarters-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(260px, 1fr);
+    gap: var(--spacing-md);
+    overflow-x: auto;
+    padding-bottom: var(--spacing-xs);
+  }
+
+  .quarters-grid[data-columns="4"] {
+    grid-template-columns: repeat(4, minmax(260px, 1fr));
+  }
+
+  .quarters-grid[data-columns="3"] {
+    grid-template-columns: repeat(3, minmax(260px, 1fr));
+  }
+
+  .quarter-card {
+    min-height: 320px;
+  }
+
+  .quarter-header {
+    padding: var(--spacing-xs) var(--spacing-md);
+  }
+
+  .quarter-dropzone {
+    padding: var(--spacing-xs);
+    gap: var(--spacing-xs);
+  }
+
+  .quarter-slot {
+    min-height: 64px;
+  }
+
+  .quarter-slot-header {
+    font-size: 0.7rem;
+    padding: 6px 8px;
+  }
+
+  .quarter-player {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+}
+
 .positions-panel {
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-md);
