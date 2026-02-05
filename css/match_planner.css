@@ -591,7 +591,7 @@ body {
 
   .row-config {
     display: grid;
-    grid-template-columns: minmax(280px, 1fr) 220px 200px 180px;
+    grid-template-columns: minmax(320px, 1fr) 240px 220px 180px;
     gap: var(--spacing-md);
     align-items: center;
     padding: 6px var(--spacing-sm);
@@ -700,8 +700,10 @@ body {
   }
 
   .positions-grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(140px, 1fr);
     gap: var(--spacing-xs);
+    overflow-x: auto;
   }
 
   .position-input label {
@@ -715,18 +717,18 @@ body {
   .quarters-grid {
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: minmax(320px, 1fr);
+    grid-auto-columns: minmax(360px, 1fr);
     gap: var(--spacing-md);
     overflow-x: auto;
     padding-bottom: var(--spacing-xs);
   }
 
   .quarters-grid[data-columns="4"] {
-    grid-template-columns: repeat(4, minmax(320px, 1fr));
+    grid-template-columns: repeat(4, minmax(360px, 1fr));
   }
 
   .quarters-grid[data-columns="3"] {
-    grid-template-columns: repeat(3, minmax(320px, 1fr));
+    grid-template-columns: repeat(3, minmax(360px, 1fr));
   }
 
   .quarter-card {
@@ -805,7 +807,7 @@ body {
 
   .row-main {
     display: grid;
-    grid-template-columns: 320px minmax(0, 1fr);
+    grid-template-columns: 300px minmax(0, 1fr);
     gap: var(--spacing-lg);
     align-items: start;
   }
@@ -888,8 +890,10 @@ body {
   }
 
   .positions-grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(140px, 1fr);
     gap: 6px;
+    overflow-x: auto;
   }
 
   .position-input label {
