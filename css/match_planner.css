@@ -93,6 +93,15 @@ body {
     gap: var(--spacing-xl);
   }
 
+  .positions-collapsible summary {
+    font-size: 0.95rem;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .positions-collapsible .positions-panel {
+    padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+  }
+
   .players-panel,
   .quarters-panel {
     min-width: 0;
@@ -515,6 +524,47 @@ body {
   color: var(--gray-700);
 }
 
+.positions-collapsible {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  background: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.positions-collapsible summary {
+  cursor: pointer;
+  list-style: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--gray-800);
+  padding: 6px var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.positions-collapsible summary::-webkit-details-marker {
+  display: none;
+}
+
+.positions-collapsible summary::before {
+  content: '▾';
+  font-size: 0.85rem;
+  color: var(--gray-500);
+  transition: transform 0.2s ease;
+}
+
+.positions-collapsible:not([open]) summary::before {
+  transform: rotate(-90deg);
+}
+
+.positions-collapsible .positions-panel {
+  border: none;
+  background: transparent;
+  margin: 0;
+  padding: 6px var(--spacing-sm);
+}
+
 @media (min-width: 1024px) {
   .planner-main {
     --planner-toolbar-height: 56px;
@@ -811,17 +861,14 @@ body {
   }
 
   .positions-panel {
-    padding: 4px var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
-    border-radius: var(--radius-md);
-    max-height: 84px;
-    overflow: hidden;
+    padding: 0;
+    margin-bottom: 0;
+    max-height: none;
+    overflow: visible;
   }
 
   .positions-panel h4 {
-    font-size: 0.82rem;
-    font-weight: 700;
-    margin-bottom: 4px;
+    margin: 0;
   }
 
   .positions-grid {
