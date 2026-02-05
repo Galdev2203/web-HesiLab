@@ -428,7 +428,7 @@ body {
 
   .row-main {
     display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
+    max-height: none;
     gap: var(--spacing-lg);
     align-items: start;
     overflow: visible;
