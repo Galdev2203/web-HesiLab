@@ -704,9 +704,10 @@ body {
   .planner-main .container {
     display: grid;
     grid-template-columns: 320px minmax(320px, 1fr) 240px 180px;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto 1fr;
     grid-template-areas:
       "team title type pdf"
+      "positions positions positions positions"
       "players quarters quarters quarters";
     gap: var(--spacing-sm) var(--spacing-lg);
     align-items: start;
@@ -770,6 +771,10 @@ body {
     grid-area: pdf;
   }
 
+  .positions-panel {
+    grid-area: positions;
+  }
+
   .team-selector,
   .team-selector.match-title,
   #matchType,
@@ -785,11 +790,30 @@ body {
     display: flex;
   }
 
+  .team-selector label,
+  .team-selector.match-title label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
   .team-selector select,
   .team-selector.match-title input,
   #matchType,
   #previewPlannerPdf {
-    min-height: 36px;
+    min-height: 32px;
+    font-size: 0.9rem;
+  }
+
+  .team-selector select,
+  .team-selector.match-title input,
+  #matchType {
+    padding: 4px 8px;
+  }
+
+  #previewPlannerPdf {
+    padding: 4px 10px;
+    font-size: 0.88rem;
   }
 
   .players-panel {
@@ -821,7 +845,8 @@ body {
   }
 
   .positions-panel h4 {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 700;
     margin-bottom: 4px;
   }
 
@@ -831,11 +856,13 @@ body {
   }
 
   .position-input label {
-    font-size: 0.68rem;
+    font-size: 0.66rem;
+    font-weight: 600;
   }
 
   .position-input input {
     padding: 3px 6px;
+    font-size: 0.85rem;
   }
 
   .quarters-grid {
