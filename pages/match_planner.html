@@ -24,18 +24,6 @@
     <p id="guestNotice" class="info-message" style="display:none;"></p>
 
     <div class="row-config">
-      <div id="teamSelectorSection" class="team-selector" style="display:none;">
-        <label for="teamSelector">Equipo:</label>
-        <select id="teamSelector">
-          <option value="">Selecciona un equipo</option>
-        </select>
-      </div>
-
-      <div class="team-selector match-title" style="display:flex;">
-        <label for="matchTitle">Título del partido:</label>
-        <input id="matchTitle" type="text" placeholder="Título del partido" />
-      </div>
-
       <div class="config-field match-type-field">
         <label for="matchType">Tipo de partido</label>
         <select id="matchType">
@@ -44,7 +32,19 @@
         </select>
       </div>
 
+      <div class="team-selector match-title" style="display:flex;">
+        <label for="matchTitle">Título del partido:</label>
+        <input id="matchTitle" type="text" placeholder="Título del partido" />
+      </div>
+
       <button id="previewPlannerPdf" class="btn btn-secondary" type="button">Previsualizar PDF</button>
+
+      <div id="teamSelectorSection" class="team-selector" style="display:none;">
+        <label for="teamSelector">Equipo:</label>
+        <select id="teamSelector">
+          <option value="">Selecciona un equipo</option>
+        </select>
+      </div>
     </div>
 
     <div class="row-positions">
