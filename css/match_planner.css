@@ -431,6 +431,11 @@ body {
   .row-main > .quarters-panel {
       align-self: start;
     min-width: 0;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
   }
 
   .planner-layout {
