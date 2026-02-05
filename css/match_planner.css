@@ -607,27 +607,23 @@ body {
   }
 
   .row-main {
-    display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
-    gap: var(--spacing-lg);
-    align-items: start;
+    display: block;
+    position: relative;
     overflow: visible;
   }
 
   .row-main > .players-panel {
-    grid-column: 1;
+    width: 300px;
+    max-width: 300px;
   }
 
   .row-main > .quarters-panel {
-    grid-column: 2;
     min-width: 0;
+    margin-left: calc(300px + var(--spacing-lg));
   }
 
   .planner-layout {
-    display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
-    gap: var(--spacing-lg);
-    align-items: start;
+    display: block;
     width: 100%;
   }
 
@@ -678,12 +674,11 @@ body {
   .players-panel {
     width: 300px;
     max-width: 300px;
-    position: sticky;
+    position: fixed;
     top: 64px;
-    height: auto;
-    max-height: calc(100vh - 64px);
-    align-self: start;
-    z-index: 2;
+    left: max(var(--spacing-lg), calc((100vw - 1280px) / 2 + var(--spacing-lg)));
+    height: calc(100vh - 64px);
+    z-index: 10;
     overflow-y: auto;
   }
 
@@ -813,18 +808,13 @@ body {
   }
 
   .row-main {
-    display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
-    gap: var(--spacing-lg);
-    align-items: start;
+    display: block;
+    position: relative;
     overflow: visible;
   }
 
   .planner-layout {
-    display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
-    gap: var(--spacing-lg);
-    align-items: start;
+    display: block;
     width: 100%;
   }
 
@@ -875,13 +865,16 @@ body {
   .players-panel {
     width: 320px;
     max-width: 320px;
-    position: sticky;
+    position: fixed;
     top: 64px;
-    height: auto;
-    max-height: calc(100vh - 64px);
-    align-self: start;
-    z-index: 2;
+    left: max(var(--spacing-lg), calc((100vw - 1280px) / 2 + var(--spacing-lg)));
+    height: calc(100vh - 64px);
+    z-index: 10;
     overflow-y: auto;
+  }
+
+  .quarters-panel {
+    margin-left: calc(320px + var(--spacing-lg));
   }
 
   .quarters-content {
