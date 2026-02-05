@@ -392,6 +392,7 @@ body {
     grid-template-rows: auto auto 1fr;
     gap: var(--spacing-sm);
     align-items: start;
+    overflow: visible;
   }
 
   #errorMsg,
@@ -453,6 +454,7 @@ body {
     gap: var(--spacing-lg);
     align-items: start;
     width: 100%;
+    overflow: visible;
   }
 
   .team-selector,
@@ -516,12 +518,15 @@ body {
     border: none;
     padding: 0;
     box-shadow: none;
-    overflow-y: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   .players-content {
-    overflow: visible;
-    max-height: none;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .players-panel,
