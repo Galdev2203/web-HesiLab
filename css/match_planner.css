@@ -1,9 +1,13 @@
-/* match_planner.css - Planificador de Partidos */
+/* =========================================================
+   BASE
+   ========================================================= */
 
 body {
   background: var(--gray-50);
   min-height: 100vh;
 }
+
+/* ---------- Collapsibles ---------- */
 
 .match-data summary,
 .players-collapsible summary {
@@ -44,7 +48,30 @@ body {
   padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
 }
 
+/* =========================================================
+   QUARTERS – BASE (única definición)
+   ========================================================= */
+
+.quarters-grid {
+  display: grid;
+  gap: var(--spacing-lg);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.quarters-grid[data-columns="3"] {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.quarters-grid[data-columns="4"] {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* =========================================================
+   MOBILE (≤768px)
+   ========================================================= */
+
 @media (max-width: 768px) {
+
   .match-data {
     margin-bottom: var(--spacing-md);
   }
@@ -62,32 +89,6 @@ body {
     padding: 0;
   }
 
-  .row-config .team-selector.match-title {
-    order: 1;
-  }
-
-  #teamSelectorSection {
-    order: 2;
-  }
-
-  .match-type-field {
-    order: 3;
-  }
-
-  #previewPlannerPdf {
-    order: 4;
-    align-self: stretch;
-  }
-
-  .row-positions {
-    order: 5;
-    margin-top: 0;
-  }
-
-  .players-collapsible {
-    margin-bottom: var(--spacing-md);
-  }
-
   .row-main {
     display: flex;
     flex-direction: column;
@@ -96,25 +97,15 @@ body {
 
   .players-panel {
     width: 100%;
-    max-width: 100%;
     position: static;
     height: auto;
-    max-height: none;
     overflow: visible;
   }
 
   .players-list {
+    display: flex;
     flex-direction: column;
-    flex-wrap: nowrap;
-    overflow: visible;
-    width: 100%;
     gap: var(--spacing-sm);
-    padding-bottom: 0;
-  }
-
-  .player-item {
-    width: 100%;
-    min-width: 0;
   }
 
   .quarters-panel,
@@ -123,17 +114,16 @@ body {
   }
 
   .quarters-grid {
-    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--spacing-md);
   }
 
-  .quarters-grid[data-columns="4"] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .quarters-grid[data-columns="3"] {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .quarters-grid[data-columns="4"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .quarter-card {
@@ -143,7 +133,6 @@ body {
   .quarter-header {
     text-align: center;
     font-size: 1rem;
-    padding: var(--spacing-sm);
   }
 
   .quarter-dropzone {
@@ -151,10 +140,14 @@ body {
   }
 }
 
+/* =========================================================
+   DESKTOP (≥1024px)
+   ========================================================= */
+
 @media (min-width: 1024px) {
+
   .match-data {
     border: none;
-    box-shadow: none;
     background: transparent;
     margin-bottom: 0;
   }
@@ -169,10 +162,6 @@ body {
 
   .players-collapsible {
     display: contents;
-    border: none;
-    box-shadow: none;
-    background: transparent;
-    margin-bottom: 0;
   }
 
   .players-collapsible summary {
@@ -189,151 +178,45 @@ body {
 
   .planner-main .container {
     display: grid;
-    grid-template-columns: 1fr;
     grid-template-rows: auto auto 1fr;
     gap: var(--spacing-sm);
-    align-items: start;
-    overflow: visible;
-  }
-
-  #errorMsg,
-  #guestNotice {
-    grid-column: 1 / -1;
-  }
-
-  .row-config,
-  .row-positions,
-  .row-main {
-    grid-column: 1 / -1;
   }
 
   .row-config {
     display: grid;
-    grid-template-columns: minmax(260px, 1fr) minmax(200px, 320px) minmax(180px, 240px) minmax(160px, 200px);
+    grid-template-columns:
+      minmax(260px, 1fr)
+      minmax(200px, 320px)
+      minmax(180px, 240px)
+      minmax(160px, 200px);
     gap: var(--spacing-md);
-    align-items: center;
     padding: 6px var(--spacing-sm);
     background: white;
     border: 1px solid var(--gray-200);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
-    max-height: 64px;
-    width: 100%;
-  }
-
-  .row-config > * {
-    min-width: 0;
-  }
-
-  .row-positions {
-    display: block;
-    margin-top: var(--spacing-sm);
   }
 
   .row-main {
     display: grid;
     grid-template-columns: 300px minmax(0, 1fr);
     gap: var(--spacing-lg);
-    align-items: start;
-    overflow: visible;
-    width: 100%;
     min-height: calc(100vh - 64px);
-  }
-
-  .row-main > .players-panel {
-    width: 300px;
-    max-width: 300px;
-    align-self: start;
-  }
-
-  .row-main > .quarters-panel {
-    min-width: 0;
-  }
-
-  .planner-layout {
-    display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
-    gap: var(--spacing-lg);
-    align-items: start;
-    width: 100%;
-    overflow: visible;
-  }
-
-  .team-selector,
-  .team-selector.match-title,
-  .match-type-field,
-  #previewPlannerPdf {
-    margin-bottom: 0;
-    width: 100%;
-  }
-
-  .team-selector,
-  .team-selector.match-title {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-  }
-
-  .team-selector label,
-  .team-selector.match-title label,
-  .config-field label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    margin-bottom: 0;
-    text-transform: uppercase;
-    color: var(--gray-600);
-  }
-
-  .team-selector select,
-  .team-selector.match-title input,
-  #matchType,
-  #previewPlannerPdf {
-    min-height: 28px;
-    font-size: 0.85rem;
-    width: 100%;
-  }
-
-  .team-selector select,
-  .team-selector.match-title input,
-  #matchType {
-    padding: 2px 8px;
-  }
-
-  #previewPlannerPdf {
-    padding: 2px 10px;
-    font-size: 0.84rem;
-    height: 28px;
-    align-self: end;
   }
 
   .players-panel {
     width: 300px;
-    max-width: 300px;
     position: sticky;
     top: 64px;
     height: calc(100vh - 80px);
-    z-index: 2;
-    align-self: start;
-    background: transparent;
-    border: none;
-    padding: 0;
-    box-shadow: none;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
 
   .players-content {
-    flex: 1 1 auto;
-    min-height: 0;
     overflow-y: auto;
-  }
-
-  .players-panel,
-  .quarters-panel {
-    min-width: 0;
+    flex: 1;
   }
 
   .quarters-content {
@@ -342,189 +225,58 @@ body {
     border-radius: var(--radius-xl);
     padding: var(--spacing-lg);
     box-shadow: var(--shadow-sm);
-    min-width: 0;
-  }
-
-  .positions-panel {
-    padding: 6px var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
-    border-radius: var(--radius-md);
-  }
-
-  .positions-panel h4 {
-    font-size: 0.9rem;
-    margin-bottom: 6px;
-  }
-
-  .positions-grid {
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(140px, 1fr);
-    gap: var(--spacing-xs);
-    overflow-x: auto;
-  }
-
-  .position-input label {
-    font-size: 0.7rem;
-  }
-
-  .position-input input {
-    padding: 4px 6px;
   }
 
   .quarters-grid {
-    display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: var(--spacing-md);
-    padding-bottom: 0;
-  }
-
-  .quarters-grid[data-columns="4"] {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .quarters-grid[data-columns="3"] {
-    grid-template-columns: repeat(3, 1fr);
   }
 
   .quarter-card {
     min-height: 300px;
   }
-
-  .quarter-header {
-    padding: 6px var(--spacing-sm);
-  }
-
-  .quarter-dropzone {
-    padding: 6px;
-    gap: 6px;
-  }
-
-  .quarter-slot {
-    min-height: 60px;
-  }
-
-  .quarter-slot-header {
-    font-size: 0.7rem;
-    padding: 4px 6px;
-  }
-
-  .quarter-player {
-    padding: 4px 6px;
-    font-size: 0.82rem;
-  }
 }
 
-
-.positions-panel {
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md);
-  background: var(--gray-50);
-  margin-bottom: var(--spacing-lg);
-}
-
-.positions-panel h4 {
-  margin: 0 0 var(--spacing-sm);
-  font-size: 1rem;
-}
-
-.quarters-panel .positions-panel {
-  display: none;
-}
-
-.positions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: var(--spacing-sm);
-}
-
-.position-input {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.position-input label {
-  font-size: 0.75rem;
-  color: var(--gray-600);
-}
-
-.position-input input {
-  padding: 6px 8px;
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-md);
-  background: white;
-}
-
-.quarters-control select {
-  min-width: 140px;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-md);
-  background: white;
-}
-
-.quarters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-lg);
-}
-
-@media (max-width: 1023px) {
-  .quarters-grid[data-columns="4"] {
-    grid-template-columns: repeat(4, minmax(180px, 1fr));
-  }
-
-  .quarters-grid[data-columns="3"] {
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
-  }
-}
+/* =========================================================
+   QUARTER COMPONENTS
+   ========================================================= */
 
 .quarter-card {
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
-  overflow: hidden;
   background: var(--gray-50);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .quarter-header {
   padding: var(--spacing-sm) var(--spacing-md);
   background: var(--primary-50);
   font-weight: 600;
-  color: var(--gray-900);
   border-bottom: 1px solid var(--gray-200);
 }
 
 .quarter-dropzone {
-  min-height: 220px;
+  flex: 1;
+  padding: var(--spacing-sm);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  padding: var(--spacing-sm);
   background: white;
 }
 
-.quarter-placeholder {
-  padding: var(--spacing-sm);
-  color: var(--gray-500);
-  text-align: center;
-}
+/* ---------- Slots ---------- */
 
 .quarter-slot {
-  display: flex;
-  flex-direction: column;
   border: 1px dashed var(--gray-200);
   border-radius: var(--radius-md);
   background: var(--gray-50);
   min-height: 88px;
-  overflow: hidden;
 }
 
 .quarter-slot.drag-over {
   outline: 2px dashed var(--primary-400);
-  outline-offset: -4px;
   background: var(--primary-25);
 }
 
@@ -532,82 +284,27 @@ body {
   padding: var(--spacing-xs) var(--spacing-sm);
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--gray-600);
   background: white;
   border-bottom: 1px solid var(--gray-200);
-  min-height: 0;
-  display: flex;
-  align-items: center;
 }
 
 .quarter-slot-body {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  flex: 1 1 auto;
-  background: white;
 }
 
-.quarter-slot.slot-multi .quarter-slot-body {
-  flex-direction: row;
-  gap: 0;
-}
+/* ---------- Players ---------- */
 
 .quarter-player {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
   gap: var(--spacing-xs);
-  text-align: center;
   padding: var(--spacing-sm);
   border-bottom: 1px solid var(--gray-200);
-  font-weight: 600;
-  color: var(--gray-900);
   background: var(--primary-25);
-  flex: 1 1 0;
+  font-weight: 600;
 }
 
 .quarter-player:last-child {
   border-bottom: none;
 }
-
-.quarter-player .player-number {
-  margin-right: var(--spacing-xs);
-}
-
-.quarter-slot.slot-multi .quarter-player {
-  justify-content: center;
-  border-bottom: none;
-  border-right: 1px solid var(--gray-200);
-}
-
-.quarter-slot.slot-multi .quarter-player:last-child {
-  border-right: none;
-}
-
-.quarter-slot.slot-multi .quarter-player .player-name {
-  display: none;
-}
-
-.quarter-slot.slot-stacked .quarter-slot-body {
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs);
-}
-
-.quarter-slot.slot-stacked .quarter-player {
-  border-bottom: none;
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-md);
-  padding: 4px 6px;
-  flex: 0 0 auto;
-  font-size: 0.75rem;
-  background: var(--primary-50);
-}
-
-.quarter-slot.slot-stacked .quarter-player .player-name {
-  display: none;
-}
-
-
