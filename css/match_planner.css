@@ -381,6 +381,91 @@ body {
   padding: 6px var(--spacing-sm);
 }
 
+@media (max-width: 768px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .planner-main,
+  .container {
+    overflow-x: hidden;
+  }
+
+  .row-config {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-sm);
+    align-items: start;
+    padding: var(--spacing-sm);
+  }
+
+  .row-config > * {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .row-positions {
+    margin-top: var(--spacing-sm);
+  }
+
+  .row-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+  }
+
+  .players-panel {
+    position: static;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .players-list {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow: visible;
+    width: 100%;
+    gap: var(--spacing-sm);
+    padding-bottom: 0;
+  }
+
+  .player-item {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .quarters-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-md);
+    overflow: visible;
+  }
+
+  .quarters-grid[data-columns="4"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quarters-grid[data-columns="3"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .quarter-card {
+    min-height: 72px;
+  }
+
+  .quarter-header {
+    text-align: center;
+    font-size: 1rem;
+    padding: var(--spacing-sm);
+  }
+
+  .quarter-dropzone {
+    display: none;
+  }
+}
+
 @media (min-width: 1024px) {
   .planner-main {
     --planner-toolbar-height: 56px;
