@@ -152,6 +152,21 @@ body {
 }
 
 @media (min-width: 1024px) {
+  .match-data {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    margin-bottom: 0;
+  }
+
+  .match-data summary {
+    display: none;
+  }
+
+  .match-data-content {
+    padding: 0;
+  }
+
   .players-collapsible {
     display: contents;
     border: none;
