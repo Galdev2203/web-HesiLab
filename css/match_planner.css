@@ -414,6 +414,9 @@ body {
   }
 }
 
+/* =========================================================
+   POSITIONS + CONTROLS
+   ========================================================= */
 
 .positions-panel {
   border: 1px solid var(--gray-200);
@@ -464,21 +467,36 @@ body {
   background: white;
 }
 
-.quarters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-lg);
-}
+/* =========================================================
+   QUARTERS – BREAKPOINTS
+   ========================================================= */
 
-@media (max-width: 1023px) {
-  .quarters-grid[data-columns="4"] {
-    grid-template-columns: repeat(4, minmax(180px, 1fr));
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .quarters-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--spacing-md);
+    overflow-x: auto;
+    overflow-y: visible;
   }
 
-  .quarters-grid[data-columns="3"] {
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
+  .quarter-card {
+    flex: 0 0 auto;
+    min-width: 260px;
   }
 }
+
+@media (min-width: 1280px) {
+  .quarters-grid {
+    display: grid;
+    gap: var(--spacing-md);
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+}
+
+/* =========================================================
+   QUARTER COMPONENTS
+   ========================================================= */
 
 .quarter-card {
   border: 1px solid var(--gray-200);
