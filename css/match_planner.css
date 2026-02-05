@@ -680,7 +680,8 @@ body {
     max-width: 300px;
     position: sticky;
     top: 64px;
-    height: calc(100vh - 64px);
+    height: auto;
+    max-height: calc(100vh - 64px);
     align-self: start;
     z-index: 2;
     overflow-y: auto;
@@ -876,7 +877,8 @@ body {
     max-width: 320px;
     position: sticky;
     top: 64px;
-    height: calc(100vh - 64px);
+    height: auto;
+    max-height: calc(100vh - 64px);
     align-self: start;
     z-index: 2;
     overflow-y: auto;
