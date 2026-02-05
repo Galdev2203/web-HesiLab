@@ -772,7 +772,7 @@ body {
 
   .row-config {
     display: grid;
-    grid-template-columns: 220px minmax(320px, 1fr) 180px 240px;
+    grid-template-columns: minmax(320px, 1fr) 240px 220px 180px;
     gap: var(--spacing-md);
     align-items: center;
     padding: 6px var(--spacing-sm);
