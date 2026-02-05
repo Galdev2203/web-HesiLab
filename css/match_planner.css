@@ -678,8 +678,8 @@ body {
     width: 300px;
     max-width: 300px;
     position: sticky;
-    top: var(--planner-toolbar-height);
-    height: calc(100vh - var(--planner-toolbar-height));
+    top: 0;
+    height: 100vh;
     overflow-y: auto;
   }
 
@@ -871,8 +871,8 @@ body {
     width: 320px;
     max-width: 320px;
     position: sticky;
-    top: var(--planner-toolbar-height);
-    height: calc(100vh - var(--planner-toolbar-height));
+    top: 0;
+    height: 100vh;
     overflow-y: auto;
   }
 
