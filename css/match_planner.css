@@ -727,11 +727,11 @@ body {
   }
 
   .quarters-grid[data-columns="4"] {
-    grid-template-columns: repeat(4, minmax(240px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
   }
 
   .quarters-grid[data-columns="3"] {
-    grid-template-columns: repeat(3, minmax(240px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .quarter-card {
@@ -922,11 +922,11 @@ body {
   }
 
   .quarters-grid[data-columns="4"] {
-    grid-template-columns: repeat(4, minmax(240px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
   }
 
   .quarters-grid[data-columns="3"] {
-    grid-template-columns: repeat(3, minmax(240px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .quarter-card {
