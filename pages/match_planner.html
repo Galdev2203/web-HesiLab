@@ -23,19 +23,38 @@
     <p id="errorMsg" class="error-message" style="display:none;"></p>
     <p id="guestNotice" class="info-message" style="display:none;"></p>
 
-    <div id="teamSelectorSection" class="team-selector" style="display:none;">
-      <label for="teamSelector">Equipo:</label>
-      <select id="teamSelector">
-        <option value="">Selecciona un equipo</option>
-      </select>
+    <div class="row-config">
+      <div id="teamSelectorSection" class="team-selector" style="display:none;">
+        <label for="teamSelector">Equipo:</label>
+        <select id="teamSelector">
+          <option value="">Selecciona un equipo</option>
+        </select>
+      </div>
+
+      <div class="team-selector match-title" style="display:flex;">
+        <label for="matchTitle">Título del partido:</label>
+        <input id="matchTitle" type="text" placeholder="Título del partido" />
+      </div>
+
+      <div class="config-field match-type-field">
+        <label for="matchType">Tipo de partido</label>
+        <select id="matchType">
+          <option value="basket" selected>Basket</option>
+          <option value="minibasket">Minibasket</option>
+        </select>
+      </div>
+
+      <button id="previewPlannerPdf" class="btn btn-secondary" type="button">Previsualizar PDF</button>
     </div>
 
-    <div class="team-selector match-title" style="display:flex;">
-      <label for="matchTitle">Título del partido:</label>
-      <input id="matchTitle" type="text" placeholder="Título del partido" />
+    <div class="row-positions">
+      <div class="positions-panel">
+        <h4>Posiciones</h4>
+        <div id="positionNames" class="positions-grid"></div>
+      </div>
     </div>
 
-    <div class="planner-layout">
+    <div class="planner-layout row-main">
       <section class="players-panel">
         <div class="panel-header">
           <h3>Jugadores</h3>
@@ -59,22 +78,9 @@
       <section class="quarters-panel">
         <div class="panel-header quarters-header">
           <h3>Cuartos</h3>
-          <div class="quarters-control">
-            <label for="matchType">Tipo de partido</label>
-            <select id="matchType">
-              <option value="basket" selected>Basket</option>
-              <option value="minibasket">Minibasket</option>
-            </select>
-            <button id="previewPlannerPdf" class="btn btn-secondary" type="button">Previsualizar PDF</button>
-          </div>
         </div>
 
         <div class="quarters-content">
-          <div class="positions-panel">
-            <h4>Posiciones</h4>
-            <div id="positionNames" class="positions-grid"></div>
-          </div>
-
           <div id="quartersGrid" class="quarters-grid">
             <!-- Cuartos renderizados dinámicamente -->
           </div>

@@ -71,7 +71,23 @@ body {
     overflow-x: hidden;
   }
 
-  .planner-layout {
+  .row-config,
+  .row-positions,
+  .row-main {
+    width: 100%;
+  }
+
+  .row-config {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .row-config > * {
+    width: 100%;
+  }
+
+  .row-main {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xl);
@@ -82,22 +98,6 @@ body {
     min-width: 0;
   }
 
-  .quarters-panel {
-    display: contents;
-  }
-
-  .quarters-header {
-    order: 2;
-  }
-
-  .players-panel {
-    order: 3;
-  }
-
-  .quarters-content {
-    order: 4;
-  }
-
   .quarters-header,
   .quarters-content {
     background: white;
@@ -105,24 +105,6 @@ body {
     border-radius: var(--radius-xl);
     padding: var(--spacing-lg);
     box-shadow: var(--shadow-sm);
-  }
-
-  .quarters-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
-    margin-bottom: 0;
-  }
-
-  .quarters-control {
-    width: 100%;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .quarters-control select,
-  .quarters-control button {
-    width: 100%;
   }
 
   .players-list {
@@ -515,6 +497,24 @@ body {
   flex-wrap: wrap;
 }
 
+.row-config,
+.row-positions,
+.row-main {
+  width: 100%;
+}
+
+.config-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.config-field label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gray-700);
+}
+
 @media (min-width: 1024px) {
   .planner-main {
     --planner-toolbar-height: 56px;
@@ -703,13 +703,9 @@ body {
 
   .planner-main .container {
     display: grid;
-    grid-template-columns: 320px minmax(320px, 1fr) 240px 180px;
+    grid-template-columns: 1fr;
     grid-template-rows: auto auto 1fr;
-    grid-template-areas:
-      "team title type pdf"
-      "positions positions positions positions"
-      "players quarters quarters quarters";
-    gap: var(--spacing-sm) var(--spacing-lg);
+    gap: var(--spacing-sm);
     align-items: start;
   }
 
@@ -718,80 +714,58 @@ body {
     grid-column: 1 / -1;
   }
 
-  .planner-layout,
-  .quarters-panel {
+  .row-config,
+  .row-positions,
+  .row-main {
+    grid-column: 1 / -1;
+  }
+
+  .row-config {
+    display: grid;
+    grid-template-columns: 280px minmax(260px, 1fr) 220px 180px;
+    gap: var(--spacing-md);
+    align-items: center;
+    padding: 6px var(--spacing-sm);
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    max-height: 64px;
+  }
+
+  .row-positions {
+    display: block;
+  }
+
+  .row-main {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: var(--spacing-lg);
+    align-items: start;
+  }
+
+  .planner-layout {
     display: contents;
-  }
-
-  #teamSelectorSection {
-    grid-area: team;
-  }
-
-  .team-selector.match-title {
-    grid-area: title;
-  }
-
-  .quarters-header {
-    display: contents;
-  }
-
-  .quarters-header h3 {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .quarters-control {
-    display: contents;
-  }
-
-  .quarters-control label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  #matchType {
-    grid-area: type;
-  }
-
-  #previewPlannerPdf {
-    grid-area: pdf;
-  }
-
-  .positions-panel {
-    grid-area: positions;
   }
 
   .team-selector,
   .team-selector.match-title,
-  #matchType,
+  .match-type-field,
   #previewPlannerPdf {
     margin-bottom: 0;
     min-height: var(--planner-toolbar-height);
-    padding: 4px var(--spacing-sm);
-    align-items: center;
   }
 
   .team-selector,
   .team-selector.match-title {
     display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
   }
 
   .team-selector label,
-  .team-selector.match-title label {
+  .team-selector.match-title label,
+  .config-field label {
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.01em;
@@ -802,7 +776,7 @@ body {
   #matchType,
   #previewPlannerPdf {
     min-height: 32px;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
   }
 
   .team-selector select,
@@ -813,11 +787,12 @@ body {
 
   #previewPlannerPdf {
     padding: 4px 10px;
-    font-size: 0.88rem;
+    font-size: 0.86rem;
+    height: 32px;
+    align-self: end;
   }
 
   .players-panel {
-    grid-area: players;
     width: 320px;
     max-width: 320px;
     position: sticky;
@@ -827,7 +802,6 @@ body {
   }
 
   .quarters-content {
-    grid-area: quarters;
     background: white;
     border: 1px solid var(--gray-200);
     border-radius: var(--radius-xl);
