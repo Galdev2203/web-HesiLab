@@ -516,15 +516,12 @@ body {
     border: none;
     padding: 0;
     box-shadow: none;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
   }
 
   .players-content {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    min-height: 0;
+    overflow: visible;
+    max-height: none;
   }
 
   .players-panel,
