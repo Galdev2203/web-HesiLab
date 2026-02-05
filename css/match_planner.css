@@ -611,6 +611,7 @@ body {
     grid-template-columns: 300px minmax(0, 1fr);
     gap: var(--spacing-lg);
     align-items: start;
+    overflow: visible;
   }
 
   .row-main > .players-panel {
@@ -678,8 +679,10 @@ body {
     width: 300px;
     max-width: 300px;
     position: sticky;
-    top: 0;
-    height: 100vh;
+    top: 64px;
+    height: calc(100vh - 64px);
+    align-self: start;
+    z-index: 2;
     overflow-y: auto;
   }
 
@@ -813,6 +816,7 @@ body {
     grid-template-columns: 300px minmax(0, 1fr);
     gap: var(--spacing-lg);
     align-items: start;
+    overflow: visible;
   }
 
   .planner-layout {
@@ -871,8 +875,10 @@ body {
     width: 320px;
     max-width: 320px;
     position: sticky;
-    top: 0;
-    height: 100vh;
+    top: 64px;
+    height: calc(100vh - 64px);
+    align-self: start;
+    z-index: 2;
     overflow-y: auto;
   }
 
