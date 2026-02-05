@@ -720,21 +720,18 @@ body {
 
   .quarters-grid {
     display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: var(--quarter-width, 360px);
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: var(--spacing-md);
-    overflow-x: auto;
-    padding-bottom: var(--spacing-xs);
+    overflow-x: hidden;
+    padding-bottom: 0;
   }
 
   .quarters-grid[data-columns="4"] {
-    grid-template-columns: none;
-    grid-auto-columns: var(--quarter-width, 360px);
+    grid-template-columns: repeat(4, minmax(240px, 1fr));
   }
 
   .quarters-grid[data-columns="3"] {
-    grid-template-columns: none;
-    grid-auto-columns: var(--quarter-width, 360px);
+    grid-template-columns: repeat(3, minmax(240px, 1fr));
   }
 
   .quarter-card {
@@ -918,21 +915,18 @@ body {
 
   .quarters-grid {
     display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: var(--quarter-width, 360px);
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: var(--spacing-md);
-    overflow-x: auto;
-    padding-bottom: 6px;
+    overflow-x: hidden;
+    padding-bottom: 0;
   }
 
   .quarters-grid[data-columns="4"] {
-    grid-template-columns: none;
-    grid-auto-columns: var(--quarter-width, 360px);
+    grid-template-columns: repeat(4, minmax(240px, 1fr));
   }
 
   .quarters-grid[data-columns="3"] {
-    grid-template-columns: none;
-    grid-auto-columns: var(--quarter-width, 360px);
+    grid-template-columns: repeat(3, minmax(240px, 1fr));
   }
 
   .quarter-card {
