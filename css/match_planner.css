@@ -623,7 +623,11 @@ body {
   }
 
   .planner-layout {
-    display: contents;
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: var(--spacing-lg);
+    align-items: start;
+    width: 100%;
   }
 
   .team-selector,
@@ -813,7 +817,11 @@ body {
   }
 
   .planner-layout {
-    display: contents;
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: var(--spacing-lg);
+    align-items: start;
+    width: 100%;
   }
 
   .team-selector,
