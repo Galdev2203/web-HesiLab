@@ -436,6 +436,7 @@ body {
     align-items: start;
     overflow: visible;
     width: 100%;
+    min-height: calc(100vh - 64px);
   }
 
   .row-main > .players-panel {
@@ -511,7 +512,7 @@ body {
     max-width: 300px;
     position: sticky;
     top: 64px;
-    height: calc(100vh - 64px);
+    height: calc(100vh - 80px);
     z-index: 2;
     align-self: start;
     background: transparent;
