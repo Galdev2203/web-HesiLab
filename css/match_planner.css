@@ -408,7 +408,7 @@ body {
     display: grid;
     grid-template-columns: minmax(260px, 1fr) minmax(200px, 320px) minmax(180px, 240px) minmax(160px, 200px);
     gap: var(--spacing-md);
-    align-items: center;
+    align-items: start;
     padding: 6px var(--spacing-sm);
     background: white;
     border: 1px solid var(--gray-200);
@@ -458,7 +458,6 @@ body {
   .match-type-field,
   #previewPlannerPdf {
     margin-bottom: 0;
-    min-height: var(--planner-toolbar-height);
     width: 100%;
   }
 
@@ -498,7 +497,7 @@ body {
     padding: 4px 10px;
     font-size: 0.86rem;
     height: 32px;
-    align-self: end;
+    align-self: start;
   }
 
   .players-panel {
