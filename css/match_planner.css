@@ -512,12 +512,16 @@ body {
     height: auto;
     max-height: calc(100vh - 64px);
     z-index: 2;
-    overflow-y: auto;
     align-self: start;
     background: transparent;
     border: none;
     padding: 0;
     box-shadow: none;
+  }
+
+  .players-content {
+    overflow-y: auto;
+    max-height: calc(100vh - 64px - 48px);
   }
 
   .players-panel,
