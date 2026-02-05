@@ -572,13 +572,9 @@ body {
 
   .planner-main .container {
     display: grid;
-    grid-template-columns: 320px minmax(0, 1fr) 320px;
+    grid-template-columns: 1fr;
     grid-template-rows: auto auto 1fr;
-    grid-template-areas:
-      "alerts alerts alerts"
-      "team title controls"
-      "players quarters quarters";
-    gap: var(--spacing-md) var(--spacing-lg);
+    gap: var(--spacing-sm);
     align-items: start;
   }
 
@@ -587,79 +583,90 @@ body {
     grid-column: 1 / -1;
   }
 
-  .planner-layout,
-  .quarters-panel {
+  .row-config,
+  .row-positions,
+  .row-main {
+    grid-column: 1 / -1;
+  }
+
+  .row-config {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) 220px 200px 180px;
+    gap: var(--spacing-md);
+    align-items: center;
+    padding: 6px var(--spacing-sm);
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    max-height: 64px;
+  }
+
+  .row-positions {
+    display: block;
+  }
+
+  .row-main {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: var(--spacing-lg);
+    align-items: start;
+  }
+
+  .planner-layout {
     display: contents;
-  }
-
-  #teamSelectorSection {
-    grid-area: team;
-  }
-
-  .team-selector.match-title {
-    grid-area: title;
-  }
-
-  .quarters-header {
-    grid-area: controls;
-  }
-
-  .players-panel {
-    grid-area: players;
-  }
-
-  .quarters-content {
-    grid-area: quarters;
   }
 
   .team-selector,
   .team-selector.match-title,
-  .quarters-header {
+  .match-type-field,
+  #previewPlannerPdf {
     margin-bottom: 0;
-    padding: 6px var(--spacing-sm);
-    gap: var(--spacing-xs);
-    align-items: center;
-    position: sticky;
-    top: var(--spacing-sm);
-    z-index: 5;
-    background: white;
-    box-shadow: var(--shadow-sm);
+    min-height: var(--planner-toolbar-height);
   }
 
   .team-selector,
   .team-selector.match-title {
-    min-height: var(--planner-toolbar-height);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
   }
 
   .team-selector label,
   .team-selector.match-title label,
-  .quarters-control label {
-    white-space: nowrap;
-    font-size: 0.85rem;
+  .config-field label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
   }
 
   .team-selector select,
   .team-selector.match-title input,
-  .quarters-control select {
-    min-height: 36px;
+  #matchType,
+  #previewPlannerPdf {
+    min-height: 32px;
+    font-size: 0.88rem;
   }
 
-  .quarters-control {
-    justify-content: flex-end;
-    flex-wrap: nowrap;
+  .team-selector select,
+  .team-selector.match-title input,
+  #matchType {
+    padding: 4px 8px;
   }
 
-  .quarters-control select,
-  .quarters-control button {
-    min-height: 36px;
+  #previewPlannerPdf {
+    padding: 4px 10px;
+    font-size: 0.86rem;
+    height: 32px;
+    align-self: end;
   }
 
   .players-panel {
-    width: 320px;
-    max-width: 320px;
+    width: 300px;
+    max-width: 300px;
     position: sticky;
-    top: calc(var(--planner-toolbar-height) + var(--spacing-md));
-    max-height: calc(100vh - var(--planner-toolbar-height) - var(--spacing-xl));
+    top: var(--planner-toolbar-height);
+    height: calc(100vh - var(--planner-toolbar-height));
     overflow-y: auto;
   }
 
