@@ -331,6 +331,14 @@ body {
   color: var(--gray-700);
 }
 
+.players-content {
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+}
+
 .positions-collapsible {
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-md);
@@ -398,19 +406,23 @@ body {
 
   .row-config {
     display: grid;
-    grid-template-columns: minmax(320px, 1fr) 240px 220px 180px;
+    grid-template-columns: minmax(260px, 1fr) minmax(200px, 320px) minmax(180px, 240px) minmax(160px, 200px);
     gap: var(--spacing-md);
     align-items: center;
-      grid-template-columns: minmax(260px, 1fr) minmax(200px, 320px) minmax(180px, 240px) minmax(160px, 200px);
+    padding: 6px var(--spacing-sm);
     background: white;
     border: 1px solid var(--gray-200);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     max-height: 64px;
+    width: 100%;
+  }
+
+  .row-config > * {
+    min-width: 0;
   }
 
   .row-positions {
-      width: 100%;
     display: block;
   }
 
@@ -420,22 +432,17 @@ body {
     gap: var(--spacing-lg);
     align-items: start;
     overflow: visible;
+    width: 100%;
   }
 
   .row-main > .players-panel {
-      width: 100%;
     width: 300px;
     max-width: 300px;
+    align-self: start;
   }
 
   .row-main > .quarters-panel {
-      align-self: start;
     min-width: 0;
-    background: white;
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
   }
 
   .planner-layout {
@@ -443,28 +450,24 @@ body {
     grid-template-columns: 300px minmax(0, 1fr);
     gap: var(--spacing-lg);
     align-items: start;
+    width: 100%;
   }
 
   .team-selector,
-      width: 100%;
   .team-selector.match-title,
   .match-type-field,
   #previewPlannerPdf {
     margin-bottom: 0;
     min-height: var(--planner-toolbar-height);
+    width: 100%;
   }
 
   .team-selector,
   .team-selector.match-title {
     display: flex;
     align-items: center;
-      align-self: start;
     gap: var(--spacing-xs);
   }
-    .players-panel,
-    .quarters-panel {
-      min-width: 0;
-    }
 
   .team-selector label,
   .team-selector.match-title label,
@@ -480,6 +483,7 @@ body {
   #previewPlannerPdf {
     min-height: 32px;
     font-size: 0.88rem;
+    width: 100%;
   }
 
   .team-selector select,
@@ -504,6 +508,16 @@ body {
     max-height: calc(100vh - 64px);
     z-index: 2;
     overflow-y: auto;
+    align-self: start;
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .players-panel,
+  .quarters-panel {
+    min-width: 0;
   }
 
   .quarters-content {
