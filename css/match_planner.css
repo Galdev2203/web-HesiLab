@@ -897,6 +897,10 @@ body {
   font-size: 1rem;
 }
 
+.quarters-panel .positions-panel {
+  display: none;
+}
+
 .positions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
